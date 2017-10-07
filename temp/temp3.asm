@@ -1,0 +1,86 @@
+                .CR     6502            Use 6502 overlay
+				.OR		$6300			**Always put before .TF directive and never use again in program
+				.TF     TEST.BIN,BIN
+				.EF		errors
+				.LF		C:\MY_CODE\LIST
+;				.LI 	OFF				Switches the assembler machine code conversion listing off so errors are easier to see				
+;				.IN 	C:\MY_CODE\INCLUDES_LIBS\routines_common
+
+
+;EXAMPLE PURPOSE: DEMO COPY FROM MAIN MEMORY TO AUX MEMORY, AND THEN BACK AGAIN.
+;
+;EXPECTED RESULT: FROM MONITOR DO 7000L AND THERE SHOULD BE $AA IN $7000-$7005
+
+
+
+	
+
+	LDA #$00			;SPECIFY START ADDRESS TO FILL
+	STA FILLTO			;THIS SHOULD MATCH THE .ORG STATEMENT BELOW FOR THE TEST PROGRAM
+	LDA #$80
+	STA FILLTO+$1
+	
+	LDY #$00			
+	
+.LOOP					;FILL MEMORY RANGE SELECTED
+	LDA #$AA
+	STA (FILLTO),Y
+	INY
+	BNE .LOOP
+	LDA FILLTO+$1
+	CMP #$94			;FILL STOP ADDRESS. IT'S CURRENTLY SETUP TO STOP AT $FF00
+	BEQ .FILL_DONE
+	INC FILLTO+$1
+	JMP .LOOP
+.FILL_DONE	
+	
+
+	SEC                 ;SET CARRY FLAG DESGINATD MOVE FROM MAIN MEMORY -> AUX
+	LDA #$00			;SET START ADDRESS
+	STA $3C
+	LDA #$84
+	STA $3D
+	
+	LDA #$FF			;SET END ADDRESS
+	STA $3E
+	LDA #$93
+	STA $3F
+	
+	LDA #$00			;SET DESTINATION ADDRESS
+	STA $42
+	LDA #$74
+	STA $43
+
+	JSR $C311
+	
+	
+	CLC					;SET CARRY FLAG DESGINATD MOVE FROM AUX MEMORY -> MAIN
+	LDA #$00			;SET START ADDRESS
+	STA $3C
+	LDA #$74		
+	STA $3D
+	
+	LDA #$FF			;SET END ADDRESS
+	STA $3E
+	LDA #$83
+	STA $3F
+	
+	LDA #$00			;SET DESTINATION ADDRESS
+	STA $42
+	LDA #$64
+	STA $43
+
+	JSR $C311
+	
+	
+	
+	BRK
+	
+	
+;======DEFINE VARIBLES======
+FILLTO	.EQ	$EB
+
+
+
+
+

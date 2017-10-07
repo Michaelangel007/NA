@@ -1,0 +1,27 @@
+
+Ultima V Monster Data
+http://wiki.ultimacodex.com/wiki/Ultima_V_Monster_Data#References
+
+
+
+I think that the inventory system is
+the only module that needs to have access to the stats
+for everything: i.e tables for weapons, armor, other items, mobs, etc. 
+
+In the inventory module, when equipment is readied, then the stats for it are recorded
+on the character sheet.
+
+In the combat module:
+
+at the start, load in the mob table, populate the combat mob array with mob stats, then let the mob table get clobbered
+
+For the characters, just load the character sheets. The combat module 
+only needs to know about the equipment that is readied.
+
+Changing equipment during combat, if permitted, goes through the inventory module which
+updates the character sheet
+
+Use item might be a command with it's own module, in which it would be aware of various item stats tables.
+
+
+ 

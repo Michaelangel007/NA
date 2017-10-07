@@ -1,0 +1,78 @@
+
+INV_8.MERCHANT_TRANSACTIONS (pseudo code)
+
+	-handoff: the talk command should check to see if the NPC is a merchant (have merchant tiles in a range that is the same on all tile_sets), 
+				*if merchnat call this routine
+				*if not merchant, call NPC talk
+	(DONE) *load merchant profile from SRTN.INVENTORY using merchant ID. 
+	
+	*Use merchant profile matrix to determine merchant ID. (see "-data structures" in the other file)
+	
+(DONE) *draw merchant trans window on right side of screen
+
+(DONE) *draw the player inventory window and menu icons (those subroutines might be called from the inventory entrance)
+
+(DONE) -call INV_4
+	
+(DONE)	*Let INV_4 init the lower right scroll window (double check size is the same)
+	Notes on that subject: original though was in INV_4, skip init of scroll window. Maybe scroll window init can be a local INV_4 subroutine also
+	called by merchant trans. Or maybe it's okay if the merchant trans init is done from INV_4 since it's the size size
+	and since INV_4 will be called by merchant trans on launch.	
+
+(DONE)	*after displaying the list of items INV_4 should exit back to merchant trans. 
+
+	
+-misc
+(DONE)	*connect up "I" command to INV_8 state loop using HTAB determined based on interface status. 
+(DONE)	*add item weight to the "I" print out.  
+	
+		*consider how to prevent quest items from being sold. $0 in master price list? Beth and I discussed this.
+
+INV_8.DISPLAY_MERCHANT.INVENTORY
+	*display price field (gold)
+		see .PRINT.READIED_INDICATOR, just after the merchant trans active check is comment in the location where the JSR should go to handle this functionality 
+
+INV_4 changes
+	(DONE) *if launched in merchant trans non-init mode (i.e player has tabbed or hotkeyed over to a player inv window menu), 
+	the state loop needs to work differently. Either modify existing state loop or transfer control to a player inventory window state loop in INV_8	
+	
+	(DONE) *Modify "I" command to set HTAB based on which interface is loaded. 
+	
+	*Try switching order of line1/line2 of the item text (i.e. so description is on 1st line and QTY, WEIGHT etc is on 2nd line)
+	
+--------INVENTORY SUB_MODULE CHANGES---------------------
+
+
+-menu icons
+*Inventory Window. restrict to just weapons/armor/misc_items/spells. Game settings isn't appropriate and the status menu
+is dependant on active player, and the character roster space is occupied by the merchant window.
+
+But, display and empty icon border in place of stats and settings so that the hotkeys can be
+2-5 without being confusing.
+
+
+-inventory menu navigation
+(DONE) *in menu change routine (INV.NEXT.MENU), in code that launches stats, advance to weapons (if merchant active), if menu
+game settings, advance to weapons (if merchant active)
+
+
+
+INV_4 changes
+
+(DONE) *GOAL: display all items regardless of qty/readied status. display an * for each time item
+is readied. Either don't permit sale of readied items or have the routine unready. the code for
+all of this can be put in subroutines(s) stored in the merchant module, and just call them from INV_4
+
+
+(N/A) *consolidate the three .VALIDATE.ITEM routines in INV_4, which controls whether an item is displayed on screen. (initial draw, scroll up, scroll down). This will save memory when
+;adding the "if merchant active" logic. 
+
+
+(DONE) *.SPELL_MENU.NOT_ACTIVE is where the readied indicator is printed. Maybe put code here to JSR
+a readied flag tally (store routine in merchant sub_module) if merchant sub_module is loaded. The tally would perhaps be a loop that iterates
+through the INV.READIED_FLAGS.BIT_TEST_MASK array and each time the bit test turns true (item is readied), print an *, which seems to be done
+via a JSR to INV_4.CALL.COUT.BACKGROUND with ACC = #$AA. Cout takes care of advancing the cursor to the next column after each print.  
+
+
+
+

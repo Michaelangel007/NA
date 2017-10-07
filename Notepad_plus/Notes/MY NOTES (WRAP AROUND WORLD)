@@ -1,0 +1,401 @@
+====Current Status (udated 2/4/2016)====
+
+*regional map with (9) 16x16tile loader zones implemented
+*128x128 tile world
+*no wrap around yet
+
+
+Items to address for Wrap Around
+
+*Zone transitions on edge
+*MOB x,y tracking. I think when it reached +/-!64,+/-64 from !128,128 then it needs to wrap around. For example, when 
+mob reached -!65, wrap it around to +!64. I could be off by 1 unit on these calculations. 
+
+
+
+-------------NOTES AFTER BETH'S ADVICE
+
+See ./My_Code/RPG_Project/Map/() Wrap-Around/Beth for my notes on my discussion with
+Beth. My last email to her, plus the notes below summarize my conclusions.
+
+
+Reduce current 64x64 world to 24x24 (3x3 loader zones of 8 tiles each)....double check how many zones 
+this would be for 256x256 map, is zone wrapping algorithm possible? If not is static mapping practical?
+
+The non active zones would be stored in memory, compressed.
+
+As they are needed, uncompressed them into the active zone space. This kind of uncompression is different and simpler in that it's occurring on data from a defined start and end.
+
+With the 24x24 active zone area being a) smaller than 64x64 and b) uncompressed, it should run much faster, hopefully with no noticeable speed different between lower left and lower right
+
+Since new zone loaded are triggered by a load threshold, the player will never reach the absolute lower right, which helps speed too.
+
+Tracking map objects with relative x,y to player should with great with this, up to a 256x255 map. After that a 16-bit x,y would be needed.
+
+Note (worlds smaller than 256x256): map object tracking is implemented using x,y relative to player. If the world is smaller than 256x256 then
+a wrap around algorithm is needed for the map object x,y (it centers on $80 as the player location, but at $80 - !64 it would need to wrap around to $80+63 (maybe 64, or something like that), using a 64x64 world as an example)
+
+
+
+-------Possible Scenario (1/13/2016)
+
+UPDATE: consider the following before proceeding:
+
+U4 had 32x32 chunks in memory at a given time per one of the links on Mike's tile spreadsheet page. 
+
+Consider that as the total size for my 3x3 loader zone set. 32/3 is not an even number though. Maybe 
+they did 32/4...4x4 loader zones each with 8x8tiles. That would be 64 zones in a 64x64 world
+
+Maybe not. It implies more than one 32x32 chunk was kept in memory at the same time, implying 32x32 
+was the loader zone size. That seems too big. The 3x3 zone array would be over 9k long. 
+
+here is what I read "The 'chunked' layout is an artifact of the limited memory on the original machines 
+that ran Ultima 4. The whole map would take 64k, too much for a C64 or an Apple II, so the game would 
+keep a limited number of 1k chunks in memory at a time. As the player moved around, old chunks were 
+thrown out as new ones were swapped in.
+
+UPDATE: In U4, I walk 12 tiles then the disk loades on the next for moves. So it looks like it has
+a load threashold of 12-16, where the load is essentially split into 4 moves. Oddly, map movement
+continues almost seamlessly while I hear the drive is spinning. Maybe this is because it takes a lot less
+time for the data to load than it does for the drive motor to come to a stop.  
+
+
+
+-Zone Management
+Using above method, 16x16 zones, 9 zones in main memory. 16 tile threashold for zone load (actually
+needs to be 15 or less until/unless we shrink the screen). This
+is what I was thinking of doing, and then decided to check Ultima V and to my delight found that 
+it looks like they did the same as observed by pulling out the britannia disk and walking until 
+the game froze, putting disk back in, taking it out again, and then being able to walk exactly 16 
+tiles until the game froze again. 
+
+Load new zones by copying and uncompressing from AUX memory. Probably means a 16x16 array
+as holding zone (copy compressed data from AUX to holding zone, and uncompress holding zone
+into its proper zone slot). The compressed data should never exceed 16x16 as 16x16 is the size
+of the data uncompressed. Make sure to put a good error trap in place just in case the holding zone
+size is exceeded. 
+
+-Map Creation
+
+Create initial map via spreadsheet, converted to hex tables (uncompressed), copied into a loader program
+which compresses the data and copies it to AUX memory.
+	Note: in the final version, the map data would be stored as compressed on disk and copied
+	to AUX via RWTS
+
+-Map Editing
+The compress routine could be used to save changes made (via edit commands) to map in-game. they
+would be saved to 5.25" disk. In order to use them, I'd need to setup the RWTS routine
+to load the map from disk and discontinue the use of the spreadsheet.
+
+To get the map back into a spreadsheet, I'm thinking use Ciderpress to view the binary file
+(with the saved map data) on the disk image, and copy/paste into excel, do text to columns.
+
+Instructions (confirmed)
+	Copy hex data from a binary file
+		Right Click and select "View"
+		Select Hex Dump from the drop down menu in the central part of the lower screen
+		Cntrl-A to select all, Cntrl-C to copy, and then paste via usual process into notepad, or wherever. 
+
+The CiderPress hex dump format is perfect because it displays 16 hex values per row, exactly
+the size of the loader zones I'm thinking of. so I would probably save each loader zone as it's
+own binary file for this reason, and so it matches the size of the array in memory RWTS would
+load it into. 
+
+summary (map editing)
+	Dev Env
+		launch: uncompressed hex data (spreadsheet) -> hex tables (source code) -> compression & loader routine -> aux memory
+			Note: the current game loader has $4700 of memory free, which would be enough to hold the uncompressed data for a 128x128 tile map.
+			if more memory was needed for a larger map, that could be done by launching a second loader which overwrites the first loader
+		
+		graphics eng: compressed data (aux memory) -> uncompress routine -> active zone region
+		
+		Save Zone: save in-game edits to tiles in the current zone (or zone region, not sure) as uncompressed data to disk at a specific track/sector
+		
+	    Update Spreadsheet: read track/sector where uncompressed zone data was saved and copy the data into excel to update the associated zone
+		
+		
+	Final Game
+		launch: compress data on disk -> aux memory			note: the compressed data would be initially created by using the compression routine
+		
+		graphics eng: compressed data (aux memory) -> uncompress routine -> holding zone, which is used to populate the active zone region
+		
+	Compression Routine
+		Core routine: compress the data for one zone. the rest is looping around the core 
+	
+	Uncompress routine:
+		Core routine: uncompress the data for one zone. the rest is looping around the core 		
+		
+**read this and make decision: double check, why would the final game need to do anything
+different than the dev game as far as storing the uncompressed map data in hex tables and then
+compressing it. I think that answer is that takes more disk space than storing the map on disk compressed.
+		
+-Map Objects (wrap around world)
+	Tracking for the entire map size. let's say a 128x128 map. So the player x,y is 128,128 and the edges of the map
+	are 64,64 and 192,192. Double check the logic on this, but I think when adjusting mob positions
+	for the player move, I'd need to have it detect the map edge (i.e. 64) and have it change to the other side (i.e 192)
+	instead of incrementing off the edge (i.e. 63)
+
+	SS Mobs. I think they would be limited in their pursit to the size of the 9 zone region loaded into
+		memory. This would be 48x48. There is a multiplication table used for identifying the tile position of the 
+		mob, which I built to 64x64 so I think that should be okay. 
+		bottom line: I think there needs to be a regional check after the visibility check, and if not in region, the record is
+		left alone just like regular mobs would be if they were not visible. 
+
+	SS Mobs (***important technical change required)
+		To detect collisions, currently (4) single tile lookups have to be done. 
+		This is handled via the JSR TILE.LOOKUP.SINGLE, a routine in the data compression toolbox. 
+		these should get replaced by the routine to lookup the tile type from uncompressed arrays.
+		I think there will still need to be one because of it's 16-bit size. **BUT** Maybe it will be short enough that I can put the code in-line like with ADC/SBC.16, especially for the SS mob routine as that will scale as mobs accumulate. 
+		for the code needs changing, see .MOB.MOVEMENT.COLLISSION_CHECK.OFFSCREEN_SS
+-Misc Cleanup
+	Search for TAG1 in map_objects_management.asm and remove associated code, which is there to deal with inconsistency in GMAP.LOOKUP which shouldn't apply after implementing loader zones
+-****MAKE SURE TO HAVE GMAP.X/Y WRAP AROUND WHEN PLAYER REACHES EDGE OF MAP. IT'S A SEPARATE WRAP AROUND
+	FROM THE ZONE WRAP AROUND
+-Entering Locations
+	I think this should be done based on x,y position (GMAP.X, GMAP.Y), becuase in a zone desgin,
+	I think GMAP is really RMAP (regional map) as it will refer to the array holding the 9 loaded zones.
+	I think there will be no way to reference the a tile position outsize of that region via 
+	   a GMAP like number. X,Y is more efficient anyway. 
+	 
+	So the key decision will be how to setup the x/y grid. where is 0,0....or do we do it like
+	with the monster x,y and have 128,128 in the center?
+
+
+
+
+	
+-------------OLD NOTES BEFORE BETH'S ADVICE ON 1/2/2016---------------
+GMAP = global map position
+
+
+World Map = Round (Method 1)
+————————————————
+
+**NOTE: method 2 appear to be a dead end. The main drawback of method 1 is that if used for 
+loader zones, there would be water (or some other single tile type) on the edges of each load 
+zone. 
+
+
+
+==Draw.Screen==
+
+If the upper and lower edges are one screen width of ocean, then just force an ocean
+draw of whole screen if GMAP is >= upper screen boundary or <= lower screen boundary 
+
+consider what happens if SMAP < 0
+
+
+
+==Movement==
+
+-Calculating GMAP adjustment
+
+if 
+ {GMAP == 0}
+ {move = west}
+then GMAP == 64 (find/create constant)
+JMP .DONE
+
+if 
+ {move = north}
+ {GMAP = upper player boundary row (convert GMAP to x,y)}
+ alternte: {GMAP generates underflow (i.e. should mean a move north past 1st row)} 
+then adjust GMAP using the offset between the 1st row and last row….I think this will be 4032 (4096-64))
+JMP .DONE
+
+if
+	{move = west}
+	{GMAP = left player boundary row (convert GMAP to X,Y)}
+	alternative: {GMAP is in an array containing the GMAP values of the first column} 
+	then GMAP becomes the first position in the current row, GMAP + 63)
+JMP .DONE
+
+
+if
+	{move = east}
+	{GMAP = right player bounrary row (convert GMAP to X,Y)}
+	alternative: {GMAP is in an array containing the GMAP values of the last column} 
+	then GMAP becomes the first position in the current row, GMAP - 63)
+JMP .done
+
+if 
+	{move = south}
+	{GMAP = lower player boundary row (convert GMAP to x,y)}
+	alternate{(GMAP < screen size) & (GMAP > first element of last row (screen size-64 I think))} 
+	then adjust GMAP (SBC) using the offset between the 1st row and last row….I think this will be 4032 (4096-64))
+JMP .DONE
+
+.DONE
+
+
+-Drawing new row
+
+;if screen is partially above top row or bottom row of global map
+If GMAP is >= upper screen boundary or <= lower screen boundary
+		then override draw with ocean tiles for entire screen
+		alternate: so that only a half screen of ocean tiles is needed on each edge,
+		figure out a way to draw a specific number of ocean tile rows before while incrementing
+		SMAP_CURRENT, so that SMAP_CURRENT can take over when the ocean rows are drawn.
+		Calculating the row of GMAP seems useful for that. 
+		
+
+
+set SMAP & SMAP_CURRENT = 0 (should result in ocean tiles)
+
+  {calculating SMAP generates underflow (i.e. top row, or a west move when SMAP == 0, upper right corner)}
+  {SMAP > X, where X = the last position in the 64-17 row}
+Then tile type for entire new column/row == deep water  (I think this gets set via an override)
+
+-Drawing new column 
+;if screen is partially off left/right side of global map
+Displaying a water tile should happen automatically if the edge of the map on all sides has a half screen width of deep water tiles. 
+ 
+Except when SMAP is in top row/column (0,0) and player moves west. 
+
+One option is that if SMAP calculation generates an underflow, then set SMAP to 1.
+This requires that at least the upper left/right corners of the map have one screens worth
+of ocean tiles. Not sure if this is compatible with the scenario where upper edge only has
+1/2 screen of ocean tiles inbetween corners. May need 1 screen width of ocean along the entire upper 
+edge. 
+
+
+
+
+
+
+
+World Map = Round (Method 2)
+————————————————
+
+**NOTE: in theory this doesn’t limit the tiles that can be used on the edges of the map, or loader zones if loaders zones were 64x64. 
+
+screen.gmap.matrix .BS $BA	;contains the GMAP value of each screen position
+Overlap		    .BS	$1	;# of rows/columns of screen not on same side of screen as GMAP
+screen.columns.middle	.EQ $8	;the column that the player icon appears in 
+screen.rows.middle	.EQ $5	;the row that the player icon appears in 
+
+gmap.column.last	.EQ $63	;column number of last (right most) column)
+gmap.boundary.left	.EQ $8 ; left most column before round world handling kicks in. Equal to #screen.column.middle
+gmap.boundary.right	.EQ $55 ; #gmap.column.last - #screen.columns.middle
+map.boundary.top	.EQ $5	; Equal to #SCREEN.ROWS.MIDDLE
+
+
+
+==Draw.Screen==
+
+;Calculate Screen.GMAP.MATRIX    (probably in init section)
+*Calculate Column & Row
+	*column = (remainder of (GMAP / 64)) -1
+	*row = (whole number of GMAP/64)….make sure division routine will return a value of 0 for whole number as that would be the case in 1st row (i.e. 24/64) == 0. Worst case, insert a
+prelim step before division to set row == 0 if GMAP <= 64
+
+*At boundary? 
+	*S0: if column < #gmap.boundary.left  & row > #GMAP.BOUNDARY.TOP
+	*if column > #gmap.boundary.right,  
+
+
+SCENARIO 0 (upper and left boundaries)
+;so if overlap == 1, that means 1 column from the other side of the map will be on the screen
+
+column_overlap = column - #gmap.boundary.left
+row_overlap = #gmap.boundary.top - row
+
+
+
+
+
+SCENARIO 1 (left boundaries)
+
+column.overlap = #gmap.boundary.left - column 
+
+
+SCENARIO 2 (lower and left boundaries)
+
+SCENARIO 3 (upper boundaries)
+SCENARIO 4 (lower boundaries)
+
+SCENARIO 5 (upper and right boundaries)
+
+SCENARIO 6 (right boundaries)
+
+overlap = column - #gmap.boundary.right
+
+
+SCENARIO 7 (lower and right boundaries)
+
+
+
+==Movement==
+
+-Calculating GMAP adjustment
+
+
+
+
+
+
+
+.DONE
+
+
+-Drawing new column/row
+
+
+World Map = Round (Other Methods)
+==================================
+
+1) Draw the screen in 4 quadrants, always. The starting point and offset in each quadrant
+is different. This may be determinable by the x,y position of the player, and comparing
+it to various boundary flags. 
+	This could possibly be implemented with the existing draw routines by creating a new routine
+	that calculates the GMAP positions, using the 4 quadrant method, for the current screen, then 
+	stores it in a new array. The draw routine would just need to be modified to use the new array as the index
+    when populating screen.tile.array with values. 	
+
+2) SMAP is calcualted, and incremented based on x/y position. Formulas are applied to the x,y position
+which simulate a two dimensional array. Essenitally, it's just like the hi-res graphics screen.
+one dimension is the base address and the other dimension is the offset. 
+
+3) Maybe it's a non-issue in a 256x256 map because the both bytes of the GMAP value would
+wrap around automatically. For example, in upper left corner, with upper left tile at 0000, move left (west) and upper left tile is 00FF, 
+which should be the last tile in the first row (i.e opposite side of the map)
+think this through carefully though. Essentially to achieve this wrap around affect, 
+moving left/right is an 8-bit ADC/SBC on the LO byte of GMAP. moving north/south is an 8-bit
+operation on the HO byte of GMAP. Maybe this is okay becauuse the north/south offset would be
+256, the exact amount of an increment to the HO byte.
+
+If this works, maybe combine with with loader zones that update every X moves and maybe this
+could be easily implimented now. A floating loader zone means that it can spill over the edge
+but if the world wrapping is as simple as in this method, that may not be a big deal.
+
+the main work would be in adjusting how SMAP and GMAP are incremented...i.e. use 8-bit routines
+based on direction moved instead of a 16-bit ADC/SBC.
+
+
+Monster Movement
+————————————————
+
+Track the X and Y relative to player (two values), where X = 1 means 1 to the east of player and X = FF means 1 to the west of player. Display the monster icons based on the relative position values. For movement, translate to GMAP to check terrain for valid moves
+
+If round world method #1 is used then this should work because non sea creatures can never move toward the edge of the map. And, for sea creatures, just make it so they can move if water is being used as the default tile. 
+
+If I used method #2 for round world, consider how the GMAP translation works when near the map edge. 
+
+
+
+Ship Draw
+————————————————
+
+==Ships not Boarded==
+
+map_objects.ships stores GMAP, # of skiffs. 
+
+New row/column: for each iteration, loop through map.objects.ships and if SMAP_CURRENT matches any stored ship/skiff locations, then draw ship/skiff in that tile. 
+
+
+-Boarding a ship—
+
+(B)card command triggers a loop of map_objects.ships, if a ship is at GMAP then change player icon and set a flag for player transport status. If transport status == skiff, then change icon and also increment # of skiffs for the ship at that location. I think if Skiffs are a blocked tile that prevents skiffs boarding skiffs or ships boarding skiffs. 
+
+
+==Ships/Skiff Boarded==

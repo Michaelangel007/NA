@@ -1,0 +1,640 @@
+
+-Spells ;wait until after tile_id reorg due to open issue with summon spells (see notes below)
+@start
+	-mabybe add level check before permitting spell to be cast. 
+			*Spells aren't player specific. PLAYER.HOTKEYS.SPELLS array applies to the entire party. As a result, any PC can try to cast a spell assigned to a hotkey.
+				magic points are a gate, but there might be some higher end spells which I don't want to cost much M.P. Adding level as a gate would make that possible. 
+			*To get the spell's level, either load the master item record associated with the spell code stored in they hotkey or create a lookup table. the item_ID and spell code need to match. 
+			Maybe the lookup table could just store spells where the level check is applicable (two bytes: spell code, level). This would reduce the size of the table. The
+			concept would be that for most spells the M.P gate is sufficient. 
+			*Consider also that if the level gate is based on a spellcaster track level, a multi-track PC could 
+				attain that level without as much focusing on spellcasting (i.e. investing attribute points in INT.) This is where a
+				spellcasting skill could be useful, but it might work out depending on the exact spells the game will have. 
+			
+	*add more spells. At a minimum we need healing spells and a gate spell. Consider other non-combat spells. 
+	 Terrain change stuff should probably wait, but be kept in mind during map design to think through how areas would be kept inaccessible if terrain change was allowed
+	
+	*Summoning spells. There is an unresolved issue on whether summonable creatures will have to be in tile set (i.e every tile set) or just can be stored
+	localling in the spell routine. I made notes on this in the code somewhere, hopefully in the summon spell routine but I don't recall for sure. 
+		;don't do this until after the tile_ID reorg. if we can commit tiles to each tile_set for the demon lord, a minor demon and the skelletons that might be enough
+		;spells and certainly much easier to impliment. 
+	
+@end
+
+
+TOWNS / CASTLES / DUNGEONS
+@START
+
+-Shops
+@start
+-Inns
+	I've considered using NPC talk and using the merchant trans interface. Before deciding consider
+	the function of inns, in particular the leaving of characters there. 
+	
+-Pubs
+	I'm pretty sure NPC Talk is the way to go, since there will be lots of text blocks triggered by keywords. And that allows other conversation with bartender
+	Use state flags to collect the gold
+		*the text block response for the key word states the price "200gp may referesh my memory on that. You pay?"
+		*Then have text blocks (that can be accessed anywhere in the conversation, nothing special) for 
+			keyword "0" = "Then buzz off", and "100", "200" etc. (each amount) which flip the state flag for that amount
+			and display the clue text. 
+		*if the state flag is set for a given amount, deduct the gold (lookup table?) and reset the state flag. Actually resetting the state 
+		 flag may not be needed becasue using this architecture multiple clues really can't have the same gold amount.  
+		*Consider that if the pub keeper says "100 gold will refersh my memory. How much will you pay?" that a text block setup for "100" wont' trigger
+		 if the player offers a different number like 101. One way to manage this, without getting a BCD input routine involved
+		is to have the default text block for the pub keeper address this. "Nice of you to offer so much, what do you want to know?" but that doesn't
+		fit with scenarios where the player puts in keywords the NPC doesnt' recognize, which is the normal purpose of the text block. 
+	-If a BCD input is used for gold amount (seems likely)
+		*a state flag should trigger control pass to a BCD input subroutine. probably a wrapper to
+			KEYIN.BCD. 
+		*Note that KEYIN.BCD will need to be upgraded to support screen animation (see "UPDATE SCREEN ANIMATION & CURSOR"), which was working before
+			so it shouldn't be a big deal. I disabled it when I used KEYIN.BCD from merchant trans where screen animation isn't active.
+		*Will also need to upgrade this routine to support a return press on at least a 3 digit input, maybe 4 digit, depending on the max gold that player can give
+			to the pub keep NPC. See notes in ".RETURN.PRESSED"
+
+	 *Maybe require whisper mode for all pub clues. The first time an NPC tells the player to ask the pub keep about something, 
+		the NPC can tip the player off "better whipser when asking, Johnson doesn't like to talk about this publicly"
+		This is a great introduction to voice mode overall.
+	
+		
+-Trainers
+	*My last thought on this was to start in NPC conversation and once the player meets the requirements to train
+	(guild membership, state flag?) it could launch merchant transactions. 
+	*Then again, there might be no point in launching merchant trans...trainers just offer once service...train in skill X or attribute X.
+	so it's probably better managed through state flags. Gold collection could be done just like for pub clues.	
+	
+
+-Shipwrites
+	-Figure out how to trigger the creation of a ship map object. A state flag could do the trigger, I'd think, but
+	 how to determine the location. Maybe each shipwrite has it's own state flag (or bit setting on a state flag)
+	-If the mark of the sea fairing guild is required that's probably a state flag thing
+	-As to collecting the gold, maybe the shipwright presents a list of ships and prices, labeled with letters
+	-pressing the letter sets the state flag to collect the gold
+@end
+
+
+-Secret Doors
+@START
+*Secret doors could be a tile that looks like a wall, mountain or other tile, and the "secret door" tile_ID range could turn off collission controls
+*And/Or, secret doors could function like regular doors, and just have different tiles which blend in. The collission controls = off scenario is probably easier
+
+@END
+
+-How Will Doors / Keys work ;do at same time as Open Chest as both involve lock pick (see below). Do at same time as HP Max because both involve the STA chart (see below)
+@start
+*Idea: player can buy lockpicks or master keys and/or magic keys. The former are tied to the lock picking skill, giving
+an advantage to thief types. The later are rally expensive or hard to find or somethings but are an option for a party
+without a thief. Ideally doors would have different lock picking difficulty. Maybe that can be managed via the flag byte
+on the object or by Tile_ID and linked to the color of the doors.
+
+I had also considered using the flag byte to force the engine to look at the adjancet map object record which could
+be used to create doors that require special keys (like quest items)
+
+Ideally lockpicks and keys would be to be accessible from memory without
+a disk load so I might need a small Special Inventory Array to store a few
+misc things like this, and also gold. 
+@end
+
+-Pilfer Skill
+*Consider in context of the "Get/Open Chest" item below.
+	*9/15/17; I don't see any notes on it. My most recent thinking it pilfer skill drives a dice roll that if the player looses means he's "caught" looting a chest, when in a town (i.e guards alerted if witnesses)
+
+*Consider renaming it to stealth skill and using it as saving throw for both guard alert scenarios: stealing and killing NPCs
+	The closest thing to this is a pilfer skill that is setup on the character sheet. My vision for it was that if a player opens a chest with an NPC present the pilfer skill would determine the odds of the player being able to open the chest and loot it without the NPC catching them and alterting the guards. Most of this function already exists as killing an NPC has a "witness check" to determine if guards are alerted. 
+	If possible I'll rename the skill to stealth and use if for a guard alert saving throw for both opening chests in front of NPCs and killing NPCs.	
+	Not sure if we'll have the memory though. Might have to just remove the pilfer skill; not sure. 
+	
+
+*Consider that stealth dice roll could occur in COMBAT.EXIT and, for open chest, in the disk loaded code if there is a disk load.
+Side note: I'm considering that open chest and some other stuff will load into a swap area reserved for minor functions....so the swap doesn't get
+clobbered by A*, or disk loaded modules like inventory. 
+	
+-Get/Open Chest ;do at the same time as Doors/Keys because both involve lock picks (see below). Do at same time as HP Max because both involve the STA chart (see below)
+@start
+*This could trigger a special subroutine disk load which handles special functions, including (U)se function, (B)oard command
+Though, if chests will be common it's probably better that it doesn't.
+
+*Ideally some chests are locked the lock picking skill is used. If the lockpick roll is lost then a trap goes off. HP damage I guess. Maybe incorpoate Bill's purple death trap either as a standard trap illustration or as a special trap. 
+	*Maybe if lock pick fails and the purple death trap goes off the box becomes unopenable. 
+	*For different difficulty of locks maybe set in the flag byte of the map object. 
+
+*Having a chest containing items would be particularily memory intensive.
+
+A simple in-memory method might be:
+
+(O)pen + direction, if chest, read flag byte of MO record, the flag byte is used to drive
+a formula which calculates the # of gold in the box. Gold will be an in memory variable so
+it can be updated easily. 
+
+One approach might be to use the in-memory approach for gold-only boxes and the disk subroutine for
+boxes with items. Then in game design, make gold-only boxes common and item boxes rare, making
+the disk load less annoying and even a welcome thing (i.e. disk is loading, yay, I know I'm going to get
+more stuff)
+
+The disk subroutine should probaly be stored in the same file as post-combat treasury management
+so that it can reuse the treasury management subroutines to do most of the work. The open box 
+subroutine would really just be an entrance point to a driver that calls the treasury mgt
+subroutines.
+
+-9/14/2017 update
+
+Read the notes above, it's worth considering key points like: lock picks, traps, and keeping the routine to at
+least do gold-only chests in main game engine memory. 
+
+Thus the following is not a fully baked solution:
+
+If open chests always triggered a diskload, it could load the treasury mgt module and branch to 
+a open chest subroutine. 
+
+open chests could take up two general map object records. I think one of the bytes needs a special setting to be skipped
+over by MO.DRAW (see portcullis and lever to see how I did that as it uses two records). In that case for parameters, I'd have 3 bytes in the 2nd record
+to work with any maybe limited use of the flag byte in the 1st record.
+
+These parameters bytes could be used to trigger code to do things like:
+	*have the chest drop a specific amount of gold or control the range in some way
+	*specify an item that the chest contains
+	*attach to a chest data table stored in the treasure mgt module. This would allow for a small number of chest
+	in the game to contain gold and multiple items. Could be useful in boss rooms or other select honey pot locations. 
+				-idea improvement1: maybe instead of a data table the parm in the MO record communicates the number of items to drop
+				 and the level of the chest, and let the same routine as combat treasure drop randomy select that number of items. This is
+				 much more scalable
+				-idea improvment2: idea improvement1 precludes a scenario where a specific item(s) are in a chest. Maybe to idea improvement1
+				 and the chest data table. Or, if I can define a single item in a chest, maybe that is enough. That would give the player a clue that important stuff is in chests by itself.
+
+-Allow items to be embedded in any tile (idea
+	*Use the dual MO record approach described above, like the portcullis & lever has. 
+	*make the presense of embedded items identified by a value in the flag byte ($03) of the 1st MO record
+	*if the tile_id = chest then trigger treasure_mgt using the open command (should barrels work this way too?)
+			;ideally, if tile_Id = chest and it's a gold only just, trigger local routine for calcualting gold
+	*if the tile_id != chest then trigger treasure_mgt using the search command
+			;in theory items could be hidden anywhere but I'd probably only want to place them in somewhat logical
+			;places (i.e. bookshelf, fireplace, barrels, chests, etc) or in places where clues guide the player to the location
+			;
+			;consider that for quest items, ideally they'd only be found once, but if areas reset, this contruct alone wouldn't erease
+			;the item. But perhaps treasure_mgt could check the state flags for the quest items and if set then nothing found. 
+
+-Lockpicking, traps
+		
+	*presumably I can pass something in the parms which is then handled by treasure_mgt. 
+	-lockpicking skill and DEX affects probability of unlocking chest and disarming trap
+		*increase lockpicking skill progress with each attempt to open a chest. 
+		;included DEX in the formula give an advantage to characters who are investing attribute points on the theif character development track (i.e. by increasing DEX sometimes instead of STR or INT)
+	*WILL LOCKPICKING APPLY TO DOORS??? CONSIDER THAT BEFORE WRITING CODE
+	*idea: maybe we could have several type of lockpicks (basic, master, grand master, etc) and the
+		;quality of the lockpick adds a modifier to the lockpicking skill
+		;
+		;BUT, if we do that then lockpicks either require player inventory (i.e. can't be managed without a disk load)
+		;or we have a side variable for each time which is updated each time lockpick qty changes. 
+		;
+		;we may just need to accept a disk load for all chest opens excpet maybe if there are some low value chests
+		;that are gold only and aren't locked
+		
+		
+-IDEALLY THE OPEN CHEST CODE WOULD STAY IN MEMORY SO MULTIPLE CHESTS COULD BE OPENED IN A ROW 
+;but I don't think that is possible in buildings where the pathfinder is using all the memory in the 
+;swap space. 
+
+
+-Select player to unlock chest
+	*The routines to move the character roster selector are in main game engine memory
+	*see CHARACTER.ROSTER.INCREMENT_DOWN, CHARACTER.ROSTER.INCREMENT_UP
+
+-9/27/2017 update
+	*I'm putting the code to do a gold drop in COMBAT.EXIT, which would include the level indexed lookup table for a base gold drop. 
+	 (I'm noteing this here in case it makes sense to put this code in a common location to share with open chest)
+	
+@end
+
+-Search Command
+Seems like it could be a disk loaded subroutine. Search could have time of day restrictions too,
+so items can only be found at certain times. 
+
+-Castle: connect portcullis to lever and/or TOD  (not critical)
+@start
+We could just leave it as is. From the top 2 tiles the player can see the portcullis is there. 
+
+Having a lever is cool and having it open/close with sunrise/sunset is cool. 
+
+Neither really have a direct puzzle/plot tie in that I can think of. If I can think of something then
+it's higher priority. 
+
+@end
+
+
+-(RESOLVED) Castle: Portcullis Archway (if obscuring, portcullis looks closed after player walks through)
+@start
+(2 tiles tall X 2 tiles wide) 
+ 
+The top two tiles show some portcullis even when it's raised. The problem is that the 2x2 tile layout is 
+only visible from outside the castle gate. once inside the castle gate, only the top two tiles are visible
+making it look like the portcullis is closed. 
+
+options 
+
+a) make the portcullis (large and small) an non-portcullis archways non-obscuring. Use the floor tile
+for the bottom two tiles of the large portcullis archway setup. Hopefully this will look good standing both
+sides
+
+b) remove the portcullis from the top two tiles so it doesn't look closed. If we do this, also
+remove the floor tile transition from the non-portcullis archway so they look consistent (i.e both black under the arch)
+
+c) Trigger the tile_IDs of the top of the portcullis archway to change (like change it in the screen array)
+once the player walks under the arch. The problem is this will be reset if the player changes floors. 
+
+
+@end
+
+
+*Decide whether they will remember sprites killed and angry guard status. Currently the sprite file
+is written to disk when a location is exited so that the game does remember. 
+
+@END
+
+-Use Items
+@start
+Note: it may be best to wait on this until I have a better idea of what useable items I want because that
+will affect the routines that need to execute the use actions. The (U)se inventory sub_module is really a "select item to use"
+routine which I think would return the item_type and item_ID of the item selected or maybe just item_ID if type=misc 
+is assumed. 
+
+ *have (U)se launch inventory in misc items mode. 
+ *if possible filter by usable items via some flag on the item's master record. Should be possible, I tenatively
+	setup an "other information" field where bit6 set desginates a useable item. 
+ *if player pressed (U) or (E)nter, read use_item module from disk and launch it. The use_item module
+  can just return to the main game state loop if needed and it may be better than way anyway. 
+  
+  
+  
+@end
+
+-Health Regeneration
+@START
+
+
+>(Chris Freeman) As a side topic to food, how are you doing resting?  Are you doing any sort of camping mechanic, or not worried about that?
+
+I'm planning on the player being able to rest at inns and rest to pass the time. Inns will probably result in healing. I'm not sure yet if resting to pass the time will result in healing or if there should be a separate "camp" mechanic like you mentioned. 
+
+By resting to pass the time I'm recalling that often I'd walk into a town in Ultima V to find that the merchant is out to lunch or something. It was always annoying to have to track down a bed to "rest" in to pass the time. I'd like for players to just be able to press (R)est or something and specific the number of hours. 
+
+It seems to "easy" to attache health regeneration to resting when done in that way. I like the idea of requiring camping to get health regeneration but I'm not quite sure the best way to implement. For example, what is the difference, really between camping and resting in place other than the graphics.....in Ultima V the main things was that when camping, there was a risk of ambush. The problem though is that I found ambushing really annoying....probably more annoying that food :-)
+
+Maybe it could be as simple as allowing camping once per day. But then the player could just (R)est in place until the next day and then camp. We're not fooling anyone!
+
+Any ideas? 
+
+-from Chris
+I was asking about rest in regards to food, because of how I was thinking about doing healing in my game.  Using food when you rest would trigger the healing process.  You need to be comfortable, warm, etc.  So standing around doesn't cut it, you need an actual 'camp' or 'room'.  If you have food, or order the large meal, you can heal more per rest.  But it gets used up.
+
+-My reply
+Good idea about food + resting = healing. If I do that then maybe I don't need camp. The tricky part there gets into how food is stored. i.e. if food is a generic resource like gold, it is easy. If food is diverse...like the player can buy a variety of food stuffs...meat, ale, cheese, etc, then those become inventory items. If (U)sing food triggers healing, then food as inventory items works fine. I could even vary the regeneration benefit across the food types. But in that scenario, for resting to trigger healing, the rest routine would have to scan the players inventory for food items. Might be possible but trickier. 
+
+
+@END
+
+
+-Ship Cannons / Wyvern
+@start
+*maybe store # of cannon / Wyvern hits in a 1 byte variable. In COMBAT.SETUP deduct it
+from the starting HP of all mobs, ignoring defense.
+
+The main issue I see is that when combat isn't loaded the engine doesn't know the mobs
+HP, so either the mobs are never killed, or a kill shot is an arbitrary dice roll.
+
+And, if mobs aren't killed before combat is entered, the # of cannon/Wyvern hits could result
+in damage exceeding mob HP. Maybe that could be resolved by identifying that case and setting
+mob HP to some floor value.  
+@end
+
+-Ship-to-Ship Combat and Land-to-ship Combat Screen
+@start
+*work with Bill to create any new graphics; i.e. low rails that are obstacales but can be shot over. 
+*create screen layout 
+*modify COMBAT.SETUP to trigger new layout, probaby based on tile_ID of attacking mob and
+the transport status of the player
+
+*What about Wyvern being attacked by ship? Maybe a non-issue, ship can only attack a flying
+Wyvern with cannons.
+@end
+
+-XP to next level (Stats: Screen0)
+@start
+Currently has a placeholder because there is no character sheet field for it. 
+Since the PC character sheet now has plently of fields I thihn I should add XP_NEXT.LO and XP_NEXT.HO
+fields. Count the fields required for the Skill Progress Bucket size mentioned below and make sure there
+is enough for that and this. 
+
+I think the code in COMBAT.EXIT that pulls it from a lookup table is still needed, the value it pulls
+on level up just needs to be saved to the character sheet. 
+@end
+
+-Skill progress bucket size (Stats: Screen3)
+@start
+Simular situation to XP to next Level. Skill progress bucket size currently has placeholders because 
+there is no character sheet field for it. Since the PC character sheet now has plently of fields I thihn I should add XP_NEXT.LO and XP_NEXT.HO
+fields. I have a note in the character sheet for an empty reserved field for each skill that says:
+ 
+"reserved for either skill progress bucket size or skill training points. For more notes on this see STA chart, Top level stats worksheet, "Skill Training" section toward center of screen. 
+
+However, I suspect I wrote that "either/or" comment at a point where I wasn't sure how many other new character sheet fields might needed 
+to be added. 
+
+
+I think the code in COMBAT.EXIT that pulls it from a lookup table is still needed, the value it pulls
+on level up just needs to be saved to the character sheet. 
+ 
+@end
+
+
+-Flying Mobs
+@start
+Will there be any? How does Wyvern/mob flying combat over ocean work? 
+How did U5 daemon / player on flying carpet combat work?
+
+@end
+
+-Sound
+@start
+	*walking
+@START
+	There is a speed problem with any sounded played out of the main game loop while the player is moving (i.e. walking, horse)
+	The only solution seems to be to use a series of notes that have a very short LENGTH parm. The slow progress sounds was
+	definately too long (LENGTH = $1D), which increased the 20 tile walking speed test increase from ~6.5 seconds to over 10seconds.
+	putting the play sound code in-line didn't help noticably. 
+	
+	I made two test walking sounds (see PLAY.SOUND.WALKING) with 3 notes (LENGTH = $01, $02, $03) and they sound workable and it doesn't seem increase
+	the 20 tile walking speed test by a noticable amount. If Mike can create a better sound great, but if not thse could work.
+	The only issue I see with these test sounds is I think they sound a bit like a walking sound for an 8-bit console game. 
+	For Mike to work on it I should probably let him know the max collective LENGTH values we can use before speed is an issue.
+	To test this just try a single note, reducing the LENGTH down from $1D until I can't detect an impact on speed. 
+	
+
+	
+	
+	
+@END
+
+	*horse
+	*fountain
+	*generic spell sound?
+	*water drip (stalagtites)
+	
+
+
+
+
+@end
+
+-Larger Map (2x) / Wrap Around Map
+@start
+Original notes made in "MY NOTES (WRAP AROUND WORLD)"
+
+-Update (9/4/2017)
+
+The last thing I remember considering was considering bolting together two surface maps, with one
+being more of an island hopping / sea fairing world and the other having larger land masses. Mike suggested
+"Kingdom of the North and Kingdom of the South"
+
+I considered having a band of mountains along the equator to avoid the issue of mobs not being able to transit,
+then having a portal of some sort in one or a couple places, which could be locked doors, a building etc.
+The idea of a castle guarding a mountain pass seems kind of cool.
+
+Another idea I had today was to have a void on the equator.
+	Falling into the void perhaps enters a fiery dungeon
+	or maybe even the home plane of the dark lord, under the right conditions. Something special is needed to survive
+	the passage perhaps. In this scenario the "portal" between could be in the undermap, but it would have to be magical
+	or it wouldn't really make sense (i.e. why can the player pass under the void). If the portal is magical I guess
+	it could be anywhere. 
+
+	Using the void approach probably means no gameplay after winning because logically the void should be gone
+	if it's caused by the DL
+	
+
+Both the void/equator mountain band would have wrap around world on the east/west and impassible glacier regions 
+in the north/south
+
+At the moment I think I'm liking the mountain scenario better. The castle/keep guarding the mountain pass could
+be fun. Maybe it's a ruined castle. Once the player gets to the other side maybe a magical portal opens up for
+easy transit between north/south worlds.
+
+-Sea Fairing
+A seperate issue is the sea fairing aspect, and where does the player start. I like the idea of the player
+starting in the large land mass kingdom (probably south) as it's a more open world expierence. But, if that's the
+case, how do we prevent and rationalize the player not getting significant boats until they get to the north kingdom.
+If the player gets all/most of the boat types in the south, that could dilute the exploration experience in the island (north) 
+kingdom where ideally they would gradually get boats. 
+
+If we just simply don't have boats in the south at first, how do we allow (rationalize) the player being able
+to get boats in the south after visiting the north. Ideas below:
+	-There are no pirates in the south, part of the lore of the north could be how its infested with pirates. Pirate town?
+	-There are shipwrights in the south but they won't do business with you without the mark of the sea fairing guild (or something), which is acquired in the north.
+	I think this could world, but it implies maybe the player can get to the north no later than mid-game, maybe even late early game. This means
+	the castle/keep guarding the mountain pass isn't high-level (i.e. no high level boss like a death knight)
+	
+
+@END
+
+-NPC Talk
+@start
+*Talk looks accross counters for NPC (might be best to do after the tile_ID reorg)
+		;pseudo code: If adjacent tile_ID = merchant_counter than check next tile out for an NPC. If NPC = non-merchant then to normal talk. If NPC = merchant then launch merchant transaction sub_module of inventory
+
+	
+@end
+
+
+-MISC ;(but important)
+@START 
+*HP MAX
+	;something needs to be cleaned up with this. I think it's that these values aren't stored on the character sheet and they need to be so they can be displayed on the stats screen. 
+
+@END
+
+
+Planned Optimizations
+@START
+
+ELS/PLS
+@START
+ELS / PLS
+
+Put the screen array offsets of each position in the lighted area in a lookup table.
+
+Integrate through the table either adding or subtracting the offset from the pls or ELS position . Do all adds then all subtracts.
+
+
+On each iteration apply any conditional logic (such as offscreen), then updated screen dark (and dark before?)
+
+For offscreen, can it be determined by getting the Column/row of the anchor position and using that and the iteration number (or embedded table value for direction relative to the anchor) to compare to the screen edge row/column?
+
+
+I think pls and ELS can share this code..just have it take the anchor position as a parm and feed the pls or ELS position into it.
+
+
+-more thoughts on screen edge detect
+
+Doing the top/bottom screen edge detect is easy. For top look for underflow on subtracting the offset. For top, look for > high element of the array.
+
+For left to right, the only way I can think of to do it is convert the anchor to column, the compare to the anchor +offset column. For left it should always be less and for right it should always be greater. My concern is the speed overhead of converting to column, but if that's happening right now it's probably okay.
+
+
+@END
+
+
+
+
+
+@END
+
+@end
+
+==========SYSTEM============
+@start
+
+-Loading Maps
+@start
+	*current architecture isn't scalable as it takes too much memory per map added and possibly per wormhole added.
+	*things to consider
+			*move wormhole data to either the .MAP or .SPR data file (decide if I'm going to consolidate those before proceeding) and load it form disk into an array. 
+				To do this I need to know the max # of wormholes on any given map. Or guess.
+			*the filenames suck a lot of memory. The map related file names have a convention:
+							DATA.MAP.M4
+							DATA.SPR.M4
+							DATA.TLK.L001			
+				instead of defining each filename as an ascii hex array (not negative ascii) with the filename length as leading byte, instead
+				setup a boilder plate filename for each of the above, during the load routine copy the map value into the appropraite bytes of the boiler plate. 
+				Then the boiler plate array can always be used as the ProDOS.IO parameter. I think the map number can be sourced from PLAYER.MAP.LOCATION which is currently used for the branch value. 
+				
+				Make sure to use a 3 digit map number, unlike the .MAP and .SPR filenames which use single digit. 
+				I think it's probably correct for the .TLK file to use the L (location) convention since, if I recall, the talk files are specific to a location (set of maps) not a specific map so that
+				NPCs on all floors of a town share the same talk file. 
+			*Get rid of the branch setup in LOAD.NEW.MAP and LOAD.NEW.SHAPES. For LOAD.NEW.MAP I think that
+			modifying the filename scheme as described above will make that possible because the parms for ProDOS.IO will be identical for
+			all maps. I havent't looked at LOAD.NEW.SHAPES but a simular approach can probably be taken with a boilerplate filename customized using the map_type code. 
+			*.IS.LOCATION.ENTERABLE (MAP.ENTER.CHECK) is another inefficient branch setup.
+				loading wormhole data from the .MAP or .SPR file into common array would eliminate the need for the branches. THe pointer would just get set to the buffer array that holds the contents of the file read.  
+			
+	*before implementing a new scheme, consider this end state goal:
+		*Track which drive each disk was in the last time a file was read from it. 
+		Use that to determine whether to specify drive1 or drive 2 in reqcmd.
+		*update the prodos.io disk prompt to include the name of the disk that must be inserted. 
+				*put the disk/side number as the first character of the filename? if the filename
+				is boilerplate with the map # inserted, that doesn't seem to fit. maybe the map number
+				is an index to a lookup table that contains the disk number the maps reside on. 
+	
+@end			
+-Build process
+      *either redesign so the build can be done in chunks (i.e. only add files to disk image which changed) OR try caddius and 
+	  or the twitter guys (Zellen?) disk image program and see if it's faster. The twitter guy seemed to think he could add a batch mode feature that would speed things up.
+
+-Map Compression
+		*Keep existing system or rewrite to use ZX7 or one of Peter's other decompressors
+
+-Change method for day/night transitions (combat system in-memory prerequisite)
+@start
+	*instead of the goofy copy from aux memory, just do a regular tile-swap (like beds) but instead
+	of triggering via map object presense, trigger by TOD. Once it's working, try using self modifying code
+	to lessen the speed impact. 
+	
+	For example, to the TOD check before the main loop starts, and if the
+	TOD is such the swap isn't needed then save a JMP instuction to the memory addres where the first
+	line of the swap code is stored inside the loop. Before doig this, fully investigate the current
+	implimentation I recall there is stuff setup in event manager and possibly on wormhole entry
+	that decides whether to initate the copy. Whatever logic it's using has to be considered in
+	a scenerio where day tiles are displayed by default and then if night, do the swap. It seem like
+	it should be that simple. Hopefully the complexity of the existing setup will just be irrelivent
+	
+	WHY THIS IS A COMBAT SYS IN-MEMORY PREREQ. By making this change, that frees up some aux
+	memory which will make it easier use other aux memory blocks to store the weapon shapes. 
+	The other memory blocks are the aux swap expansion space, which is no longer needed since inventory doesn't use the $9000-$9600 range
+	and also the range just above the map compression. 	
+
+@end
+		
+
+-ANIMATION
+@start
+
+-unsync animation frames of S_ENTITIES
+	*consider reserving high-bit of the flags byte on the mob MO record to trigger animation.frame++ in order to make it so all S_ENTITIES aren't in sync
+	*(don't actually increment animation.frame, but use the ++ value to drive the calculation of the shape table address for the "current" frame)
+		
+-Ocean force animation
+@start
+*try changing force animation in all water screen
+If force flag set, only force animation one out of every four sequential-moves (key held down). Set counter independent of animation frames
+
+*if this works (I.e travel. Time across Ocean seems reasonable, consider enlarging map.
+
+*if map enlarge, maybe use John brooks technique for a "sails set" fast boat mode. I.e if all ocean screen one move = 4 tiles. Could take some memory. Be careful.
+		*update 9/22/2017; clarification: to do 4 moves with a board it would need to work like the Wyvern....as the movement routines are setup
+		;to move one tile at a time, and the screen scroll and edge tile draw needs to happen for the screen to look correctly after the 4 moves are done.
+		;I'd need to essentially execute 4 move calls, but then only update aniamtion and flip the page after the 4th. It might be a substatnial speed gain
+		
+	
+
+@end
+
+
+@end
+		
+-Combat System 
+		*make final decision on whether to keep in memory all the time. (see prerequisite above)
+			*8/20/17; I lost track of where I put my notes on ideas for fitting combat into memory. 
+			
+			Some of them are here:
+			
+			See MY NOTES (Combat) file, hdeading "===COMBAT ALWAYS IN MEMORY -NOTES=====" This section also contains a note about 
+			where my notes on the physical clipboard pad are on this topic
+
+			I'm pretty sure I also had some notes abou optimizations if it turned out I can't keep combat module in memory all the time.
+	
+				
+		-if combat stats in memory always, that means stats screen0 (stats summary) will always be in memory. 
+			*modify the inventory module so that screen0 is launched from memory always, instead of disk loaded for non-combat access. 
+			*See the "temporary" note in .DRAW.MENU_ICONS which described other adjustements needed and optimizations desired, once screen0 becomes a routine permenantly in memory
+			*If the combat module is permenantly in memory, I think this means the spell file would load into the swap space without clobbering the combat module.
+			With the entire swap module available, consider if at least some spells could stay in memory once loaded from disk (via load flag)
+			There are probably more spells code blocks than would fit in the swap space but it might be possible to organize the reserved memory blocks so the more common spells are in separate memory.
+			Loading inventory uses the swap space but the contents will be put back
+
+		-Make final connection between combat and inventory
+			*see comments in COMBAT.DISPLAY.STATS_SUMMARY
+		
+		
+-Speed optimizations (at least the low hanging fruit, see "memory, speed planning" notes file)
+
+-File IO optimizations (at least the low hanging fruit, see "File IO optimizations" notes file)
+
+-Convert to Git (see list of benifits below)
+		*Review videos from Kfest with Quinn's session on Git
+			*she provided like to sample project and cheat sheet
+				https://github.com/blondie7575/HelloKFest
+		-Install Tower (A git tool), the local git software that Quinn did a demo of. 
+			*Put the top level source folder for the local repository on dropbox so that it backs up automatically. If I did pull requests to Githhub then that would take care of the backup, but all github repositories are public without a pay account.
+			*At this point, it may make sense to split the source code out of c:\my_code and into the local repository. 
+			*Consider renaming c:\my_code to c:\projects\nox_archaist
+			*Review San's feedback on making code public and be consistent with it at this stage except for length of comments			
+		*Notepad+ and Tower would both be used. Hopefully clicking on a file in Tower will launch notepad+. When Quinn click on a file in Mac version of tower it launched some kind of 3rd party source code editor (when I asked about it), though she seemed unsure if it would work. 
+
+		-Benifits
+			*Tower handles version control, enabled comments on versions and comparisons between versions, or at least to some extent...for sure I saw it showing changes between a new version (pull request) and the last version
+			*dropbox handles backups. 
+				*Since I'd be splitting off the source files from the mess that is c:\my_code, the size of the backups should be managable
+				*However, the build backups pull in lots of stuff other than source code (i.e disk images, excel sheets, batch files, etc)
+					so maybe I should keep doing those.  
+					
+-Apple IIgs optimization
+@start
+-Detect IIgs and flip soft switch to slow system to 1mhz mode
+
+-Tom Phelps (taphelps@gmail.com) emailed me and suggsted the IIgs uses $c036 to store the system speed, 
+	and in just a handful of instructions one could save the current value, set fast speed, run the slow 
+	but which is now faster, then restore system speed.
+	*I think this means there would be less lag between player moves on the Apple IIgs. Is that the only system?
+	his email seemed to imply IIgs was just one. Did IIc have a faster processor?
+	
+
+@end
+			
+@end

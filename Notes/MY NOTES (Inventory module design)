@@ -1,0 +1,159 @@
+
+Task list
+
+-(DONE) decide where whether the player inventory data file will be it's own file or placed at front of game items file
+    *consider the space required for the saved game version which won't need the item names if those are populated on boot. 
+
+-(DONE) setup misc items table to reduce unknown
+	*include body part field (same as armor table), which has "unreadiable" status
+
+-(done)*setup datagram for player inventory table in Combat Stats.xls (rename to Combat_Inventory Stats)
+
+*(done).EQ the inventory table to $BA00. If we use 6 byte records /w 256 item max,
+then the table will fit from $BA00-$BFFF
+
+
+*(DONE) move the inventory file I/O routines to main game engine memory
+
+*create routine to add/remove items/records to the inventory table (main game engine memory)
+	*note: I had considered that when records are added to the inventory table that the
+	level field wouldn't be populated so the inventory file I/O routines could stay local to the 
+	inventory module. However, the treasure and merchant routines will need access
+	to the item names so therefore the inventory file access routines will need to be in main game engine memroy anyway
+
+	ADD_REMOVE.INVENTORY.ITEM and FILE.READ.INVENTORY_DATA.ENTRANCE
+	are setup to handle this....well the labels exist and have "starting" point code in them I copied
+	from other routines, but I didn't start work on them yet. 
+	See "ADD_REMOVE.INVENTORY.ITEM" for notes on the design I envision and the
+	problem of only being able to write 2 pages at a time. 
+	
+
+*write routine to sort the in-memory inventory data by the item level field 
+		This is need so that the inventory display shows the most powerful items first. 
+		To sort we'll need to save the array length. to the 2 bytes before the start
+		of the inventory array. Just reserve $B9FE.$B9FF for this purpose and setup a pointer to
+		$B9FE to use with the sort routine. 
+		
+
+(DONE) *write the ready equipment routine. See "inventory mgr rule" notes
+at the top of the inventory module.
+		Consider the interface to the eventual UI screen. Probably a good place to start is an interface routine
+		that processes a ready/unready request, taking paramters like the item ID/code
+		of the item to ready/unready. This would trigger an examination of the in-memory 
+		inventory data to make the ready/unready happen and if a "ready" then unready any items
+		that conflict. 
+
+*write the UI screens
+
+--------------
+
+==UI Screens==
+
+*Needs to support ready and unready. Probably enter key to toggle ready/unready status. 
+	*needs to support unready because readied items can't be sold. Readied items can't be sold becuase
+	the merchant trans module has no way to set the slot to hands/skin
+
+-fill buffer with on screen items
+	-buffer contains the inventory record fields plus extra added to the end of the record as needed.
+		*ACTIVE_PLAYER_READIED
+		*QTY_AVAILABLE
+	-Only display items which the player has sufficient qty to ready or which the active player has readied
+	For each item:
+			;if item readied by active player THEN
+						;....add item to buffer 
+						;....set ACTIVE_PLAYER_READIED field (check both readied fields and if both readied then set ACTIVE_PLAYER_READIED = $02)
+			;run loop to count the number of players who have the item readied. Check both readied flag fields
+				*QTY_AVAILABLE = inventory record qty - # of times item is readied
+				;if ACTIVE_PLAYER_READIED not set AND qty > count THEN    (if ACTIVE_PLAYER_READIED is set then recor will already be added to buffer)
+						*...add item to buffer
+			
+		
+*If player hits the ready/unready key on an item with "item_type = armor" then
+play dumb ass sounds and display text "Not during battle!"
+
+
+-Display Qty
+	*display QTY_AVAILABLE (see fill buffer above)
+	
+-Ready/Unready toggle key
+	*if ACTIVE_PLAYER_READIED is set ($02) ;$02 means item is readied twice
+			THEN call UNREADY (I think the intention is that it only unreadies one of the items)
+	*if ACTIVE_PLAYER_READIED is set ($01) ;$01 means item is readied once
+			AND selected item is 2-handed THEN call UNREADY
+			AND QTY_AVAILABLE = $0 THEN call UNREADY
+			ELSE
+			call READY
+	*ELSE
+		READY	
+	
+	*TEXT DISPLAY (lower border window): "Item Readied", "Item Unreadied"
+	
+-Spells/Misc tab
+		*detect spells by range.
+		*Add filter to exclude spell range from misc tab
+		*add filter to exclude everything NOT in spell range from spell tab
+		*When enter is pressed, if item is in spell range, don't call ready/unready routine,
+		instead call ready spell routine.
+			*prompt (scroll window?) to select spell slot to ready (hot key 0-9)
+			
+	
+(DONE) -TESTING SETUP
+*enter the players readied weapons/armor in a sequential manner. 
+so player 1-6 has weapon codes 0-6 or something. Maybe it’s that way already
+
+*insert a break and observe the values in the player character sheets (do all 6). Then after changing the routines, keep debugging until I get the same values. 
+
+*test boot speed for inventory routine. 
+
+(DONE) ---------RESET SEEK POINTER METHOD----------
+
+-setup a stencil to the equiped table (except drop the item type bytes). 
+		*(DONE) the inventory module sets the bytes to $01 for items which have been modified.
+		*setup a special entrance (process_all) to the calculate stats subroutine which sets all items as modified. 
+		 this can be used for testing and in-game in the character creation module. 
+*Keep the PC loop at top level. Use YREG to track which equiped item is being processed.
+-(DONE) For each item in the loop, check the stencil using Y-REG and only process if $01. 
+	*note only: STR calcs are done in the left/right hand weapon routine so no corner case there. 
+	*note only: DEX triggers recalc of TO-HIT from baseline value, using the DEX attrib value on char sheet. So, no file I/O involved
+	This calc can be done every time, but as importantly, it should be done, along with STR after level up.
+
+-STR/DEX corner case
+	*note only: STR is done in lhand/rhand weapon
+	*(DONE) setup level-up entrance. Set lhand/rhand weapon in stencil
+	*(SKIPPED, dex is always processed) DEX: process if level-up or process_all flag is set
+	
+	
+-File I/O
+	*(DONE) merge the equiped item table (currently in its own file) into the top or bottom of item file. Later might be easier as then the item routines don't need to be modified
+	*(DONE) separate initial open/read and seek/read into two diffrernet routines
+	*(DONE) I think the seek/read just needs the seek pointer reset code added to the start of it, or maybe end of it. 
+	
+
+---------CALCULATE ARBITRARY SEEK METHOD------
+—FILE.READ.ITEM_TABLES.ENTRANCE 
+
+*becomes INV.READ.ITEM_TABLES.FILE_OPEN
+*strip down to just the open file code. I think leave the NOP byte 
+at start of file
+
+
+-INV.READ.ITEM_TABLES.FILE
+
+*becomes INV.READ.ITEM_TABLES.FILE.READ
+
+*move the other stuff from the old entrance routine (i.e. set.read.parameters)
+to this routine
+
+*seek.bytes.current = item.record.offset - seek.position
+*item.record.offset = calculated via set.read.parameters
+*seek.position = init ($01), seek.last + record.size.last
+
+for next iteration
+*seek.last = seek.bytes.current
+*record.size.last = record size of current read
+
+
+*note: to add the equipped item table at the end of the items file
+I’ll need to address that in set.read.parameters (maybe give it an item_type
+code and then for record.size.last take into consideration that it’s record size is different)
+

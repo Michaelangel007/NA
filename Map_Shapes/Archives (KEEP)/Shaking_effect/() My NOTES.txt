@@ -1,0 +1,19 @@
+
+Move south once and observe the screen shaking effect
+
+I discovered this early in animation testing, when hard coding the animation for a single tile (flag).
+
+The two frames are cycled via a page flip. To support this I created PAGE.MIRROR, which is called
+right after DRAW.SCREEN.
+
+In this version I didn't implement PAGE.MIRROR after the movement routines. Thus, the screen looks
+fine on lauch because Hi-Res Page 1&2 are mirrored. After moving, the screen scrolls, thus 
+making page1 and page2 != by 1 row or column. Thus, the page flip in the animation routine creates
+the illusion of shaking the screen. 
+
+**nOTE there is a bug in the PAGE.MIRROR used in this version. The stop address isn't being 
+set correctly 
+
+it is fixed by adding the following to the end of .PAGE1.CURRENTLY.FOREGROUND
+	LDA #$60
+	STA COPY.STOP.ADDRESS

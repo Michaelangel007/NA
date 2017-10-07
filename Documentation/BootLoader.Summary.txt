@@ -1,0 +1,171 @@
+
+Original Write-up done on 1/26/2016, by Mark Lemmert
+
+SUMMARY
+
+Boot0
+Boot1
+Custom Boot1
+Custom Boot2
+GAME.LOADER1
+GAME.LOADER2
+
+Maintaining Boot Loader During Development
+
+==BOOT0==
+
+Boot0 is stored in ROM and is launched when the power is turned on to the computer. Boot0 reads
+T0, S0 (which normally contains boot 1) into $800.
+
+
+==BOOT1 / CUSTOM BOOT1===
+
+-Boot1
+boot1 reads RWTS into $B7B5-$BFFF so that needs to be done before my custom code can take over.
+boot1 turns control over to Custom Boot1 at the point where it would normally turn control over to
+to boot2. Maybe my custom boot1 should have been called custom boot2. oh well. the code for custom boot1
+is in the same page as boot1 (it starts at $08B3) so I guess that's why I was thinking of it that way.
+
+-Creating Custom Boot1
+I originally created custom boot1 by using My.RWTS to read track 0, sector 0 from a dos 3.3 disk and
+changing the JMP at $084A to goto $0B83 (start of custom boot1), instead of the boot2 address.
+
+Then I added the custom boot1 code at $08B3 and used My.RWTS to write the $800 page back to track 0, sector 0.
+I had actually read T0,S0 into $7000, so it was really the $7000 page I wrote back, but conceptually it 
+was the code normally located in the $800 page at bootup.
+
+Then the disk image this write was done to became the master bootloader disk image for the development
+process using SBASM and AppleCommander.  
+
+
+-Custom Boot1
+
+It has a very stripped down version of my.rwts which is used to read my.rwts.bin from disk into
+$0F00. This .bin file contains MY.RWTS (which after this load permenantly has it's entrance at $0F04),
+and contains Custom Boot2, which is loaded into $1200.  
+
+(track $01, sector $0A-$0F) into $0C00
+
+
+Then, a hard coded JMP to $1200 turns control over to Custom Boot2. 
+
+==CUSTOM BOOT2====
+
+my.rwts has some code on the back-end, which via a .NO directive is positioned to always start
+at $1200. This code is Custom Boot2. 
+
+Custom Boot2 reads in the file LOADER.BIN via My.RWTS. The use of the term file is conceptual. LOADER.BIN
+is in fact a file created by SBASM during assembly and is added to the disk image (along with all other
+BIN files created during assembly) via AppleCommander.
+
+However, once in the world of RWTS (and my custom interface MY.RWTS), files cease to have meaning and 
+tracks/sectors are how data read/writes are done. Each sector is equal to 1 page. A track is equal to 16 pages (a super page in my short hand).
+
+The only leftover artifact of the concept of a file seems to be 4 bytes prepended to the beginning of
+the hex data encoded in the binary file by the assembler. AppleCommander also skips a couple sectors between
+files. I suspect that the 4 byte header is a pointer to the skipped sectors and the skipped sectors contain
+some sort of information on the file. If I were to re-read the book Beneath DOS it would probably clarify
+this further, or indicate I'm flat ass wrong and I originally read the book at 2am after a long day of coding. 
+
+Regardless, the concern of the boot code is to prevent this 4 byte header from causing trouble since
+it throws off the addresses that the assembler assumed certain code would be located at when it attached memory
+addresses to labels. More on that later.
+
+After reading in LOADER.BIN, Custom Boot2 does a soft JMP to GAME.LOADER1 which is a subroutine in the
+file "LOADER.BIN". I say soft JMP because from this point on, the cross-assembler (SBASM) is in control
+of files and manages lables. Actually, MY.RWTS.BIN is a file created by SBASM as well, but the JMP
+between Custom Boot1 and Custom Boot2 (on the back-end of MY.RWTS.BIN) had to be a hard coded JMP because
+Custom Boot1 had to be written permenantly to the disk image on track0,sector0. 
+
+
+
+===GAME.LOADER1===
+
+GAME.LOADER1 (a subroutine in LOADER.BIN) has two functions. 1) load data from disk into aux memory 2) load game files from disk into memory using my.rwts
+
+The following game files are loaded:
+
+;	GOTHIC.SET		$0C00
+;	CONT.HRCG		$0300
+;	GAME.BIN 		$6000
+
+Loading GAME.BIN to $6000 overwrites most of the main memory temporarily used to store the data loaded
+from disk that was copied to aux memory. The rest of the temp memory is in the graphics area of memory
+and will be overwritten once the game clears the screen pages. 
+
+GOTHIC.SET and CONT.HRCG have some special handling due to the 4 byte header mentioned earlier. I needed
+to strip off that header because CONT.HRCG is in a very tight memory space, and it's very fussy code, so
+stripping off the headers was the path of least resistance. For GOTHIC.SET it might have worked to leave the 4 bytes
+on if I adjusted the references to it in CONT.HRCG but at a minimum the extra 4 bytes resulted in GOTHIC.SET becoming
+3 pages + 4 bytes, which messed up my memory map (only 3 pages were allocated) and in any event would have been a less
+clean stop point than on a page boundry. There could have been other unforseen issues too trying to run the code that way.
+More details on exactly how the headers are stripped off (using a memory copy routine) are noted in CONT.HRCG
+
+Control is turned over to GAME.LOADER2 via a soft JMP. 
+
+
+===GAME.LOADER2===
+
+GAME.LOADER2 is a subroutine in GAME.BIN. In fact, it is the very first code executed, which
+loads this file:
+
+VARIABLES.BIN	$1200    (overwriting the Custom Boot2 and LOADER.BIN code)
+
+After this file is in memory, all game files have been loaded and control is turned over to the 
+main program of the game. 
+
+
+
+=====Maintaining Boot Loader During Development===
+
+The bootlaoder is fully integrated into my automated development process with SBASM and AppleCommander.
+
+The linch pin to doing that was discovering that it is possible to identify the track and sector
+of a file written to a disk image by AppleCommander. This identification is done using CiderPress.
+
+Open a disk image using CiderPress 
+Select Disk Sector Viewer from the Tools Menu
+Click Open Current Archive
+Click Open File
+Enter the name of a file on the disk image (note: this is the name specified by AppleCommander. My convention was to drop the .BIN used in the file created by SBASM. So LOADER.BIN would be named LOADER on the disk image, for example)
+
+
+The starting track and sector of the file appears in the upper right corner. click the "Read Next" button
+until the last sector is reached (the sector will stop incrementing when this happens). Viola! We now
+know the start/end track and sector of the file. Comparing the hex data on the ciderpress screen to
+the SBASM machine code output is when I first noticed the 4 byte header. The hex data on the ciderpress
+screen is exactly what RWTS reads in. 
+
+----The Rub----
+
+So here's the rub. The track and sector locations of the files will change as their size changes. I 
+organized the files on the disk with the ones least likely to change first, with the main game file
+last as it was still under intense development. 
+
+The other trick I used was to insert .NO directives
+in the assembly source code to append the binary files with $00s, resulting in them always being the
+same size even if I added more code because the .NO statement would just pad less zeros since .NO is
+really just advancing the program counter to a specified memory address and backfilling with $00s.
+
+Also cool is that SBASM will generate an error if the program code ends at an address greater than the 
+address specified with the .NO directive. As a result, I was able to more or less make coding changes
+as I normally would without really paying any extra attention. This applies to all files except for
+Custom Boot1 as that is written to the disk image master.
+
+If file sizes do change, then repeat the process in Ciderpress and update the start/end track/sector
+values in each stage of the boot process. This would be a PITA to do for each iteration of the code
+but it's not a big deal once in awhile. 
+
+
+
+
+Final Comments:
+
+This was one of the most interesting programming projects I've every done. My work on trying to
+save Ultima III from being lost to histry some day result in my diving deep into the Apple II boot process and and that knowledge was the foundation
+for writing a bootloader (I didn't realize that at the time).
+
+An email to Mike Reimer on 1/25/16 "Game: something really cool just happened" talks about this more
+and what development the bootloader meant for the game project. 
+
+

@@ -1,0 +1,14 @@
+
+section: Row A, Column A (top-left zone)
+
+Has battlement walls with day floor tile, day roof surface, and day roof wall tiles
+
+
+section: Row A, Column B (top-center zone)
+
+Has battlement walls with night floor tiles, night roof surface, and night roof wall tiles
+
+
+**NOTE: the roof walls have night versions for 3 of the 4 tiles because those roof wall tiles
+contain some pixels of the roof surface as a transition. Since the roof surface changes color with day/night, the
+roof wall tiles with the surface need to change too. 

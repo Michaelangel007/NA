@@ -1,0 +1,56 @@
+REM ===================GOPU.BAT========================================================
+REM ========FUNCTION: UPDATE PRODOS FILE SYSTEM BOOTLOADER =====
+REM ========(update the disk controller Peter Ferrie (qkumba) wrote, stores at Track0, Sector1======
+REM ========(use after gotest.bat)
+REM ==================================================================================
+REM
+REM Make Backup Copy of Code Iteration
+set Hour=%Time:~0,2%
+if "%hour:~0,1%" == " " set hour=0%hour:~1,1%
+set Min=%Time:~3,2%
+
+mkdir c:\my_code\backups\%hour%.%min%
+cd\my_code
+copy c:\my_code\test*.asm c:\my_code\backups\%hour%.%min%
+copy c:\my_code\INCLUDES_LIBS\pdriver.asm c:\my_code\backups\%hour%.%min%
+REM copy c:\my_code\temp\*.asm c:\my_code\backups\%hour%.%min%
+copy c:\sbasm3\*.bat c:\my_code\backups\%hour%.%min%
+
+
+copy test.bin c:\ac1.3.5
+del test.bin
+
+copy PRODOS.DRIVER.BIN  c:\ac1.3.5
+del PRODOS.DRIVER.BIN 
+
+
+
+copy BOOTLDR.PRODOS_FS c:\ac1.3.5\sbasm_test.PO
+
+cd\ac1.3.5
+REM java -jar ac.jar -p sbasm_test.hdv test B 0x6000 < test.bin
+java -jar ac.jar -p sbasm_test.po TEST bin 0x1000 < test.bin 
+java -jar ac.jar -p sbasm_test.po PDRIVER bin 0x800 < PRODOS.DRIVER.BIN
+
+java -jar ac.jar -p sbasm_test.po DUMMY.FILE bin 0x6000 < DUMMY.FILE.BIN
+java -jar ac.jar -p sbasm_test.po M bin 0x7000 < gothic.set.bin 
+java -jar ac.jar -p sbasm_test.po DATA bin 0x4000 < DATA.SHAPES.SURFACE.BIN
+
+REM java -jar ac.jar -p sbasm_test.po ORG bin 0x8000 < opendsk.bin 
+
+
+
+
+copy sbasm_test.po c:\applewin\games
+copy sbasm_test.po c:\ADTPro-2.0.0\disks\
+copy sbasm_test.po c:\USERS\MARK\DROPBOX\TEMP2\
+del sbasm_test.po
+del test.bin
+del gothic.set.bin
+del DATA.SHAPES.SURFACE.BIN
+del PRODOS.DRIVER.BIN 
+del DUMMY.FILE.BIN
+REM del OPENDSK.BIN
+
+
+cd\my_code

@@ -1,0 +1,93 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf130
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 Hi Beth,\
+\
+Hope you had a great holiday!\
+\
+I\'92m making good process on the game and have encountered two complicated topics (wrap around world maps and maps too large to store in memory). If you have time at some point, I was wondering if you have any insights? (details below) As always I really appreciate your advice.\
+\
+I\'92m currently working on animation so this is planning ahead to the next phase. \
+\
+\
+\
+\
+Examples \
+\
+Wrap-Around-Map: diagram1 (attached)\
+Loader Zones: diagram2 (attached)\
+\
+\
+Observations\
+\
+It seems like these two topics are somewhat related. I recall Ultima IV/V had a 256x256 tile map, and the disk drive would load data periodically as though the map was divided into \'93loader zones\'94.\
+\
+In dealing with wrap around world maps and loader zones within a world map it seems like the same similar issue exists: how to determine which tiles are within the screen view when the player icon (center tile) moves to a location close enough to the \'93edge\'94 that the screen view spills over the \'93edge\'94.\
+\
+I did some research and found quite a bit online about the wrap around world concept in tile graphics systems in post Apple II games (unfortunately none from the Apple II era). It seems that the concept of making a rectangle map wrap around on the edges reflects the geometric shape of a torus. It also appears that post Apple II tile games used mathematical formulas to describe the relationship between an X/Y position on a torus shaped tile map and a tile data array, or possibly doing the conversion using lookup tables via multi-dimensional arrays. These feel like dead ends to me in 6502 assembler given the processor overhead of intense math and the lack of multi-dimensional lookup capability, aside from any memory implications. \
+\
+I\'92ve sketched out what I think is a possible solution to both issues, but before embarking on this journey am curious if you see any holes in them and/or if you have any other ideas?\
+\
+\
+-Background on existing map implementation \
+\
+world map: 64x64 tiles\
+screen view: 17x11 tiles\
+\
+Currently the tiles viewed on the screen are determined by the player\'92s position on the map (GMAP), which is tracked via a 2-byte unsigned integer that refers to an element in the GMAP.TILE.DATA array. The elements of this array hold the tile_type data and correspond to a rectangle world map as illustrated in Diagram 1 (attached). The location in GMAP.TILE.DATA of any tile position on the screen can be calculated as an offset to GMAP. \
+\
+When the player moves, GMAP is incremented (+1 for east, -1 for west, -64 for north, +64 for south). So essentially the player is moving through the one dimensional GMAP.TILE.DATA array as though it were two dimensional. \
+\
+Currently, when the player moves off the map, one of the following scenarios occur spending on player location: \
+\
+1) an SBC underflow occurs (example, moving north (-64) from the top world map row (position 0-63).\
+\
+2) edge of view screen has 1st or last world map column and player moves east/west. Result is that the tiles from opposite side of map are shown but 1 row askew.\
+\
+3) bottom edge of view screen is in last row and player moves south. The +64 increment overshoots the end of the GMAP.TILE.DATA array so the tile type for those screen positions is whatever happened to be in memory at those addresses.\
+\
+\
+\
+\
+-Possible Wrap-Around-World Map Solution (64x64 tile map)\
+\
+I think converting GMAP to an x,y coordinate is fairly straightforward. Thus, when movement occurs, detecting when GMAP is on the edge of the map and overriding the increment to result in a GMAP position on the opposite edge seems fairly straightforward. The more challenging issue (I think) is when the player doesn\'92t move off an edge, but the screen view does. I think there are too many combinations to handle with static overrides or lookup tables containing the GMAP offset values for the entire screen based on player location.    \
+\
+\
+My idea, in a nutshell, is to place ocean tiles on the edge of the map, in the amount of 1/2 screen width on each edge. The player\'92s GMAP is adjusted to the other side of the map when the center tile moves off the edge (as described in paragraph above).\
+\
+Then when moving the screen view moves off the left or right edge, the 1 row askew isn\'92t visually detected because it\'92s all ocean anyway. When the screen view moves off the top or bottom edge, the routine that draws a new row of tiles would detect that the new row is off the top of bottom edge (probably by converting GMAP to x,y and testing the y value for proximity to the edge), and if so automatically using the ocean tile type. \
+\
+\
+One wrinkle that occurred to me was that monster movement (including water monsters and pirate ships) and player owned ship tracking wouldn\'92t work properly near the edge of the map if I used GMAP to track monsters and owned ships. My idea for solving that is to track the location of these map objects by their proximity (x,y) to the player, essentially disconnecting them from GMAP for purposes of drawing. For example, a monster 1 tile to the right of the player would have an x = 1, one tile left would be x = FF, one tile up would be y = 1, one tile down would be y = FF. \
+\
+The routine that draws the monsters/ships would use these values to determine if the monster/ship is in the current view screen and if so, which screen tile location to draw it on. The routine that calculates monster movement each turn would increment these values to reflect the monster move. But before doing so it would convert the x,y of the adjacent tiles to GMAP in order to check for impassible tiles. At the edge of the screen, this monster collision detection routine would not calculate a GMAP value that was correct, but using the same techniques as with managing the screen view near the edge, I could make it so that it would detect the tiles over the map edge as ocean, which is what the player would be seeing. This would permit water monsters to move off the map edge and reposition then on the  opposite side. \
+\
+There is a bit of math involved here doing the x,y to GMAP conversions, but I don\'92t think nearly as much in a full blow torus algorithm. And, I\'92m considering only allowing monsters to move if their location is in the view screen of the player, which would cut down on the math. I was considering this even before thinking about this challenge because it seems to make more sense than having monster moving toward a player which they can\'92t see.\
+\
+\
+-Possible Loader Zone Solution (for maps too large to fit into memory)\
+\
+I haven\'92t decided yet if 64x64 is the world map size I want to use. At a certain size (not sure what size) it seems logical that loader zones would be required so that only a fraction of the map data was in memory at a time and map data was loaded from disk periodically. \
+\
+I don\'92t think the world wrapping technique mentioned above is practical for loader zones because it would require each loader zone to be surrounded by ocean or some other single tile type. \
+\
+\
+The idea I came up with (using a 256x256 tile map as an example) would entail 16 loader zones of 64x64 tiles each. But, the in memory tile data array would be a little larger than 64x64 so that each loader zone would overlap (illustrated in attached diagram 2). The thought being that the player could walk right to the edge of the current loader zone and be able to see what is in the next loader zone up up to the size of the view screen. Once the player icon crosses into the next loader zone, then the data for the next loader zone is loaded from disk into memory, which also contains overlap data.\
+\
+\
+What I don\'92t like about this idea is:\
+\
+ 1) It seems like putting together the map tile data could be cumbersome as a lot of \'93patching\'94 needs to be done to the map tile data stored on disk so each loader zone has the overlap data.\
+\
+ 2) wasted memory. I\'92ve got bank-switched an AUX memory working, but I\'92d still prefer to be memory efficient when practical as totally memory requirements of the game are unknown. \
+\
+\
+\
+\
+\
+Thanks much for any ideas!\
+}

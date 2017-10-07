@@ -1,0 +1,65 @@
+-file I/O optimization to-do list-
+
+
+========combat.setup speed improvements (applicable only if plan DOES work out to keep combat in memory all the time)
+
+*combat setup: add MOB_ID list sort at start of phase 2
+
+
+Spell file Load
+*Speed up spell file (is 2nd file open done to load code block?)
+
+*consider making spell file a .include to end of combat file at some point and doing. Well, the problem there is we can't seek backwards for the spell code block. but, we can reset the file offset now and start the seek over. 
+
+*Add open file check to spell file loader. It should always be open after first spell cast unless inventory was launched.
+	This is in s scenario where combat is always in memory and the weapon shape table and darkness module loads go away
+
+
+
+Building Load
+*game: increase building load speed, merge .map and .spr data tiles (once less file open)
+
+
+Other
+*building and non-building routines are loaded from disk. I did this so $9000-$95FF could be used
+for the swap space. Since inventory didn't use that space, it seems like I can go back to keeping
+the building and non-building routines in memory. But I suppose that will cut into the memory savings
+of getting $9000-$95FF back, which is helpful to the cause of being able to keep combat in memory.
+
+So in summary, this file i/o improvement is only possible if enough memory is avalable to do it AND
+to keep combat in memory, as keeping combat in memory is more important. 
+
+
+*Track which drive each disk was in the last time a file was read from it. 
+Use that to determine whether to specify drive1 or drive 2 in reqcmd. 
+
+==============combat.setup speed improvements (applicable only if plan DOESN'T work out to keep combat in memory all the time)
+
+LOAD.WEAPONS.SHAPE_TABLES 
+
+*put duplicate copy of LOAD.WEAPONS.SHAPE_TABLES (combat main), into setup file, 
+
+*move weapon shape tables to COMBAT.SETUP probably after COMBAT.SETUP.MAIN and before the mob tables
+
+*do weapon table shape load from COMBAT.SETUP, probably between phase I and phase II. 
+
+This way another file open is avoided in the combat launch process.
+
+Before doing this, consider impact to cast spell load time. I.e. are weapon shapes even being loaded? probably not. if not, then no impact. if weapons shapes are being restored at the end or something, then if a file is being opened already to do the weapon shape load then probably no impact to moving. 
+
+
+
+COMBAT.SETUP report
+
+Merge the combat setup file and combat main file, with combat setup at the start of the file, followed by combat main. This would eliminate the file open for combat main
+
+The combat setup source could still be in it's own .ASM file, which would be an include file at the beginning of the main combat file.
+
+
+
+Spell file Load
+*Speed up spell file (is 2nd file open done to load code block?)
+
+*consider making spell file a .include to end of combat file at some point and doing. Well, the problem there is we can't seek backwards for the spell code block. but, we can reset the file offset now and start the seek over. 
+
+

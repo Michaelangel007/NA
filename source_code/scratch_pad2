@@ -1,0 +1,42 @@
+;=====================SUBROUTINE DOCUMENTATION===========================================================================
+;
+;=============================================================================================================================
+
+;=====================CODE-SECTION DOCUMENTATION==========================================================================
+;
+;===========================================================================================================================
+
+
+LWR.MAIN.RTNS.BIN
+BS.ROUTINES.BANK1
+BS.ROUTINES.BANK2
+BS_AUX.ROUTINES.BANK2.bin
+	BS_AUX_ROUTINES.BANK2.FILE_END
+swap.routines.building.bin
+swap.routines.npc.talk.bin
+swap.routines.inventory.bin
+swap.routines.combat.setup.bin
+swap.routines.combat.exit.bin
+swap.routines.combat.bin
+swap.routines.cast_spell.setup_exit.bin
+swap.routines.spell_file.bin
+
+ZONE_TOOLS.OUTPUT_BUFFER
+ZONE_TOOLS.INPUT_BUFFER
+
+
+COMBAT.ATTACKER.SINDEX
+COMBAT.TARGET_HIT.DB
+
+COMBAT.MOB.ACTIVE.RECORD
+
+CHR_SHEET.MOB.INT.WP_SHAPE_TYPE	
+CHR_SHEET.MOB.ENGAGED.WP_SHAPE_ID.SPELL_CODE
+
+
+
+
+
+
+
+

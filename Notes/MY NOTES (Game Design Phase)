@@ -1,0 +1,89 @@
+
+
+
+===GAME ENGINE FINAL TUNING=====
+
+
+--REGIONAL TILE SWAPS--
+
+Outline of ideas on how to change terrain tiles based on a trigger using event manager
+
+
+Goal: change terrain values in RMAP data array if the tile swap zone (zone the tile swap locations are in) is loaded into the memory.
+
+*modify code that loaded zone data (consider some transitions and game load and first time map load) to record the active zones in a 9 byte array ZONES.ACTIVE
+
+*trigger: if tile swap zone is in ZONES.ACTIVE and if run flag isn't set
+
+-run flag: prevents event code block from being run more than once until trigger condition clears.
+
+*if trigger not set and run flag set then clear run flag. This is in the top level entrance code for the event which runs on every iteration of the game loop. Or put it in a section restricted further to only run once after player move, but not sure what the gain would be as move time is what matters.
+
+*Set run flag at end of event code block.
+
+-event code block
+*see if the rmap position of the tile swaps can be calculated by comparing the gmap.x/y of the player and the gmap.x/y of the tile swaps. Maybe apply the differential to player rmap.x/y and then convert to rmap.
+
+*or maybe use the Rzone slot the tile map zone in to selects an offset from rMap data start to the start of the rmap data for the tile swap zone
+
+*in any case, create a subroutine to do a tile swap at one position, which can be used by loops to change a series by incrementing some parm values.  Like for the castle, store the tile swap IDs needed to make the castle, lava moat and darkness in A small array.
+
+
+
+===PUZZLE/CLUE MECHANICS===
+
+
+---------DUNGEONS------------
+
+--PUZZLE--
+	*Portculis/lever. Could be used with any graphic that fits with an up/down open/closed construct
+	*Doors which require a specific key
+		(see "complex general map objects" in notes section below)
+	*Magic mouths
+		*described in clues section. Since the NPC Talk engine is used, the magic mouth could pose a riddle and only give
+		its clue if the player answers correctly.
+	*Think of other uses for the complex general map object feature
+	
+--CLUES--
+
+-NPCs
+	*there can be NPCs in dungeons, out in the wild and in mob towns. 
+
+-Magic mouth
+	*special graphic to blend into wall
+	*setup as NPC that doesn't move
+	*magic mouth speal is the NPC intro text. 
+	*no goodbye text
+
+-Ancient Writing (on walls)	
+	*same game setup as magic mouth
+	*maybe use it for less important clues and the magic mouth for more dramatic moments
+	*ideally, the look command would trigger, some maybe
+		have the look command check for the ancient writing tile ID (or range if multiple)
+		and if found treat it as a talk request
+		
+---------NPCs------------
+
+-voice mode
+
+-state flag push/pulls
+
+
+-(future; easy) NPC conversation triggering an item add to inventory. (example: NPC gives an item as a quest reward)
+
+	-To implement in the code
+	In NPC Talk, set a two byte holding variable (item_type, item_code), which doesn't yet exist. Error trap if already set (support can advise the player to restore from last save and launch inventory to process)
+	In INV_4, on initial launch, (merchant or regular interface) after player inventory is loaded, read the holding variable and pass it to the player inventory add routine which should be in the entrance module. Reset holding variable
+	This holding variable should be part of the save game data.
+
+
+	-Another example: NPC gives you a special key to go do something
+	This could be useful but keep in mind that for the game engine to verify the item is owned later,
+	it will probably need to be stored in a persistent variable rather than in player inventory so that the
+	item's owned/not_owned status can be determine from anywhere in the code. However, it in addition to setting
+	the persistent variable it may be useful to add the item to player's inventory so that the player can see it, 
+	presumably with a price = $0 so the item can't be sold. That way we don't have to worry about unsetting the 
+	persistent variable when the item is sold, and the player can't accidentally sell it.
+	
+	
+

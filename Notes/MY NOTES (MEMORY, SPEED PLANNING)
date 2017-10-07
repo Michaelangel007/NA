@@ -1,0 +1,166 @@
+
+*Increasing Speed (top ideas)
+	*tile draw speed
+		*(hard) draw.tile. Unroll the loop
+			Search for "-Alternatives" in examples/6502/graphics/unrolled_draw_loop (John Brooks). 
+			The jist is, I can do a branch based on the tile start line address (!11 possibilities) and then hard code the STA memory addreses for each. 
+			Before trying; take current size of loop * !11 and see how much memory is required. 
+			*actually the memory is more than that. The current get line code is dropped, and in it's place are 16 STAs.
+				calcualte the difference and take that *11 to see the net memory increase or decrease. 
+		*Quinn mentioned that games about have a section of art on the right side of screen and score board on the bottom to keep the animation in the "8-bit math zone" I wonder if this was part of how U5 achieved the tile map move speed that it did. U5 and pretty much all other tile games has character roster on right side of screen. Less on bottom though.
+
+		
+		
+	*Screen scrolling, only get 1 address via lookup tables. Calculate the other page address via +/- $2000 offset
+		*Note: we don't know which page is in PAGE.BACKGROUND/FOREGROUND so a branch is needed to determine whether the offset is +$2000 or -$2000
+	*Impliment idea for horizontally adjacent shapes to repeat use of shape table buffer
+	*don't draw a tile if a map object is detected as present or if the tile is animated (maybe...that might cause a visual gap)
+	*Review DRAW.SCREEN for opportunities. Initially I didn't put much emphasis on improvement becasue it was only loaded once at launch, but now it is loaded after commands like board, and after NPC.TALK is complete.
+	*use Sprite type to select tile type for MTT in animation manager
+	
+*Options to free up more main memory
+	*Have game loop clobber it's init section up to the launch (commands like board) and reentry point from monitor
+	(DONE) *Swap prodos driver out to aux memory after bootstrapping is done, have P.IO wrapper swap in when called. 
+	*integrate CONVERT.ASCII.UCASE into game_loop.ASM and remove the lowercase keypress checks since they won't be needed anymore. 
+	*Consider moving the map object Mgr To the combat module. If damage routines don't use up all the memory
+		*This is looking good. The spell file buffer is pretty big. 
+    *Move LOAD.NEW.LOCATION and LOAD.NEW.MAP contents to a file. Figure out a good buffer location to load them into. the portion of the main memory swap above the rzone array may work. I don't think that 
+		area gets clobbered by anything (such as NOX A*) until after the LOAD.NEW.MAP hands off control
+	*Load the data for new location worm hole coordinates to a file (see ;---MAPS with WORMHOLES---), probably the start of the map file. reserve a certain # of bytes and so the start of the map data is predictable. This may require changing the format of the worm hole arrays.
+		it is probably best to wait to do this until after I've done a fair amount of game design so I have some idea of how many worm holes per map are typically needed
+	*Move stuff not run at speed sensitive time to aux and swap into main game engine mememory, after it is swapped out to aux
+		I.e. Library routines like division and multiplication. Verify where they are used. If only combat stats good to go. But I think multiplication is used in Nox A*. Maybe there are other routines though	
+	*Game: try getting programs to run in aux memory (i.e. combat stats roll routines)*
+		And see if there is something in main engine to run in aux BSR bank2, then load weapon shapes into aux bsr bank2 in combat loader
+	*Move PRODOS.IO to aux BSR:bank1, adjacent to where the OpenDir is stored. 
+	*There may be some space left in the $C00-$1FFF range. When I initially moved graphics engine and npc building mgr over there there was ~$400bytes left
+	*use Sprite type to select tile type for MTT in animation manager
+	*Review variables, and have more of them borrow space from large ranges like input/output buffer and the shape table.
+	*(DONE NPC Building Mgr may be able to be loaded from disk, freeing up more room in $C00-$1200 for other routines
+	*Deprecate MLP.16.NO_BCD into MLP.32. To avoid having to init the 32-bit portion of the multiplyer and multicand, 
+		;setup a 32-bit mode parm which resets to 16-bit parm value at the end of the routine. See DIV.16 for example
+	*Review the library routines. It seems they take up a fair amount of space and maybe there are some subroutines which aren't in use. 
+	*redo map compression. Compress PC side using LZ4, aLib or ZX7, and use QB64 to build headers (either as a table at the front or a zone # and length byte embedded between the compressed data). Then in 6502, the existing decompressor code and header code can be eliminated in exchange for the code to use one of Peters decompressors. DOING THIS MEANS THE MAP CANNOT BE PERMENANTLY CHANGED IN-GAME
+	*maybe at some point the first portion of map_tools.ASM (everything except the general purpose subroutines for converting stuff toward the end of the file) could be loaded into the swap space buffer. This file could get really big once all 
+	  the enterable maps are added. If it were loaded into the upper portion of the swap space where pathfinder creates it's database, it probably wouldn't interfere
+	  with anything else. pathfinder can just clobber it. 
+	  The swap section used for the building specific routines loaded from disk (npc mgr, $9600-$9FFF) could also be used for surface/undermap specific stuff. 
+ 	*Move more of the driver from GAME.BIN to LOADER.P.BIN. Anything I put in LOADER.B is memory savings because it gets clobbered by graphics data once GAME.BIN launches. 
+	        This should be very doable because after LOADER.P.BIN loads GAME.BIN all variables and subroutines should be available for any subsequent code in LOADER.P
+	*Move GENERATE.DEBUG.LOG code to aux memory and copy it into main memory to execute as part of the QUIT.PREP routine. 	
+	*mOVE COMBAT MOVE MGR from map object to combat module. May require moving combat stats routines into aux memory and have them swaped into an area of the main game engine which is in turn swapped out to aux memory	
+	*think of other routines that aren't needed on the surface and can be loaded from disk into the main memory swap region when needed. 
+	*think of routines that do not need to be in main memory other than surface location. Any such modules could be allowed to overflow into main memory swap area, and then be copied to aux memory when a location is loaded requiring main memory swap
+	*think of things that could take the speed hit of being swapped in and out of aux memory when used
+	*;To free up main program memory, move the character sheet read/write routines back to the COMBAT module and
+		;create duplicates for any other modules that need them, like the INVENTORY module. If my original design holds, READ_WRITE.CHR_SHEET.POINTER needs to stay in main program memory. 
+		;Another option is to put these routines at the very start of the combat module, and tied the end address to a constant. 
+		;In the inventory module use the constant to reserve memory at the start of the module so that the character sheet read/write routines
+		;can be read from the combat file on disk into the reserved memory when the inventory module is loaded.
+		;I think this is the way to go. 
+	*move everthing before GAME.RENTRY in gameloop.asm to the loader.P.ASM file. 
+		;once restore save game is implemented that should also be in LOADER.P
+	*MONITOR.VARIABLE (routines_general.asm) is only needed for debugging and not used often. on the rare occassion it is useful, some main program code could be disabeld in order to enable the monitor variable routien.  
+	*Change all filenames on disk image to a two digit numerical code. I can still use descriptive labels in the source code and extensive comments in the batch files could be made to keep things clear. each line of the
+		;batch file has the full .BIN filename on it anyway so the only time I'd need to look at a matrix would be if viewing files on the disk image via ciderpress
+	*remove the trace codes from calls to FULL.BRK in error traps. Not needed now that I know how to use the stack pointer to trace RTS addresses back to the source. 
+		;Also, I did something simular with calls to draw tile single. Those can be removed too for the same reason. 
+	*Run main game engine routines in aux BSR: Setup weapon shapes to load to aux bsr on combat launch. Then use aux bsr to offload main game engine routines which ideally don't use zero page vars as parms or return values. If they do, I think those variables could be mirrored in a main memory location (i.e. just put them in the offloaded variables file as a none-ZP definition) as the main memory bank is still accessible when aux BSR is enabled. zero page vars used within the subroutine should be fine as-is. 
+	*DISPLAY.CHARACTER.ROSTER is used by main game engine and in combat. Move it to aux BSR (which combat clobbers with weapon shape data) for main game engine use. Then in the combat loader, copy DISPLAY.CHARACTER.ROSTER
+		;from aux BSR into a reserved memory range in the main combat module. Use alternate label names in the combat model for calling it. 
+	*Combine the screen dark and before arrays. Track the before status with the high bit. It should take same memory to LDA the same array and do a BMI as it is to LDA a different array and to a BEQ/BNE
+
+	*Screen holes in hi-res page1/2 (info from Daniel Liverani)
+	
+	512 byte unused on Hires pg 1:
+	$2000+$77 = 2077 (8 bytes)
+	$2080+$77 = 20F7 (8 bytes)
+	$2100+$77 = 2177 (8 bytes)
+	$2180+$77 = 21F7 (8 bytes)
+	$2200+$77 = 2277 (8 bytes)      $200 on hires1
+
+	512 byte unused on Hires pg 2:
+	$4000+$77 = 4077 (8 bytes)
+	$4080+$77 = 40F7 (8 bytes)
+	$4100+$77 = 4177 (8 bytes)
+	$4180+$77 = 41F7 (8 bytes)
+	$4200+$77 = 4277 (8 bytes)     $200 on hires2
+
+	Tot 1024 bytes avaialble!
+
+	comments from Daniel:
+		you have to develop a routine
+		that pushes and pops the data from those holes
+		if you want to use it in a row
+		or you can use them with constant data
+		the downside is that that memory is not senquential
+		right
+
+		so addressing it needs some time costs
+		also for II+
+		there's the mysterious left row
+		bug
+		in the early II+ models
+		if you don't clear completely
+		all the bytes
+		of the hires $2000-$6000
+		(I used to avoid the cleaning of the unseen ones)
+		in the early models of II+
+		due to an hardwere video addressing bug
+		some of those bytes are turning on some pixels on the left
+		in some sort of -1 positiong 
+
+
+
+-surface/undermap only memory
+	*$A900-BCFF should be useable for non-town code because this range is normally used for the pathfinder database. 
+	
+-Options to free up aux memory
+	*load angled shapes from disk instead of aux memory. 
+		*They are $400bytes each, and thus won't fit along with the spell code in the $500byte spell buffer. I'd need to do a 2nd load from 
+		 disk, which would cost some more memory in the combat module (not much, but could be meaningful if the module is full). As to the load destination, the best
+		 appoach would likely be to load into a $400byte buffer for angled shapes. Then modify SELECT.SHAPE_TABLE to automatically set the pointer to that buffer. It would calculate the offset 
+		 to the specific shape table pair based on the slope octet just like it does now.
+
+-Options to free up Combat module memory
+	*See sub-heading "-Options to free up Combat module memory" under heading "===COMBAT ALWAYS IN MEMORY -NOTES=====" in MY NOTES (COMBAT)
+	
+---------------------------
+ADD TO MAIN PROGRAM
+	NPC movement
+	Event Managemnet (maybe split this by location type)
+	Default screen layout
+	Expansion to mob generation (sea mobs for sure, 
+			if there is a lot of custom stuff for undermap, consider swapping that part in/out)
+
+SWAP IN/OUT OF MAIN OR BS MEMORY
+	NPC arrays for each building and undermap. 
+		it probably gets loaded from disk into the swap space and then copied 
+		into .BS reserved variables, since the game will use this same swap space
+		for other items on this list. 
+		ALTERNATIVE
+		Keep the NPC arrays in the swap area of main memory, 
+		and swap it to aux memory when another module like inventory or merchants
+		gets loaded into the main memory swap area.
+	
+	NPC conversation
+	Combat
+	Inventory
+	Merchant Interaction (does all part of inventory need to be loaded at the same time?)
+
+	
+
+(DONE) SHUFFLE MEMORY AFTER PRODOS CONVERSION
+
+*move HRCG character set to $800-$AFF (text page2)
+*move one of the screen arrays + some misc vars to $B00-$BFF
+*MY.RWTS will be gone
+*Use $C00-$1FFF for one or more of the current include files
+*The 8 pages leftover in $D000, not used by prodos driver is trickier. 
+	It seems inconvenient to store variables there but maybe
+	could fine a small include file to put there or even split
+	off a stable portion of a include file to put there. I probably
+	want to hold off on this until I really need the memory. 
+	
+	small modules: tile_functions2 ($E436-E57B), zone_functions ($E57B-$EA89)
+		other possibities are routines_disk, and the other library files

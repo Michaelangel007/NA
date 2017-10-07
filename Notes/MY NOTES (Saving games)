@@ -1,0 +1,91 @@
+
+
+****SEE BELOW FOR ACTUAL CODE WRITTEN*****
+
+-OVERVIEW
+
+*I think we want to allow for saved games to be saved to 
+a save game disk (optionally). Then the game could be restored
+from the save game disk after the player obtained updated game
+disks (from a patch etc). 
+
+This would require a blank disk, prodos orderd, with a dummy file(s) on
+it with the name of the saved game files(s) since ProRWTS requires the 
+file to exist to do a write. 
+
+I don't think anything special would need to be done to the saved game
+routine. it will check both drives for the saved game file and
+it will find it on either the main player disk or the saved game
+disk, whichever the player inserts. 
+
+Ideally the main player disk could just be duplicated and used
+for this purpose but if I recall Peter didn't think that would
+work, probably because ProRWTS wouldn't know how to read it if it
+was expecting the copy protection scheme.  
+
+Worst case I think we just include a save game disk floppy and there
+is one more disk in the game. 
+
+-----UPDATE: 5/22/17: Peter and I worked out a good plan
+that also addresses the way that software updates could
+work. No extra disk needed. 
+In personal gmail see "Copy program for protected images -> physical floppy. save game transfer.", dated 5/22/2017
+
+*****WARNING!!!!! (9/1/2017) I need to talk to Peter about this plan. Consider the following comment posted on 9/1/2017 to
+http://www.6502workshop.com/2017/07/nox-archaist-kickstarter-campaign.html
+
+
+"I want to be able to make copy of the original disk and use the copy to play my game..like the good old days!!!"
+
+It sounds like people expect to be able to copy the player disk. 
+
+ 
+
+-ADDITIONAL THOUGHTS
+
+*make sure the EVENT.FLAGS array (game state flags) is included. 
+*make sure gold and any other inventory info that is stored in memory, outside of the inventory file, is included. 
+
+====================CODE SECTIONS================
+
+;this used to be in calc stats in the inventory module but
+;since character sheet data is in memory all the time it
+;should only be written to disk when the game is saved
+.SAVE.PC_CHR_SHEET 
+@START
+
+;set command type (READ | WRITE | SEEK)
+; cmd_seek.current_drive 	.EQ $90
+; cmd_read.current_drive  	.EQ $91
+; cmd_write.current_drive 	.EQ $92
+;			
+; cmd_read.drive1			.EQ $1
+; cmd_read.drive2		  	.EQ $81
+; cmd_write.drive1			.EQ $2
+; cmd_write.drive2			.EQ $82
+
+	lda #cmd_write.drive2
+	sta parm.reqcmd
+
+;set write data size (# of 512 byte blocks to write from memory)
+	lda #DATA.PLY.CHR_SHEET.FILE_SIZE ;always #$00
+	sta parm.sizelo
+
+	lda /DATA.PLY.CHR_SHEET.FILE_SIZE ;number of pages to write (must be in multiples of 2. i.e. 2, 4, 6, 8 $0A, etc)
+	sta parm.sizehi
+	
+;set source memory address for write
+	lda #CHR_SHEET.PC.AUX_MEMORY.START
+	sta parm.ldrlo
+	lda /CHR_SHEET.PC.AUX_MEMORY.START
+	sta parm.ldrhi
+	
+;set filename to write to	
+	lda #DATA.PLY.CHR_SHEET ;load LO address
+	sta parm.namlo	
+	lda /DATA.PLY.CHR_SHEET ;load HO address
+	sta parm.namhi	
+		
+		LDA #$01	;PARM: $00=main, $01=aux
+	JSR PRODOS.IO
+@END

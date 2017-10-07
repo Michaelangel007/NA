@@ -1,0 +1,210 @@
+BMI ;branch if high-bit is set
+BPL ;branch if high-bit is not set
+
+
+
+;-----------Break if "Q" is pressed
+		jsr keyin
+		cmp #$D1
+		bne .temp
+		lda #$aa
+		jsr prep.brk
+		brk
+.temp
+;-----------
+
+
+			STA TEMP
+			LDA TROUBLESHOOTING.HOOK
+			CMP #$01
+			BNE .TEMP
+			JSR PREP.BRK
+			BRK
+.TEMP
+			LDA TEMP
+
+;-----------
+
+	
+			STA TEMP
+			LDA TROUBLESHOOTING.HOOK
+			CMP #$01
+			BNE .TEMP
+			; LDA *
+			; LDA *-2
+			; LDX *-1			;PROGRAM COUNTER AT BRK+$2 WILL BE RETURNED IN X-REG/Y-REG
+			; TAY
+			LDA #$AA			
+			JSR FULL.BRK
+.TEMP
+			LDA TEMP
+
+			
+
+;----------------
+
+;IS MOB MULTI-TILE (MTT)?	
+	LDA #$08 ;the AND mask value needed for the BIT operation below. 
+	BIT MAP_OBJECT.RECORD.READ+$3 ;test bit3 of MAP_OBJECT.RECORD.READ+$03
+	BEQ .MTT_CHECK.MTT_NOT_FOUND ;branch if bit3 is not set (mob is not multi-tile)
+
+;
+;----------------
+
+;MAP TYPE/CODE BRANCH
+	;is combat active
+	LDA PLAYER.MAP.LOCATION_TYPE	;load map type of player's current map
+	CMP #MAP.TYPE.COMBAT
+	BEQ .COMBAT.ACTIVE2
+
+	;is a particular map active
+	LDA PLAYER.MAP.LOCATION		;load map code of player's current map
+	CMP #MAP.TYPE.SURFACE
+	BEQ .MAP.TYPE.SURFACE.ACTIVE2
+
+	;is a building map active
+	;**OPT** Memory. Speed. Right now there is only one code for location type, which is used to determine the tile_set to use and for other location-type specific features. There are a lot of the later. It might be a savings if the 
+					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
+					;but I suspect it would pay off. 
+	LDA PLAYER.MAP.LOCATION_TYPE
+	CMP #MAP.TYPE.BUILDING.GRE 	;is map type = building?
+	BCC .MAP.TYPE_CHECK.DONE		;if no
+	CMP #MAP.TYPE.BUILDING.LT	;is map type = building?
+	BCS .MAP.TYPE_CHECK.DONE		;if no
+	JMP .SUNLIGHT.NORMAL 			;if yes
+	
+;----------------
+			
+;PC/MOB TURN BRANCH
+	LDA COMBAT.TURN_STATUS   ;($00 = PCs turn. $01 = Special(s) S_ENTITY (example Wyvern Ally, Summoned Demon), $02 = MOBs turn)
+	BNE .SKILL_PROGRESS.UPDATE.MOB_SPECIAL ;if not PCs turn, then branch
+
+;----------------
+
+;DAMAGE TYPE BRANCH 
+	LDA COMBAT.STATS.DAMAGE.TYPE ;($00 = melee | $01 range, $02 spell. High-bit not set = non-magic weapon (doesn't apply to type=spell or MOBs) | high-bit set = magic weapon (doesn't apply to type=spell or MOBs))
+	CMP #$02 ;**OPT** Memory. Changing spell value to $00, and have melee/range as $01/$02 should free up some memory. Verify that BNE will work for all situations that are not spell.
+	BEQ .LOAD.PC.DAMAGE.SPELL ;branch if damage type is spell	
+
+;----------------	
+		;YREG = parm: sindex of attacker
+		LDA #$00 ;set read mode ;($00 = read | $01 = write)
+		;LDA #$01 ;set write mode ;($00 = read | $01 = write)
+	JSR COMBAT.READ_WRITE.CHR_SHEET ;read character sheet
+		LDA CHR_SHEET.PC_MOB.TO_HIT ;read to-hit field
+
+	
+;----------------------------------------
+	
+	LDA PLAYER.MAP.LOCATION_TYPE		;load map type code
+	CMP #MAP.TYPE.TOWN_VILLAGE			;is map type = building?
+
+;----------------------------------------
+
+;PC/MOB CHARACTER SHEET LOOP
+	
+	LDX #$01 ;init loop counter and player #
+.LOOP.COPY.MOB.HP_MAX
+	;read PC character sheet data
+		TXA
+		;ACC = player sequential # (high-bit not set = read mode)
+	JSR COMBAT.READ_WRITE.CHR_SHEET.PC
+		;RETURN VALUE = CHR_SHEET.RECORD.READ
+
+	;***<INSERT ACTION CODE HERE>*****
+	
+		;exit test
+	CPX PARTY.TOTAL.PC
+	BEQ .LOOP.COPY.MOB.HP_MAX.COMPLETE
+	INX	;next PC	
+	JMP .LOOP.COPY.MOB.HP_MAX
+.LOOP.COPY.MOB.HP_MAX.COMPLETE
+
+;------------------------------------
+
+	
+	
+.INV_4.MERCH_INTERFACE.BRANCH ;exit if merchant interface mode is active 	
+	;is merchant transactions (MT) sub_module loaded in memory, and if so was the call to INV_4 from the .INIT_SCREEN code (initial launch)?
+	LDA INV.SUB_MODULE.LOAD_FLAGS+$8 ;($00 = sub-module not loaded in memory | $01 = sub-module loaded in memory | high-bit set = initial launch complete)
+	BNE .INIT.SCREEN2.DONE ;branch if MT module in memory
+
+	
+.INV_4.MERCH_INTERFACE.BRANCH ;exit if call to this subroutine was from INV_8 (merchant transactions) 	
+	LDA INV_4.1b.CALL_FROM	;($00 = main inventory interface active | $01 = merchant transactions interface active)
+	BEQ .INV_4.MERCH_INTERFACE.BRANCH.DONE ;branch if no
+	
+	
+;------------------------------------
+
+.EXTRACT_FLAGS
+;EXTRACT MOB BOOLEAN FLAGS	
+	LDA MAP_OBJECTS.GENERAL+$3,X
+	LDY #$00	
+
+.LOOP	
+	LSR
+	BCS .CARRY_IS_SET	
+
+
+	
+.CARRY_IS_CLEAR							;THE CARRY IS NOT KATIE;
+	STA SAVED.ACC.LOCAL
+	LDA #$00
+	JMP .WRITE_FLAG_VALUE
+.CARRY_IS_SET							;THE CARRY IS KATIE
+	STA SAVED.ACC.LOCAL
+	LDA #$01
+
+
+.WRITE_FLAG_VALUE
+	STA MAP_OBJECTS.GENERAL_FLAGS,Y
+	CPY #$07
+	BEQ .FLAGS_DONE
+	INY
+	LDA SAVED.ACC.LOCAL
+	JMP .LOOP
+.FLAGS_DONE
+
+
+;----------------------------------------
+
+	LDA MOB.MOVE.CURRENT					;#$00=north, $01=south, $02=east, $03=west,  $04 = NO MOVE
+
+	CMP #$00
+	BEQ	MOB.MOVE.NORTH
+	CMP #$01
+	BEQ .MOB.MOVE.SOUTH_STEP
+	CMP #$02
+	BEQ	.MOB.MOVE.EAST_STEP
+	CMP #$03
+	BEQ .MOB.MOVE.WEST_STEP
+	CMP #$04
+	BEQ MOB.MOVE.PASS
+	JMP ERROR1
+	
+;-----------------BSR
+;ENABLE BANK-SWITCHED RAM ($D000 Bank 1)
+	LDA $C08B					;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK1, 1ST)
+	LDA $C08B
+	
+
+;ENABLE BANK-SWITCHED RAM ($D000 Bank 1)
+	LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK2 2nd)
+	LDA $C083
+
+;DISABLE BSR / ENABLE ROM	
+	LDA $C082				;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
+
+;-----------------AUX_BSR
+	;enable
+		TSX			;transfer stack pointer to X-REG
+		STX STACK_POINTER.SAVED	;save stack pointer
+	STA $C009 ;enable aux zero-page & aux BSR 
+
+	;disable
+	STA $C008 ;enable main zero-page & main BSR 
+		LDX STACK_POINTER.SAVED2	;restore stack pointer to X-REG
+		TXS ;transfer X-REG to stack pointer
+
+;-----------------

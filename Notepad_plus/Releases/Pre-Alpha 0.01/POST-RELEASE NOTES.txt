@@ -1,0 +1,23 @@
+*was accidentally labeled as version 0.09 instead of 0.01 in the release notes.
+
+
+
+
+BUG REPORTS
+
+(RESOLVED IN 0.10) *Can't launch via PR#6 when an emulator is booted from a hard drive
+
+
+(RESOLVED IN 0.10) *walking south to arrow, then east eventually crashes game. 
+		Root Cause: start address for last zone in zone lookup table is wrong.
+
+
+
+OTHER ACTION ITEMS
+
+
+(d) *Add "Q" to the list of commands, (Q)uit to Apple monitor
+
+(d) *Do a clear screen before the first text print. When launching from ProDOS Harddrive, the screen isn't already clear
+
+(d) *Switch text output to COUT.V from COUT

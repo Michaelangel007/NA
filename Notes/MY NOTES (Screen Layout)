@@ -1,0 +1,74 @@
+--General screen--
+
+(DONE) *center top/Bottom border line with text
+
+(DONE) *center text with map, not screen
+
+(DONE) *put space before/after text so lines don't touch
+
+(DONE) *replace text with line when a text window is displayed such as npc talk
+
+
+--NPC Talk--
+
+(DONE) *reserve a couple lines at bottom for player prompt and a few lines text
+
+(DONE) *the main text window bottom row will be just able this area with the prompt
+
+(DONE) *the main text are will scroll and support page breaks
+
+
+--Stats/Inventory--
+
+Also see "Player Info: stats, inventory etc." item on the game sheet. I think that info was earlier.
+
+*Menus/tabs 
+			*Press tab key to bring up menus
+			*would be on the top line of the screen left to right
+			*tab key or arrow keys to move between menus, shown by highlighting the active menu
+			*return key to select menu
+			
+*The contents of each menu is displayed 
+	in a text window on left side of screen. 
+	This way a merchant conversation can go on via the right side text window
+	and stats can be open on the left. Essentially the tab key should still trigger
+	the overhead menus, even when talking to an NPC. need to imbed this into the keyboard scan of the input function. If tab key, then xyz
+	
+-From item on game sheet
+Static info strip on right side (4 text chars wide): gold, food, health for 7 characters.
+
+Extended info: Press tab displays labels in static info strip (i.e. characters, pack, stats, spells, etc), use arrow keys to select a label, which then displays the info in an expanded info window.
+
+We talked about a window that pops out from the 4 character right side strip which
+contains more information. I'm not sure what info it was going to be but probably more basic info on the players
+like name, numerical HP, numerical MP, etc
+
+Tentative decision for gold qty to be numerical value and to based the games economy on 9999 gold being a metric ass-load, or at least an english-unit ass load.
+
+Tentative decision on food being a graphical icon to show qty, but undecided the specifics.
+
+Possibly alert pop-ups if player runs low on food or health.
+
+--Combat--
+
+*Right side text window
+
+See comments at top of COMBAT.UPDATE.TEXT_WINDOW
+
+*Active player pop-out window. Maybe have a window pop-out further into the screen with right side text window
+with more info on active player. In particular this was a solution for displaying a weapon name longer than !13 chars.
+An alternate to that solution was to split the weapon name into two !13 character fields and print it on two lines in the right side window.  
+
+
+*solutions for displaying long weapon names
+(see Active player pop-out window above)
+
+
+Multi-Screen Combat
+	*Small, couple line, text window in lower left and/or upper right for things like: character name, readied weapon, and the command prompt, and the summary of attack results 
+	*We also talked about the 4 char wide text window that currently has gold, can be used to display the active character HP, MP, etc. 
+	
+	
+Single-Screen Combat
+	*Just do a text window like for npc talk. The player won't be at the center of the screen
+    because in a single screen combat, the sprites will move on the map rather than the map moving around the screen.	

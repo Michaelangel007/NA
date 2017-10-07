@@ -1,0 +1,242 @@
+
+
+DUNGEON NPCs
+
+Dungeon NPCs...separate routine from Building NPCs? Even if dungeon NPCs had schedules of some sort, they'd be on a different map grid. The problem with schedules is they can't move unless they are in the RZONE array. Maybe if their appearance is event driven it would work out. Or maybe the only options are for them to be  tethered to a flocking point or allowed to move randomly. If allowed to move randomly, maybe give them a preference for a direction or they may just hand out in roughly the same spot anyway. (THIS PART IS ALL STILL PRETTY FUZZY)
+
+
+
+
+***Consider the "skip to next anchor flag" further, I'd really like it so it functioned like this: once the anchors was reached, the game would set the next anchor in the schedule file, ignoring time. This way anchors could be used to create a guard patrol routine (not sure how they'd go to bed), 
+or in the undermap create a wide route for the NPC adventurers to wander. What happens if they get killed? how does combat work?). The only reason I didn't sketch it out this way is there needs to be a mechanism to make sure the NPC gets draw and if they are at the anchor location when appearing on the ladder....maybe it's ok, if the X,Y gets set before the "skip"occurs. 
+
+
+OBJECTIVES
+	Use exiting Mob Movement routine for NPCs and MOBs.
+	Plan out how NPCs will work in dungeons so that the NPC implementation in buildings can be easily expanded to suppport
+	NPCs move randomly anchored to a particular x,y
+	NPCs have schedules. use Beth's flocking algorithm apporach
+	Not decided: will guards remain hostile after exiting
+				(maybe for awhile? Would need a date tracker)
+	Not decided: will dead guards/NPCs regenerte
+				(gaurds certainly should after awhile)
+
+CONSIDERATIONS
+	(check in-depth) For flocking to work, the existing movement routine needs to be 
+		able to accept the flocking x,y as a variable, instead of the
+		$80,80 constant it is now. Mobs will essentially flock to the player
+		because for them $80,80 will be loaded as the flocking point.
+	If NPC isn't offscreen maybe skip move if the NPC Record (in-transit) flag is not set and the NPC Record (movement routine flag) is not set to hostile
+	
+	
+QUESTIONS
+	Mob/NPC X,Y
+		Can I stick with the mob/npc x,y as offet from player, especially when considering undermap with multiple entrances/exits?
+		Am I better off storing true map x,y in the mob/npc array and converting it to relative player x,y before entering the mob movement routine?
+	Different Record Lengths (mob & NPCs)
+		Put the next record increment in a variable? 
+		4th byte is treated as index to additional information array when in building? the problem is that won't work on undermap....mobs and NPCs are needed there
+		(best so far) let Mobs and NPCs have their own looping routines, and JSR to the core routines. 
+			Serve up a record in a short array for the core routines and it can include  MOB/NPC/hostile guard field
+			
+
+OTHER IDEAS
+	Maybe use existing template for non-walled towns, and for
+		walled towns, use zones not on edge of world map, 
+		override the zone transition exit for that location type
+		and instead have the exit set to the very edge of the map.
+		the thinking is that the walls would block any garbage tiles beyond
+		the 9 zones. Crap, the problem is when the wyvern is in flying
+		mode. Maybe there is a way to shoe horn grass tiles in when
+		the wyvern is flying and near the map edge.
+		
+		
+
+BREATH FIRST SEARCH ALGO
+	*I don't think he path index byte is needed in NPC record
+	because the lookup will be done by using the npc x,y as an
+	index to the search table.
+	But, maybe that field should be used to store the search tile
+	# of the players x,y. so a lookup is done once to set it and
+	from there use the current search tile # as an index to get
+	the destination search tile #
+	
+	
+	
+GREEDY'S BEST-FIRST SEARCH ALGORITHM
+	
+INIT	
+	*Set search tile to 0, set x,y to npc x,y. save?
+
+LOOP	
+	*Acquire new neighbors (T pattern from current search tile)
+		*Exclude any neighbor with a Tile_ID that violates collision rules
+		*calculate distance from each neighbor to destination
+		*store search tile # and distance in a priority que array
+				*increment the priority que size counter (needed for bubble sort, later)
+				(don't worry about sorting yet)
+				*somehow check to see if size of priority que array was exceed and if so error. I need to expiriemnt and see how much space is actually needed. 
+	*Store new neighbors sequentially in search path table array (this table will contain all neighbors acquire in the entire process, the final path will be derived from this table)
+		*format: search tile #, source tile #, source X, source Y
+		*Search tile # tally is next in sequence
+		*to find next record iterate until search tile # tally -1 is found
+		****THIS IS A 16-BIT ARRAY
+	
+	*Sort priority que, shortest distance first
+	*Change current search tile to the next in prioirty que
+		*Use search tile # as index to search path table array to lookup the x,y of current search tile. save to current search tile x,y variable
+	*delete the record that was used in the priority que by setting values to #$FF, #$FF and decrementing NPC.PATHFINDER.PRIORITY.QUE.SIZE
+	*DO LOOP UNTIL THE X,Y OF THE DESTINATION TILE IS LOADED
+	
+DETERMINE NEXT NPC MOVE
+	*look up the source search tile # to get it's source tile #, and so on until the source tile # loaded is source tile # 0. (the npc's current position). Get that search tile's x,y (the one with a source tile # of 0. that is the one with the X,Y to move to. save as next npc move x,y or something
+	*Convert next npc move x,y to a movement direction. 
+	*JSR the movement subroutine (one it's split out)
+	 
+	 
+****SEE "GAME LEFT OFF" EMAIL DATED 4/9/16 TO CONSIDER NEXT STEPS	 
+	 
+	 
+	 
+		
+VARIABLES
+	Search tile # tally			incremented each tile a neighbor is added to the temp table. this variable will always have the next sequential search tile # in
+	current search tile #		the STN of the tile which the being processed for acquireing new neighbors
+	current search tile x,y
+	priority que array
+	proritiy que size			needed for bubble sort
+	search path table array
+	destination search tile #
+	npc next move x,y
+	npc next move direction (00-03, the usual movement codes). Chance of pass or random move would get handled by movement routine itself
+
+	
+NOTES
+	****For 16-bit arrays, track a HO/LO address counter, after each record 
+		is found (stop value reached), close out the X/Y-REG index to the 
+		LO address counter
+	***To save the search path algorithm, if I can't figure out a way to recycle
+	the memory and end up keeping all the algoriths calculated, maybe just copy it into
+	aux memory (2 super pages would cover 30 NPCs) and put in index in the first byte of
+	the NPC record #. Crap, it's 30 NPCs * 3-4 anchors. I need to figure out how to recyle
+	but that's a problem when the length is variable. But, if I'm using aux memory, maybe
+	just fix the length conservitivly. 
+			**Note I wrote the psudeo code above assuming I'd keep the entire
+			search path table. makes sense if it's a one use and discard but
+			this can get parred down to 2 byte records (x,y) with an npc record byte0 index if
+			we're going to save it. Max moves on the grid is 60 x 2 byte = 120. we
+			could do a fixed record length of 128bytes, and store 1 path for 30 NPCs using 
+			about 1 super page of aux memory. We can recycle the memory because of the fixed length
+			and we shouldn't need more than 1 path per NPC at a given time because the worst case is
+			all NPCs are in transit at the same time to a single anchor. by the time a given
+			npc needs to transit again, it's own path in memory from the last anchor can be disgarded
+			*And, build/maintain an index betwee each NPC record and the aux start address of it's path in memory for faster access.
+			This would cost 30npcs*3bytes (npc record#, lo, ho) = 90 bytes
+	
+	*I think having a town larger than 9 zones won't work with NPC schedules	
+	See other ideas for ways to expand space of towns.
+	
+	
+
+	
+OTHER NOTES
+
+
+
+
+
+NPC pathfinder update. Looks promising. Got it down to ~1.5 seconds, for the algorithm to run once between moves with no other mobs/NPCs active. And, I’ve still got some optimizations left I think will be significant.
+
+I’d say it’s very likely we’ll be able to use the pathfinder approach, in some form. Worst case, it runs in the background (using pauses between player moves, including for npc conversation), and it essentially prepares the paths for NPCs at the next anchor change. In this scenario NPCs in transit to the next anchor wouldn’t be able to navigate around other NPCs of the player. They would just stop until the path cleared. I don’t know exactly how U5 gets NPCs between anchors but I do know they stop cold if the player blocks there path. So this is worst cast.
+
+
+Best case, the processing time gets small enough that we can use pathfinder ad-hoc to help NPCs get around unexpected obstacles like the player or other NPCs AND be able to use pathfinder to help mobs get around obstacles too, at least for those mobs we want to be that smart. This is what I’m aiming for but I’d give it a 25% chance. 
+
+
+
+
+
+Map_object_management.asm review notes
+————
+
+*.ONSCREEN_CHECK.INITIAL and .APPLY.PLAYER_MOVE coming before MANAGE.OBJECTS, seems like a problem. maybe the transport and .APPLY.PLAYER_MOVE mob sections should be done in both the transport and mob sections, with the mob section. Alternative is that the NPC routine…..Hmmmm, since this is object array specific maybe it should be handling by the looping routine for NPCs. 
+
+
+MANAGE.OBJECTS is part of the looping routine
+
+****THE TRANSPORT AND MOB LOOPING ROUTINES ARE INTEGRATED. THEY’D HAVE TO BE SPLIT OUT TO BE ABLE TO JUST RUN TRANSPORT, AND WE’LL WANT TO RUN TRANSPORT AND NPCS. 
+
+MOB.ENTRANCE: it starts with an end-of array check. that would need to be moved if the looping is going to be separate.
+
+
+IDENTIFY.SCREEN_SECTION seems to just be needed for aggressive mobs (or hostile NPCs). PASSIVE.MOB.CHECK occurs immediately before and bypasses IDENTIFY.SCREEN_SECTION if the mob is passive. Maybe PASSIVE.MOB.CHECK could have a set of routines that apply if the NPC flag is set and hostile is not set. This way a move is chosen based on the NPC move selection routines. There may still be some way to share some code on the move selection, but need to look closer.
+
+
+If I do an scenario that involves the mob routine accessing the MO data from a small array with the current record data, keep in mind that small array will get modified with moment changes (maybe more, need to check) and those changes will need to get written back to either the mob or NPC MO array.
+
+
+====
+
+Mob/NPC integrated scenario
+———
+
+
+
+cowz
+
+
+
+
+*the mob/npc record data needs to be loaded into the current record array at the top of primary loop, before .ONSCREEN_CHECK.INITIAL
+
+*manage object does end of array check for mob & trans. 
+	*one approach is to have it also check for end of NPC array. 
+	*then, when a building is entered from surface, copy the mob array data to 
+        aux memory
+	filling 00s in it’s place so there are no records to process. 
+	*do the same when under map is entered from surface.
+	*undermap and NPC data would need to get saved to disk when exiting those 
+        locations or be discarded. 
+	*transport arrays also need to get swapped out or zeroed out. 
+
+.EXTRACT_FLAGS (mob.entrance)
+*Not limited to this section; pay special attention to the mob flag field that would be part of the current record array. Make sure that’s compatible with whatever occupies that field when the NPC data is used, or some branches will be needed in the code to make the mob flag stuff conditional on the current record being a mob record.
+
+*.MOB.NOTONSCREEN_STEP (MOB.ENTRANCE). add code to detect if NPC and if NPC is in transit. If NPC is in transit SS flag is off. If is NPC then, and is in-transit then skip the SS region check. 
+
+*MOB.SS.REGI0N_CHECK. Maybe this can be skipped for NPCs as they are always in region. 
+
+
+
+MOB.IDENTIFY.LOCATION
+	*At first, try it run running MOB.IDENTIFY.MAP_LOCATION. It really doesn’t 
+	look any slower than converting from GMAP X/Y
+	*always run MOB.IDENTIFY.TILE_LOCATION, which gets the screen tile #
+	(needed even if NPC/mob is offscreen just in case they move on screen)
+
+	alternate: store RMAP x,Y in the NPC record
+ 	     *if NPC hostile (probably should be guards only), run
+	     MOB.IDENTIFY.MAP_LOCATION
+	     *if NPC not hostile, branch to LABEL to convert rmapxy to rmap. this 
+             should be faster than converting from player relative x,y.
+		(or maybe not here, unless NPC is in transit, I don’t think they  
+               need RMAP)
+
+COLLISION_CHECK_OFFSCREEN. We’ll need the ability for pathfinder to call this routine over and over. It can be used for onscreen and offscreen checks, even though it was written for offscreen, because it checks the RMAP array directly. Probably have COLLISION_TESTS_COMPLETE detect via a flag if it should JMP back to pathfinder. Actually that is more cycles than a JSR/RTS. So either just do that or use inline code.
+
+
+IDENTIFY.SCREEN_SECTION seems to just be needed for aggressive mobs (or hostile NPCs). PASSIVE.MOB.CHECK occurs immediately before and bypasses IDENTIFY.SCREEN_SECTION if the mob is passive. Maybe PASSIVE.MOB.CHECK could have a set of routines that apply if the NPC flag is set and hostile is not set. This way a move is chosen based on the NPC move selection routines. There may still be some way to share some code on the move selection, but need to look closer.
+
+
+
+Misc thoughts
+
+*The current npc.mob record small array probably should hold the NPC gmap x,y and the NPC relative player X,Y. The later is needed right from the start with onscreen checks. 
+
+*maybe just make byte 3 for the NPC record a flag that parallels the mob version, for most purposes. This way I can just set all NPCs to SS for schedule management purposes. As long as I can keep the NPC array under a page and have capacity for 30  NPCs I think that will be fine. 
+
+
+
+————————
+
+	

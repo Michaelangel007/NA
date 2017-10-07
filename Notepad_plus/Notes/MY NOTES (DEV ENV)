@@ -1,0 +1,106 @@
+
+ASSEMBLING CODE
+
+Filenames
+	source code files should be given the .asm extension.
+	
+	output files of the assembler should be given the .bin extension
+		This is controlled by the following line in the source code
+			.TF     TEST.BIN,BIN
+			
+
+sbasm  <filename.asm> 
+	when run from the SBASM3 directory, this command assembles the code, and outputs errors to the screen and to errors.err as long as ".EF errors" 
+	is in the source code.
+
+java -jar ac.jar -p SBASM.dsk <output filename> B 0x6000 < <input filename.bin>
+	When run in the C:\AC1.3.5 director, this command adds a binary file to a disk image. Multiple files can be added
+	this way.
+	
+	The paramter "0X6000" means that the file will run at memory location $6000. If this parameter is ommitted then
+	by default the file will run at $2000. 
+
+Steps for Assembling Nox Archaist
+	See c:\my_code\documentation\"other concepts.doc", look in the section titled "Assembling Game Code"
+	
+	
+	
+CIDERPRESS
+	Copy hex data from a binary file
+		Right Click and select "View"
+		Select Hex Dump from the drop down menu in the central part of the lower screen
+		Cntrl-A to select all, Cntrl-C to copy, and then paste via usual process into notepad, or wherever. 
+	Identify Tracks/Sectors used by a specific file on a disk image
+	Open a disk image using CiderPress 
+		Select Disk Sector Viewer from the Tools Menu
+		Click Open Current Archive
+		Click Open File
+		Enter the name of a file on the disk image (note: this is the name specified by AppleCommander. My convention was to drop the .BIN used in the file created by SBASM. So LOADER.BIN would be named LOADER on the disk image, for example)
+			The starting track and sector of the file appears in the upper right corner. click the "Read Next" button
+			until the last sector is reached (the sector will stop incrementing when this happens). Viola! We now
+			know the start/end track and sector of the file. Comparing the hex data on the ciderpress screen to
+			the SBASM machine code output is when I first noticed the 4 byte header. The hex data on the ciderpress
+			screen is exactly what RWTS reads in. 
+	Verifying Data Written
+		!!!!!WARNING!!!: When an assembly program uses RWTS to write to a disk image (as opposed to a physical floppy disk), Ciderpress will only 
+		be able to see new data written to a disk image if the disk image is first ejected from the emulator disk drive.
+		It doesn't seem to matter if the disk image is open in CiderPress when the write occurs. 
+	
+			
+DISK TRACKS/SECTORS
+	;I've successfully tested read/write on all tracks/sectors with RWTS. track $00-$22 and sectors $00-$0F on each track)
+	;However, Applecommander skips track !17 ($11) and track !18, sectors !14 & !15 ($T12,$E & $D)
+	;These are DOS reserved tracks/sectors  and MY.RWTS will skip those tracks and sectors if they are
+	;part of a range it is given, unless the RWTS.DOS.OVERRIDE flag is set 
+	;This entire section is really only relevant when using a bootloader disk image. If using a DOS3.3 disk
+	;image then DOS takes care of managing this automatically. 
+	
+MEMORY, USEABLE RANGES
+	See MEMORY MGT notes file for information on what memory ranges are useable for programs. 
+	Scroll down a ways, the section is called "WHAT MEMORY RANGES CAN BE USED FOR PROGRAMS?"
+
+TRANSFER DISK IMAGE TO APPLE 2
+	Transfer the disk image with ADTPro (use the receive file option on the A-IIe client for ADTPro, just like with 
+	any other disk image). It won't work with just any disk image through. 
+	
+	There are two scenarios I have been able to get to work. 
+	
+	Option 1 is create a disk image on a physical Apple II first.
+	See below for details. 
+	
+	Option 2 is to create an image in CiderPress (it puts DOS 3.3 on the image if you select it), and add the binary
+	output files to that image. Note though that these files get tagged as type "?? F2" by default. To change the
+	file type to binary, select the file, right click and select edit properties.
+	
+	Option D of the two total options is to create an image using AppleCommander = my ass. AC doesn't put DOS on the
+    image so if you try to boot it, it will boot to a montior prompt with a break at $803 because the ROM boot 0 code
+    tried to read sector 0, into $800, on the disk image and found nothing.	
+	
+	Using the master.dsk image that comes with AppleWIN or adding a file to an existing image of a "file game", doesn't
+	work either. Not sure why as these images all boot in emulators. 
+	
+	-Apple IIe Disk Image
+	Use ADTPro on my A-IIe to create a disk image of a bootable 
+	disk (one that boots to an Applesoft prompt), transfer that image to a PC with ADTPro, then add the binary output 
+	files created by the assembler (SB-Assembler or CC65/CA65) to that disk image, then transfer that disk image back
+    to the A-IIe. 
+
+	Of course, once the disk image is created from the A-IIe bootable disk, it can be kept as a master. No need to do 
+	that step every time. 
+
+
+
+TRANSFER LISA ASSEMBLER CODE TO PC
+	1) Using ADTPro, create a disk image of the floppy disk with the Lisa source code files (use the send option) 
+	2) Open the disk image with CiderPress
+	3) Select the file, and click the extract button
+	4) check the "convert to Apple II format" option.
+	5) This should produce a text file in the target folder that contains the Lisa source code.
+	6) Copy/paste the Lisa source code into Notepad++
+	7) Call it a day
+	
+
+NOTEPAD++
+	-Shortcuts
+		Block Comment: Control+shift+Q
+		Block Uncomment: Control+shift+K

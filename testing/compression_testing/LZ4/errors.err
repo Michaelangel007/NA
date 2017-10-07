@@ -1,0 +1,5 @@
+Source file: c:\my_code\testing\test.asm
+
+*** Error: Illegal label name
+     10 .+
+

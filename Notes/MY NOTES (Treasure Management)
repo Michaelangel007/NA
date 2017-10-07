@@ -1,0 +1,84 @@
+
+
+-Outline (9/13/2017)
+
+-A small lookup table would contain a baseline gold drop amount indexed by level. !16 bytes*2
+(this table would be located either in combat exit or TM_1 (treasure_mgt) sub_module of inventory file
+	*each item_type table needs it's own lookup table, which is indexed by level-1. So once the item_type
+	for the drop is determined, load the associated lookup table into a z-page pointer, then use level-1 in Y-REG
+	to get the memory address for the start address of the items for that level. 
+
+*Byte $0 (MOB/SPECIAL ID) on the mob/special character sheet becames Treasure_Code
+
+(DONE) *modify the master item table hex data so that items are organized by level, with a label inserted between each level group, 
+which will be used to identify the item_ID range to use for a given item drop. 
+
+
+*treasure_code would be the % of the baseline gold drop that the mob/special actually drops. Setting to $0
+should result in 0 gold and no item drop. Use the apply % routine from merchant transactions. 
+
+-treasure_code would also be the basis for determining the % chance that a mob/special drops an item. For
+example, maybe treasure_code / x (maybe 2) = %item_chance. I can fine tune that when I build the economy model using
+Beth's formula in "original notes" below. Setting to $0 should result in 0 gold and no item drop.
+	*Create an Economy worksheet in STA and note the constant that I use for the / X in "maybe treasure_code / X = %item_chance" above
+	*also note the name of the lookup table that stores baseline gold
+	
+
+-Combat Exit routine would handle the gold drop
+	-iterate through the mob and special character sheets. For each record:
+		*do the calculations described above, and add to player gold, making sure !9999 isn't exceeded (see INV_8.SELL_ITEM to borrow some code)
+		*print the gold amount found to the scroll text window. Pause after printing the current line when VTAB is = last row in scroll window
+		
+		
+*Scroll text window: "Search for useable equipment? (Y/N)"
+
+*If no, exit back to map
+
+*If yes, then read TM_1 sub_module of inventory file into memory and hand off control.
+
+
+TM_1 (Treaure Mgt) Sub_module
+
+-iterate through the mob and special character sheets. For each records
+	*Do the item drop yes/no calculation descirbed above using treasure_code on the mob/special char sheet
+	*item drop = yes
+		(done) *use random # to decide the item_type code of the drop. maybe weight the odds rather than each has 33% chance.
+			The easiest thing may be to never do random drops of spell books. i.e. any that can be found are define somehow in the game. 
+		(done) *use the labels between level groups (see above) to identify the item ID range in the table
+			*maybe use level - 1 through level +1 (i.e. the items for 3 levels would be in range for the drop. This might be needed in case I don't have a lot of items per level in some cases. )
+		(done) *generate random # to decide which item_ID drops
+		(done) *print the item found to the scroll text window. Pause after printing the current line when VTAB is = last row in scroll window
+
+
+
+
+------------------------original notes
+
+
+-See email from Beth in thread "saved games" dated 5/25/17 at 9:53am
+where she provides a detailed example of an STA formula for 
+level appropriate treasure drops.
+
+I think this was the most relevant part:
+
+One thing you mention is economies. Yes, you’ll have to figure out how to fairly price things for the sake of game balance and treasure drops, especially since it sounds like you’re going to allow the selling of extra items (swords, armor, etc) as treasure as well. You’ll probably want to generate another spreadsheet like the combat spreadsheet to give you as sense of how much various encounters should net in terms of $$$, use that to get a sense of how much $$$ the players will get per experience level, then baseline price armor and weapons according to what level you think players should obtain such items.
+ 
+So, for example, if you say that players start with nothing (Sticks & Cloth Armor) and then work up to (Dagger + Leather Armor) at level 5, then (Sword + Chain Mail) at level 10, you could say:
+ 
+Each character level = 10 average encounters
+Each average encounter drops gold at 10gp * level.
+So from level 1 to level 5 that’s:
+10 * 10 + 10 * 20 + 10 * 30 + 10 * 40 + 10 * 50 = 1500 gold total acquired (average) by level 5
+So maybe you want (Dagger + Leather) priced at 50% of that total, so 750.
+ 
+Of course, you’ll want to factor in how much dropped items are worth to sell, and how often on average players will get those drops, the cost of outfitting multiple party members, etc. Again, a spreadsheet where you play around with a progression here is good.
+
+
+
+-keep in mind support for an open box (with items subroutine). 
+
+I'm considering an in-memory routine for gold-only boxes (see My Notes (Finishing the Game Engine)
+and for item boxes, a disk subroutine stored in the same file as post-combat treasury management
+so that it can reuse the treasury management subroutines to do most of the work. The open box 
+subroutine would really just be an entrance point to a driver that calls the treasury mgt
+subroutines. 

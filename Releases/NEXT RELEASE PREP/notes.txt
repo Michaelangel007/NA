@@ -1,0 +1,12 @@
+
+
+-Reminders on code modifications to do for each pre-alpha release
+
+
+*Disable secret features: quicksand, storms, castle icon, multi-tile mobs and boats
+
+*turn off the apple_bell that alerts when an NPC transition is missed (map_objects.mgr)
+
+*Verify Mob generation is turned on
+
+

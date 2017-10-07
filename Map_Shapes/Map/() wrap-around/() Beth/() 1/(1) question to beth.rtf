@@ -1,0 +1,59 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf130
+{\fonttbl\f0\fnil\fcharset0 HelveticaNeue;}
+{\colortbl;\red255\green255\blue255;\red25\green25\blue25;\red98\green98\blue98;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs26 \cf2 \expnd0\expndtw0\kerning0
+Hi Beth,\
+\
+Hope you had a great holiday!\
+\
+I\'92m making good progress on the game. Animation of water, flags and a few NPCs is working in hard wired tests, currently working integrating it into the engine so animated tiles can be anywhere on the map/screen. \'a0\'a0\
+\
+In planning ahead to the next phase, I\'92ve encountered two complicated topics: wrap around world maps and maps too large to store in memory. (details below) \'a0\
+\
+If you have time at some point, I was wondering if you have any insights?\'a0\
+\
+As always, I really appreciate your advice!\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 Examples\'a0
+\b0 \
+\
+Wrap-Around-Map: diagram1 (attached)\
+Loader Zones: diagram2 (attached)\
+\
+\
+
+\b Observations
+\b0 \
+\
+It seems like these two topics are somewhat related. I recall Ultima IV/V had a 256x256 tile map, and the disk drive would load data periodically as though the map was divided into \'93loader zones\'94.\
+\
+In dealing with wrap around world maps and loader zones within a world map it seems like similar issues exists: how to determine which tiles are within the screen view when the player icon (center tile) moves to a location close enough to the \'93edge\'94 that the screen view spills over the \'93edge\'94.\
+\
+I did some research and found quite a bit online about the wrap around world concept in tile graphics systems in post Apple II games (unfortunately none from the Apple II era).\'a0\
+\
+It seems that the concept of making a rectangle map wrap around on the edges reflects the geometric shape of a torus. It also appears that post Apple II tile games used mathematical formulas to describe the relationship between an X/Y position on a torus shaped tile map and a tile data array, or possibly doing the conversion using lookup tables via multi-dimensional arrays. These feel like dead ends to me in 6502 assembler given the memory and processor requirements for intense math and storing huge lookup tables, but I may be overlooking something.\'a0\
+\
+\
+
+\b Background Info on Existing Map/Screen Implementation\'a0
+\b0 \
+\
+world map: 64x64 tiles\
+screen view: 17x11 tiles\
+\
+\
+In case it helps, the attached Diagram3 shows the mapping of the tile data array elements to the world map and more detailed information on how in the existing code a screen view is rendered from the world map.\
+\
+\
+Thanks much for any ideas!\
+\pard\pardeftab720\partightenfactor0
+\cf3 \'85\cf2 \
+}

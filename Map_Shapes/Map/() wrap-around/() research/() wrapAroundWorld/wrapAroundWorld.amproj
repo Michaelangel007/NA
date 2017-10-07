@@ -1,0 +1,63 @@
+﻿<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+  <PropertyGroup>
+    <AmethystProjectType>ActionScript</AmethystProjectType>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <MainSourceFolder>
+    </MainSourceFolder>
+    <ProjectGuid>{9fa3ac7d-b845-4f1b-8fd9-4a6f2116b971}</ProjectGuid>
+    <SDKDirectory>
+    </SDKDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <Incremental>true</Incremental>
+    <MainFile>Code\wrapAroundWorld.as</MainFile>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <UsePlayerToLaunch>True</UsePlayerToLaunch>
+    <FlashPlayer>C:\programming\Flash\flashplayer_10_2_sa_debug.exe</FlashPlayer>
+    <UseAlternatePlayer>True</UseAlternatePlayer>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Incremental>true</Incremental>
+    <MainFile>wrapAroundWorld.as</MainFile>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <UsePlayerToLaunch>False</UsePlayerToLaunch>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Code\Constants.as" />
+    <Compile Include="Code\Geometry\AABB.as" />
+    <Compile Include="Code\Geometry\IAABB.as" />
+    <Compile Include="Code\Geometry\OverlapFlags.as" />
+    <Compile Include="Code\Graphics\Box.as" />
+    <Compile Include="Code\Maths\Scalar.as" />
+    <Compile Include="Code\Maths\Vector2.as" />
+    <Compile Include="Code\System\Assert.as" />
+    <Compile Include="Code\System\eKeyCodes.as" />
+    <Compile Include="Code\System\GameLoop.as" />
+    <Compile Include="Code\System\Keyboard.as" />
+    <Compile Include="Code\System\Pool.as" />
+    <Compile Include="Code\System\ReferenceArray.as" />
+    <Compile Include="Code\System\UnexpectedCaseException.as" />
+    <Compile Include="Code\System\Utils.as" />
+    <Compile Include="Code\System\VectorPool.as" />
+    <Compile Include="Code\wrapAroundWorld.as" />
+  </ItemGroup>
+  <ItemGroup>
+    <AmethystReference Include="frameworks\libs\player">
+      <Name>playerglobal</Name>
+      <LibraryAction>External</LibraryAction>
+    </AmethystReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="NewFolder1" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath)\SapphireSteel Software\Amethyst 2008\Amethyst.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,128 @@
+
+OBJECTIVES
+	Use exiting Mob Movement routine for NPCs and MOBs.
+	Plan out how NPCs will work in dungeons so that the NPC implementation in buildings can be easily expanded to suppport
+	NPCs move randomly anchored to a particular x,y
+	NPCs have schedules. use Beth's flocking algorithm apporach
+	Not decided: will guards remain hostile after exiting
+				(maybe for awhile? Would need a date tracker)
+	Not decided: will dead guards/NPCs regenerte
+				(gaurds certainly should after awhile)
+
+CONSIDERATIONS
+	(check in-depth) For flocking to work, the existing movement routine needs to be 
+		able to accept the flocking x,y as a variable, instead of the
+		$80,80 constant it is now. Mobs will essentially flock to the player
+		because for them $80,80 will be loaded as the flocking point.
+	If NPC isn't offscreen maybe skip move if the NPC Record (in-transit) flag is not set and the NPC Record (movement routine flag) is not set to hostile
+	
+	
+QUESTIONS
+	Mob/NPC X,Y
+		Can I stick with the mob/npc x,y as offet from player, especially when considering undermap with multiple entrances/exits?
+		Am I better off storing true map x,y in the mob/npc array and converting it to relative player x,y before entering the mob movement routine?
+	Different Record Lengths (mob & NPCs)
+		Put the next record increment in a variable? 
+		4th byte is treated as index to additional information array when in building? the problem is that won't work on undermap....mobs and NPCs are needed there
+		(best so far) let Mobs and NPCs have their own looping routines, and JSR to the core routines. 
+			Serve up a record in a short array for the core routines and it can include  MOB/NPC/hostile guard field
+			
+
+OTHER IDEAS
+	Maybe use existing template for non-walled towns, and for
+		walled towns, use zones not on edge of world map, 
+		override the zone transition exit for that location type
+		and instead have the exit set to the very edge of the map.
+		the thinking is that the walls would block any garbage tiles beyond
+		the 9 zones. Crap, the problem is when the wyvern is in flying
+		mode. Maybe there is a way to shoe horn grass tiles in when
+		the wyvern is flying and near the map edge.
+		
+		
+
+BREATH FIRST SEARCH ALGO
+	*I don't think he path index byte is needed in NPC record
+	because the lookup will be done by using the npc x,y as an
+	index to the search table.
+	But, maybe that field should be used to store the search tile
+	# of the players x,y. so a lookup is done once to set it and
+	from there use the current search tile # as an index to get
+	the destination search tile #
+	
+	
+	
+GREEDY'S BEST-FIRST SEARCH ALGORITHM
+	
+INIT	
+	*Set search tile to 0, set x,y to npc x,y. save?
+
+LOOP	
+	*Acquire new neighbors (T pattern from current search tile)
+		*Exclude any neighbor with a Tile_ID that violates collision rules
+		*calculate distance from each neighbor to destination
+		*store search tile # and distance in a priority que array
+				*increment the priority que size counter (needed for bubble sort, later)
+				(don't worry about sorting yet)
+				*somehow check to see if size of priority que array was exceed and if so error. I need to expiriemnt and see how much space is actually needed. 
+	*Store new neighbors sequentially in search path table array (this table will contain all neighbors acquire in the entire process, the final path will be derived from this table)
+		*format: search tile #, source tile #, source X, source Y
+		*Search tile # tally is next in sequence
+		*to find next record iterate until search tile # tally -1 is found
+		****THIS IS A 16-BIT ARRAY
+	
+	*Sort priority que, shortest distance first
+	*Change current search tile to the next in prioirty que
+		*Use search tile # as index to search path table array to lookup the x,y of current search tile. save to current search tile x,y variable
+	*delete the record that was used in the priority que by setting values to #$FF, #$FF and decrementing NPC.PATHFINDER.PRIORITY.QUE.SIZE
+	*DO LOOP UNTIL THE X,Y OF THE DESTINATION TILE IS LOADED
+	
+DETERMINE NEXT NPC MOVE
+	*look up the source search tile # to get it's source tile #, and so on until the source tile # loaded is source tile # 0. (the npc's current position). Get that search tile's x,y (the one with a source tile # of 0. that is the one with the X,Y to move to. save as next npc move x,y or something
+	*Convert next npc move x,y to a movement direction. 
+	*JSR the movement subroutine (one it's split out)
+	 
+	 
+****SEE "GAME LEFT OFF" EMAIL DATED 4/9/16 TO CONSIDER NEXT STEPS	 
+	 
+	 
+	 
+		
+VARIABLES
+	Search tile # tally			incremented each tile a neighbor is added to the temp table. this variable will always have the next sequential search tile # in
+	current search tile #		the STN of the tile which the being processed for acquireing new neighbors
+	current search tile x,y
+	priority que array
+	proritiy que size			needed for bubble sort
+	search path table array
+	destination search tile #
+	npc next move x,y
+	npc next move direction (00-03, the usual movement codes). Chance of pass or random move would get handled by movement routine itself
+
+	
+NOTES
+	****For 16-bit arrays, track a HO/LO address counter, after each record 
+		is found (stop value reached), close out the X/Y-REG index to the 
+		LO address counter
+	***To save the search path algorithm, if I can't figure out a way to recycle
+	the memory and end up keeping all the algoriths calculated, maybe just copy it into
+	aux memory (2 super pages would cover 30 NPCs) and put in index in the first byte of
+	the NPC record #. Crap, it's 30 NPCs * 3-4 anchors. I need to figure out how to recyle
+	but that's a problem when the length is variable. But, if I'm using aux memory, maybe
+	just fix the length conservitivly. 
+			**Note I wrote the psudeo code above assuming I'd keep the entire
+			search path table. makes sense if it's a one use and discard but
+			this can get parred down to 2 byte records (x,y) with an npc record byte0 index if
+			we're going to save it. Max moves on the grid is 60 x 2 byte = 120. we
+			could do a fixed record length of 128bytes, and store 1 path for 30 NPCs using 
+			about 1 super page of aux memory. We can recycle the memory because of the fixed length
+			and we shouldn't need more than 1 path per NPC at a given time because the worst case is
+			all NPCs are in transit at the same time to a single anchor. by the time a given
+			npc needs to transit again, it's own path in memory from the last anchor can be disgarded
+			*And, build/maintain an index betwee each NPC record and the aux start address of it's path in memory for faster access.
+			This would cost 30npcs*3bytes (npc record#, lo, ho) = 90 bytes
+	
+	*I think having a town larger than 9 zones won't work with NPC schedules	
+	See other ideas for ways to expand space of towns.
+	
+	
+	

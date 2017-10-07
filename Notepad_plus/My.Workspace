@@ -1,0 +1,326 @@
+<NotepadPlus>
+    <Project name="Nox Archaist">
+        <Folder name="Map Compression (Powershell)">
+            <Folder name="Testing">
+                <File name="C:\My_Code\NA\Powershell\output.asm" />
+                <File name="C:\My_Code\NA\Powershell\test_map_data.ASM" />
+                <File name="C:\My_Code\NA\Powershell\Examples\Batch Files\template.bat" />
+                <File name="C:\My_Code\NA\Powershell\test3.PS1" />
+                <File name="C:\My_Code\NA\Powershell\test2.PS1" />
+                <File name="C:\My_Code\NA\Powershell\test2.bat" />
+                <File name="C:\My_Code\NA\Powershell\test.ps1" />
+                <File name="C:\My_Code\NA\t.bat" />
+            </Folder>
+            <File name="C:\My_Code\NA\compression\world.map\map.compression.PS1" />
+            <File name="C:\My_Code\NA\compression\world.map\map.compression.bat" />
+        </Folder>
+        <Folder name="Speech Compression (QB64)">
+            <File name="C:\qb64\gospeech1.bat" />
+            <File name="C:\qb64\gospeech2.bat" />
+            <File name="C:\My_Code\NA\Compression\NPC.Speech.Text\binary.collator.bas" />
+            <File name="C:\My_Code\NA\Compression\NPC.Speech.Text\zx7.6502.s" />
+        </Folder>
+        <Folder name="Nox Batch Files">
+            <Folder name="RWTS Version">
+                <File name="C:\sbasm3\go2c.bat" />
+            </Folder>
+            <File name="C:\sbasm3\go1.bat" />
+            <File name="C:\sbasm3\go2p.bat" />
+            <File name="C:\sbasm3\go1cp.bat" />
+            <File name="C:\sbasm3\go2cp.bat" />
+            <File name="C:\sbasm3\go1hd.bat" />
+            <File name="C:\sbasm3\go2hd.bat" />
+        </Folder>
+        <Folder name="Boot">
+            <Folder name="Boot Loader Tools (RWTS)">
+                <File name="C:\sbasm3\goboot1.bat" />
+                <File name="C:\sbasm3\goboot2.bat" />
+                <File name="C:\My_Code\6502.stuff\Bootloader\boot_loader.format_tool.ASM" />
+                <File name="C:\My_Code\6502.stuff\Bootloader\boot_loader.update_tool.ASM" />
+            </Folder>
+            <Folder name="GAME LOADER (RWTS)">
+                <File name="C:\My_Code\NA\source_code\Loader.ASM" />
+                <File name="C:\My_Code\NA\source_code\Custom_Boot2.ASM" />
+            </Folder>
+            <Folder name="Bootloader (ProRWTS2)">
+                <File name="C:\My_Code\6502.stuff\Bootloader\ProRWTS2\OPENDSK.S" />
+                <File name="C:\My_Code\6502.stuff\Bootloader\ProRWTS2\old version1\proboot.s" />
+            </Folder>
+            <File name="C:\My_Code\NA\source_code\NOXARCH.MAIN.ASM" />
+            <File name="C:\My_Code\NA\source_code\NOXARCH.MAIN.old.asm" />
+            <File name="C:\My_Code\NA\source_code\LOADER.P.ASM" />
+        </Folder>
+        <Folder name="Data">
+            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.other.sunrise_sunset.ASM" />
+            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.txt.global.asm" />
+            <Folder name="Tile Sets">
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.surface.asm" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.undermap.asm" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.undermap_town.asm" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.building.asm" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.castle_courtyard.asm" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.castle_courtyard (demo castle).ASM" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.castle_courtyard (Bill testing).ASM" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.blank_template.ASM" />
+            </Folder>
+            <Folder name="UnderMap">
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.undermap_lv1.ASM" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.undermap_lv1.ASM" />
+            </Folder>
+            <Folder name="Surface">
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.surface.asm" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.surface.ASM" />
+            </Folder>
+            <Folder name="Buildings">
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.template.ASM" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.template" />
+                <Folder name="Location1 (test town)">
+                    <File name="C:\My_Code\NA\INCLUDES_LIBS\data.tlk.L001.ASM" />
+                    <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.L1.F1.M1.ASM" />
+                    <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.L1.F1.M1.ASM" />
+                    <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.L1.F2.M2.ASM" />
+                    <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.L1.F2.M2.ASM" />
+                </Folder>
+                <Folder name="Location2 (test castle)">
+                    <Folder name="Floor 1.1 (courtyard)">
+                        <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.L2.F1.1.M3.ASM" />
+                        <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.L2.F1.1.M3.ASM" />
+                        <Folder name="Floor 2.1 (courtyard battlemenets)">
+                            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.L2.F2.1.M4.ASM" />
+                            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.L2.F2.1.M4.asm" />
+                        </Folder>
+                        <Folder name="Floor 3.1 (courtyard towers)">
+                            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.L2.F3.1.M5.asm" />
+                            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.L2.F3.1.M5.asm" />
+                        </Folder>
+                    </Folder>
+                </Folder>
+            </Folder>
+        </Folder>
+        <Folder name="Main Files">
+            <File name="C:\My_Code\NA\build_folder\list.lst" />
+            <File name="C:\My_Code\NA\source_code\game_loop.asm" />
+            <File name="C:\My_Code\NA\source_code\Movement_Manager.asm" />
+            <File name="C:\My_Code\NA\source_code\event_manager.ASM" />
+            <File name="C:\My_Code\NA\source_code\Graphics_Engine.asm" />
+            <File name="C:\My_Code\NA\source_code\Graphics_Scrolling.asm" />
+            <File name="C:\My_Code\NA\source_code\darkness_manager.asm" />
+            <File name="C:\My_Code\NA\source_code\animation_manager.asm" />
+            <File name="C:\My_Code\NA\source_code\map_object_management.asm" />
+            <File name="C:\My_Code\NA\source_code\npc_building.manager.ASM" />
+            <File name="C:\My_Code\NA\source_code\map_tools.asm" />
+            <File name="C:\My_Code\NA\source_code\tile_functions2.asm" />
+            <File name="C:\My_Code\NA\source_code\zone_functions.asm" />
+            <File name="C:\My_Code\NA\source_code\sound_manager.asm" />
+            <File name="C:\My_Code\NA\source_code\general_subroutines.ASM" />
+            <File name="C:\My_Code\NA\source_code\misc.main_memory_only.ASM" />
+            <File name="C:\My_Code\NA\source_code\LOWER_MAIN.ROUTINES.ASM" />
+            <File name="C:\My_Code\NA\source_code\BS_ROUTINES.BANK1.ASM" />
+            <File name="C:\My_Code\NA\source_code\BS_ROUTINES.BANK2.ASM" />
+            <File name="C:\My_Code\NA\source_code\BS_AUX_ROUTINES.BANK2.ASM" />
+            <Folder name="SWAP ROUTINES">
+                <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.non_building.asm" />
+                <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.building.ASM" />
+                <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Npc.Talk.ASM" />
+                <Folder name="Combat Related">
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.setup.ASM" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.ASM" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.exit.ASM" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.stats_routines.asm" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.stats_routines2.ASM" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.stats_summary.ASM" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Cast_spell.setup.ASM" />
+                    <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Spell_File.ASM" />
+                </Folder>
+                <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.test_data.ASM" />
+                <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Combat.test_data2.ASM" />
+                <Folder name="Inventory File">
+                    <Folder name="Inventory Module">
+                        <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.Inventory.ASM" />
+                        <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.entrance_exit.asm" />
+                        <Folder name="stats screens">
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.stats_summary.ASM" />
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.readied_equipment.asm" />
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.combat_stats.asm" />
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.skills.asm" />
+                        </Folder>
+                        <Folder name="SWAP.ROUTINES.INV.display_inventory.ASM">
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.display_inventory.ASM" />
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV_4.1a.shared_routines.ASM" />
+                            <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV_4.1b.shared_routines.ASM" />
+                        </Folder>
+                        <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.ready_unready.ASM" />
+                        <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.calc.combat.stats.asm" />
+                        <File name="C:\My_Code\NA\source_code\SWAP.ROUTINES.INV.merchant_transactions.ASM" />
+                    </Folder>
+                    <Folder name="Shared Routines">
+                        <File name="C:\My_code\NA\source_code\SWAP.ROUTINES.INV.search.ply_inv.ASM" />
+                    </Folder>
+                    <File name="C:\My_code\NA\source_code\SWAP.ROUTINES.INV.treasure_mgt.ASM" />
+                </Folder>
+            </Folder>
+            <Folder name="DATA FILES">
+                <File name="C:\My_Code\NA\source_code\data.ply.character_sheet.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.ply.inventory.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.game.inventory.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.game.master_price_table.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.game.merchant_profile.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.game.mob_tables.ASM" />
+            </Folder>
+        </Folder>
+        <Folder name="Variables">
+            <File name="C:\My_Code\NA\source_code\offloaded_variables.asm" />
+        </Folder>
+        <Folder name="ScratchPad">
+            <File name="C:\My_Code\NA\source_code\scratch_pad1" />
+            <File name="C:\My_Code\NA\source_code\scratch_pad2" />
+            <File name="C:\My_Code\NA\source_code\scratch_pad3" />
+        </Folder>
+        <Folder name="Library">
+            <Folder name="NOT IN USE">
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\Routines_disk.ASM" />
+                <File name="C:\My_Code\NA\INCLUDES_LIBS\Routines_MY.RWTS.asm" />
+            </Folder>
+            <File name="C:\My_Code\NA\source_code\Routines_Text.asm" />
+            <File name="C:\My_Code\NA\source_code\Routines_Math.asm" />
+            <File name="C:\My_Code\NA\source_code\Routines_Graphics.asm" />
+            <File name="C:\My_Code\NA\source_code\Routines_general.asm" />
+            <File name="C:\My_Code\NA\source_code\sound_manager.asm" />
+            <File name="C:\My_Code\NA\source_code\ptools.ASM" />
+            <File name="C:\My_Code\NA\source_code\controller.hrcg.aux.ASM" />
+        </Folder>
+        <Folder name="Testing">
+            <Folder name="General">
+                <Folder name="Batch Files">
+                    <File name="C:\sbasm3\gotest1.bat" />
+                    <File name="C:\sbasm3\gotest2.bat" />
+                    <File name="C:\sbasm3\gotest1.acme.bat" />
+                    <File name="C:\sbasm3\gotest2.acme.bat" />
+                    <File name="C:\My_Code\NA\testing\test5B.ASM" />
+                    <File name="C:\My_Code\NA\testing\test6.asm" />
+                </Folder>
+                <File name="C:\My_Code\NA\testing\test.asm" />
+                <File name="C:\My_Code\NA\testing\test2.asm" />
+                <File name="C:\My_Code\NA\testing\test3.asm" />
+                <File name="C:\My_Code\NA\testing\test4.asm" />
+                <File name="C:\My_Code\NA\testing\test5.asm" />
+            </Folder>
+            <Folder name="Compression Testing">
+                <Folder name="LZ4">
+                    <Folder name="amce source">
+                        <File name="C:\My_Code\NA\testing\compression_testing\LZ4\acme.test.S" />
+                        <File name="C:\My_Code\NA\testing\compression_testing\LZ4\L4DSTSRC.S" />
+                        <File name="C:\ACME\golz4.bat" />
+                    </Folder>
+                    <Folder name="batch files">
+                        <File name="C:\sbasm3\gocomptest2.bat" />
+                        <File name="C:\sbasm3\gocomptest1.bat" />
+                    </Folder>
+                    <File name="C:\My_Code\NA\testing\compression_testing\LZ4\comp.test.ASM" />
+                    <File name="C:\My_Code\NA\testing\compression_testing\LZ4\comp.test.boot.asm" />
+                </Folder>
+                <Folder name="ZX7">
+                    <Folder name="batch files">
+                        <File name="C:\sbasm3\gozx7test1.bat" />
+                        <File name="C:\sbasm3\gozx7test2.bat" />
+                    </Folder>
+                    <File name="C:\My_Code\NA\testing\compression_testing\ZX7\comp_zx7.test.boot.asm" />
+                    <File name="C:\My_Code\NA\testing\compression_testing\ZX7\comp_zx7.test.asm" />
+                </Folder>
+            </Folder>
+            <Folder name="ProDOS Testing">
+                <Folder name="pdriver">
+                    <Folder name="Version (20160710-01)">
+                        <File name="C:\sbasm3\goptest1b.bat" />
+                        <File name="C:\sbasm3\goptest2b.bat" />
+                        <File name="C:\My_Code\NA\testing\prodos_testing\ptest_b.ASM" />
+                    </Folder>
+                    <Folder name="Batch Files">
+                        <File name="C:\sbasm3\goptest1.bat" />
+                        <File name="C:\sbasm3\goptest2.bat" />
+                        <File name="C:\sbasm3\goptest1.drive2.bat" />
+                        <File name="C:\sbasm3\goptest2.drive2.bat" />
+                        <File name="C:\sbasm3\goptest1c.bat" />
+                        <File name="C:\sbasm3\goptest2c.bat" />
+                        <File name="C:\sbasm3\go2pa.bat" />
+                        <File name="C:\sbasm3\goptest1d.bat" />
+                        <File name="C:\sbasm3\goptest2d.bat" />
+                        <File name="C:\sbasm3\goptest1e.bat" />
+                        <File name="C:\sbasm3\goptest2e.bat" />
+                    </Folder>
+                    <File name="C:\My_Code\NA\testing\prodos_testing\ptest.asm" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\ptest.drive2.asm" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\ptest_c.ASM" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\ptest_d.ASM" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\ptest_e.loop.asm" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\OPENFLP.S" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\OPENDSK.S" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\dummy.file.asm" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\acme.pdriver.ASM" />
+                    <File name="C:\My_Code\NA\testing\prodos_testing\dummy.file2.asm" />
+                </Folder>
+                <Folder name="Cadius">
+                    <File name="C:\sbasm3\gopctest1.bat" />
+                    <File name="C:\sbasm3\gopctest2.bat" />
+                </Folder>
+            </Folder>
+            <Folder name="QB64 Testing">
+                <Folder name="Generate Binary Files">
+                    <Folder name="batch files">
+                        <File name="C:\sbasm3\gogen1.bat" />
+                    </Folder>
+                    <File name="C:\My_Code\NA\testing\qb64_testing\generate.binary.files.ASM" />
+                    <File name="C:\My_Code\NA\testing\qb64_testing\data.tlk.M1.00.ASM" />
+                    <File name="C:\My_Code\NA\testing\qb64_testing\data.tlk.M1.08.ASM" />
+                    <File name="C:\My_Code\NA\testing\qb64_testing\data.tlk.M1.10.ASM" />
+                </Folder>
+                <File name="C:\qb64\goqbtest1.bat" />
+                <File name="C:\qb64\goqbtest2.bat" />
+                <File name="C:\My_Code\NA\testing\qb64_testing\test.bas" />
+            </Folder>
+            <Folder name="Sound">
+                <File name="C:\sbasm3\gosoundtest1.bat" />
+                <File name="C:\sbasm3\gosoundtest2.bat" />
+                <File name="C:\My_Code\NA\testing\sound_generation\sound.generator.ASM" />
+                <File name="C:\My_Code\NA\testing\sound_generation\sound.generator.master.asm" />
+            </Folder>
+        </Folder>
+        <Folder name="Misc">
+            <Folder name="Mame">
+                <File name="C:\mame\gomame.bat" />
+                <File name="C:\mame\mame1.bat" />
+                <File name="C:\mame\mame2.bat" />
+            </Folder>
+        </Folder>
+        <Folder name="Notes">
+            <Folder name="Documentation">
+                <File name="C:\My_Code\NA\Notes\MY NOTES (DEV ENV)" />
+                <File name="C:\My_Code\NA\Notes\MY NOTES (GRAPHICS)" />
+                <File name="C:\My_Code\NA\Notes\MY NOTES (MEMORY MGT)" />
+                <File name="C:\My_Code\NA\Notes\MY NOTES (SBASB3)" />
+            </Folder>
+            <File name="C:\My_Code\NA\Notes\MY NOTES (MAP OBJECTS)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (WRAP AROUND WORLD)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (ENTERABLE LOCATIONS)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (MEMORY, SPEED PLANNING)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (File IO Optimizations)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (NPC MOVEMENT, SCHEDULES)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Combat)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Character creation)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Copy Protection)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Dungeons)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Finishing Game Engine)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (future game)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Game Design Phase)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Intro Screen)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Inventory module design)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Merchant Transactions)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Merchant Transactions -pseudo code)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Saving games)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Screen Layout)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (stats system)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Tile_ID reorganization)" />
+            <File name="C:\My_Code\NA\Notes\MY NOTES (Treasure Management)" />
+        </Folder>
+    </Project>
+</NotepadPlus>

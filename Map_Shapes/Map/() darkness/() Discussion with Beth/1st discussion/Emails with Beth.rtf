@@ -1,0 +1,495 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf130
+{\fonttbl\f0\fswiss\fcharset0 Helvetica;\f1\fswiss\fcharset0 ArialMT;\f2\fnil\fcharset0 Calibri;
+\f3\ftech\fcharset0 Wingdings-Regular;\f4\froman\fcharset0 TimesNewRomanPSMT;}
+{\colortbl;\red255\green255\blue255;\red26\green26\blue26;\red16\green60\blue192;\red24\green55\blue106;
+\red62\green0\blue63;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+
+\f0\fs24 \cf0 \
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf2 \expnd0\expndtw0\kerning0
+Hello Beth,\
+\
+I recently reviewed Joe\'92s blogs and the posted copy of some of the emails you exchanged regarding tile graphics.\'a0\
+\
+I\'92m a big fan of you both, and I wanted to you know your advice to Joe really helped me in a project I\'92ve recently undertaken, to develop a new tile-based RPG for the Apple II written sole in 6502 assembly.\'a0\
+\
+Thank you very much!\'a0\
+\
+\
+I checked out your website, and saw that you mentioned an interest in a PDF version of the Beagle Brothers Peeks and Pokes chart.\'a0 I\'92m not sure if you came across one already, but if not I have a copy (attached). Also saw your letter from the king himself (Lord British)....very cool!\
+\
+\
+\
+My plan for the game (along with a friend helping on gameplay design), is to create it in the spirit of the classic 1980s RPG, with some of the innovations of modern RPG games, subject of course to the processing power of the Apple II.\'a0\
+\
+For example, toggle readied weapon with [ ] keys instead of (R)eady weapon (N) Axe\'85.and instead of a large text window for player information taking up 1/3 of the screen, have tiles filling the whole screen and toggle an information window with the shift key, overwriting and rewriting the tiles underneath).\'a0\
+\
+Those features aren't implemented yet, but we do have a 64x64 tile map up and running with movement in all 4 directions, with 3 tiles types. Data compression setup for both disk and memory. The tiles are uncompressed in memory for the current view screen only, as the player moves.\'a0\
+\
+Here is link to a 30 second demo video is below if you are interested in seeing it.\
+\
+\pard\pardeftab720\partightenfactor0
+{\field{\*\fldinst{HYPERLINK "https://www.dropbox.com/s/0c0ncqaryy231g4/tile_movement_demo.MOV?dl=0"}}{\fldrslt \cf3 \ul \ulc3 https://www.dropbox.com/s/0c0ncqaryy231g4/tile_movement_demo.MOV?dl=0}}\
+\
+\
+As next steps we're hoping to add animation tiles and darkness associated with wall, mountains etc.\'a0\
+\
+\
+If you have time, I was wondering if you would be willing to offer some advice on those two topics? I really appreciate and insight you are willing to share.\'a0\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\b \cf2 1. Animated tiles
+\b0 \
+\
+Do you know of a better/faster method than the following?\
+\
+Example: flag pole on town tile moves up and down, 2 animation frames. enemy tile moves it\'92s sword around, 4 animation frames.\
+\
+An array (screen.animation.frame) is created to store the active animation frame for each tile on the screen.\
+\
+The main game loop calls an animation routine which iterates through the screen.animation.frame array, and for each tile increments its animation frame value and triggers a draw of of the tile using the position and frame specified in the array. Any delay needed would be inserted at the end of the routine so the frames flip at the desired rate. \'a0\'a0\
+\
+When the player moves (screen scroll) a) the position of each animation tile is updated, deleting animation tiles no longer on the screen and b) for new animation tile appearing on the screen for the first time, the tile_type and position is recorded to the screen.animation.frame array (the animation routine would treat tile_type as the first animation frame for that tile)\
+\
+\
+\
+
+\b 2. Darkness (i.e. behind walls, mountains, etc.)
+\b0 \
+\
+This one is a real mind bender for me. From looking at some games like Ultima III, I think I can see the high level principle in involved, in that the tiles adjacent to the wall/mountain tiles in the opposite screen direction of the player are dark, and in a given column or row all tiles in between dark tiles are dark.\'a0\
+\
+In terms of how to implement that in assembly language, I\'92ve only come up with one method (described below) and I\'92m concerned that it would slow down the screen refresh to an unacceptable level. Maybe the time saved by not drawing the tiles that are dark would make up for it but I\'92m not sure.\'a0\
+\
+Do you know of a better/faster way to do it?\
+\
+Do you know a way to do it without having the tile data for the entire screen in a temporary array for manipulation (i.e. changing the tile_type codes to darkness for certain tiles)\'a0\
+\
+\
+The dilemma I have regarding the temporary array is my graphics engine currently only uncompresses one row of tile data at a time (into a temporary screen row array) when drawing the screen. Since the whole point of the compression was to save disk/memory, I decide against a temporary array for the whole screen since that would take 11 times as much memory as one row. I have a feeling this decision is about to come back to bite me. Nothing I can\'92t change of course, just a pain.\'a0\
+\'a0\
+\
+\
+\'97possible method\'97\
+\
+Before the screen is drawn, calculate the adjacent tiles to the wall/mountains, away from the field of view of the player as shown in the attached (darkness_digram). Then calculate which tiles are in between and record those as darkness tiles. Something like this:\
+\
+let\'92s say the tile data for the screen was all in a screen.tile.data array before any tiles are drawn. After the adjacent darkness tiles are calculate and updated in the screen.tile.data array, the graphics engine iterates through the array from the beginning, evaluating one row at a time, starting from the 1st tile in each row. If a darkness tile is found in the row, it finds the position of the other darkness tile in the row (if any) and it records the tiles in between as darkness. next row.\
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf0 \kerning1\expnd0\expndtw0 \
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf2 \expnd0\expndtw0\kerning0
+\
+\
+On Tue, Dec 8, 2015 at 11:13 PM, Beth Daggert \uc0\u8234 <{\field{\*\fldinst{HYPERLINK "mailto:beth@daggert.com"}}{\fldrslt \cf3 \ul \ulc3 beth@daggert.com}}>\uc0\u8236  wrote:\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 Mark,
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Hi there! Wow, this was a blast from the past. You made me go and see how far Joe had gotten with that whole project, truth be told I\'92d pretty much forgotten about it until you brought it all up. Looking through his blog and seeing how much he did \'96 that\'92s just plain awesome. There\'92s plenty of grist for the mill there for somebody willing to step in and try to make some fun things happen.
+\f1\fs26 \cf2 \
+\
+\
+Beth, thanks so much for your reply. I really appreciate the time you took to share your insights and ideas!\'a0\
+\
+The blog really is awesome! It helped me in a couple specific ways.\
+\
+My experience coming into this was having written a tile based game engine in AppleSoft BASIC on the Apple II (1980s), which promptly crashed without ever displaying a full screen of tiles, and again in the 1990s, using a 33mhz 386 PC hoping brute force would get the job done. It ran, but the screen refresh was too slow, even without darkness or animation which I didn't attempt. \'a0\
+\
+I knew in concept that 6502 assembler was the language to get the job done on the Apple, but I would have hit a brick wall on the current project had it not been for your emails with Joe posted on his blog. Until reading it, I had no concept of the significance (or existence) of page flipping or compressing map tile data. I can totally see how I would have developed the tile engine only to have run out of memory on tile data, and found the screen draw was painfully visible and not really have known what to do. So, with many thanks to you, I did it "right" the first time (I hope!) in those areas.\'a0\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 So my big up-front disclaimer here is (as always) that it\'92s been a *
+\b long
+\b0 * time since I dealt with any of this stuff. A few more years of rust in the old braincase, as it were. So if the best I can do is leave you some food for thought I\'92ll consider my job well-done. 
+\f3 J
+\f1\fs26 \cf2 \
+\
+Understood, and thank you!\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Thanks for the links and info. I love the internet. Every piece of history is slowly but surely being surfaced online. Also, your video was great. You\'92ve a working Apple as well! That\'92s no small feat.
+\f1\fs26 \cf2 \
+\
+Thanks. I really like the setup. I've got the Apple IIe connects to my PC's usb->RS232 serial port for moving disk images back and forth. I am using the SB cross assembler to write code on my PC then transfer it to floppy disk to test (in addition to emulator tests). I started out on the Lisa assembler a few months ago to learn the language, and enjoyed the authentic feel of it, but ultimately decided I would do the heavy lilting on a cross assembler in the interest of increasing the odds of completing the project :-)\'a0\
+\'a0\
+
+\f2\fs30 \cf4 Of course, this is the part where I have to ask, \'93Why?\'94 in terms of bringing your game to the Apple ][, not that I fault you, it\'92s an awesome challenge and I\'92ve obviously done the same many years back. I\'92m just curious as to your particular motivation. 
+\f3 J
+\f1\fs26 \cf2 \
+\
+Great question! Thanks for asking.\'a0\
+\
+It's been a life long goal of mine to write a tile based RPG on the Apple II in assembly language. Growing up in the 1980s playing RPGs, dungeons and dragons, and learning programing, I naturally (to me) wanted to create a game. It evolved into a desire to write the game specifically in assembly after my failed attempts in AppleSoft, but I had difficulty figuring out where to start.\'a0\
+\
+The information age truly is amazing and I've downloaded dozens of 6502 assembly books since starting this project a few months ago. I got a hold of two assembly books in the 80s but they were the wrong books to start learning the language with. With my limited knowledge of programming at the time, I didn't even know why they were the wrong books in order to conduct a search for better books to start with. This time around, I sifted through several and picked a great book, "Using Assembly Langue by Randy Hyde", which went through all the core concepts from a beginner point of view with examples designed for the Lisa assembler so I could see them run and experiment.\'a0\
+\
+Ironically, my career ended up in Finance/Business Mgt (in software companies) rather than programming or even IT. So I'm having a blast doing this as a hobbie, revisiting my past and tackling that unexplored frontier (assembly language) I had left behind.\'a0\
+\
+As a result, I'll be totally satisfied if I finish the game (a 1st for me) and nobody ever plays it. However, since diving in I've also noticed that there is a notable community of users who still play classic RPG's from the 1980s. There is even a guy (know as the CRPG addict) who is playing and doing a blog review of every CRPG every made, one release year at a time, and he gets a lot of response ever time he posts a review.\'a0\
+\
+I certainly don't see commercial opportunity here, but my thinking if people still play CRPGs, they must love the genre and instead of playing the same ones over and over again, maybe they would play a new CRPG if it were made. I'd be thrilled to setup a blog and have a dialog with players about it, if there was interest.\
+\
+Additionally, I've read some comments from people speculating why there aren't many new Apple II games being created these days, despite the large retro computing user base. Some think that it has a lot to do with how hard it is to find the information. I can attest to that!\'a0\
+\
+You and Joe got the ball rolling with the tile graphics engine concepts, which is huge, probably the single most important component. I'd like to follow that up and create some kind of information base that covers all the key programming concepts needed to create a fully functioning game on the scale of say an Ultima III, or maybe even IV/V (we'll see!). For example, writing a custom boot loader (skipping DOS) to free up memory and disk, creating an RWTS interface that a game could use without DOS routines like file manager in memory, high res character generation in assembly, etc. These are a few that I tackled first before the tile engine just to make sure I could figure them out. There are bread crumb clues out there on these topics, but it could be made a lot easier with an information base written with the game developer in mind.\'a0\
+\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 I\'92ll do what I can for your questions:
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 \ul \ulc4 Animations:
+\f1\fs26 \cf2 \ulnone \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 Well, you\'92re right in needing the different art frames. And you may have a variable number of frames for different types of tiles, fair enough. If you want to maintain a different set of animation frames for every possible tile position, then you need to spend the memory. You can do some tricky things, like saying that no type can have more than 4 frames, for example. Then you could pack the animation frame # two a nibble (four to a byte) and instead of blowing 227 bytes on animation frame storage you could cut that to a quarter. Of course, you end up wasting time manipulating the array as you move around, packing and unpacking bits, so maybe that\'92s not optimal, either.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Your other option, imho, is to fix everyone onto the same animation cycle. There are a couple of variations of this, but the one I\'92ll describe basically works as you keep a list of all your tile types. Let\'92s say you have 64 different types (trees, water, etc). Then you need to simply store which frame of animation any of those 64 is on, you can limit to 4 frames max (as above), and pack 4 values in a byte, giving you a cost of 16 bytes for animation frame data, total. Of course, this means all your flags will be drawing the same animation frame at the same time, but that might be cool, too.
+\f1\fs26 \cf2 \
+\
+This a great idea. I had not considered that keeping animation frames in sync. I see how that means that the animation routine can simply flip through the next frame for all tiles, and doesn't have to keep track of the individual animation frame each tile is at. Thanks!\
+\
+\
+\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 In either case, as part of the draw you have to do the lookup into your animation-frame-array to figure out which animation to draw.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 \ul Darkness:
+\f1\fs26 \cf2 \ulnone \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 Darkness is fun, but ugly in terms of computation, you\'92re absolutely right. Every approach I can think of comes with tradeoffs, none are particularly cheap.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Similar to what I outline above, I\'92ll give you one idea for doing your darkness. Keep the darkness values in a \'93darkness map\'94. Like a shadow map used in modern graphics, you\'92re essentially operating with a 1-bit stencil. Consider that your visible grid is 17x11. Tightly packed that\'92s about 29 bytes, loosely packed we can say it\'92s 33 bytes (24 bits wide to get you 17 bits by 11 tall). Each bit represents whether you draw a tile or not. So you don\'92t have to keep the whole screen tile array in memory to do your manipulation, but you do have to keep the stencil. And when you go to draw, you reference whether the bit in the corresponding position is set or not in order to decide whether to draw the tile.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Of course, you will still have to do your calculation to figure out which items to block from view or not, just like in your attached diagram, no easy way around that.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Hmmm, as I\'92m thinking this through off the top of my head, you\'92re trying to avoid holding the whole screen array in memory at any time. That\'92s fair. But in point of fact I\'92m not really sure you can from a gameplay perspective. Different tiles are going to have different properties, right? How do you prevent a player from moving east into mountains when that\'92s the next logical tile? Or onto water without a boat? Or to know they\'92re standing over a city so they can enter it? You have to have a \'93game interaction array\'94 uncompressed in memory somewhere, don\'92t you?
+\f1\fs26 \cf2 \
+\
+You're absolutely right. I didn't connect two thoughts in my head when making that decision before. I have a vision for collision detection and entering locations which requires game awareness of tiles near the player, at least. I guess I could call my tile.lookup.single routine 5 times to extract the tile type for the tiles the player is on and up/down/left/right. But, that certainly comes with a CPU cost. \'a0\
+\
+Between this and the darkness logistics, I think it's very likely that I'm best off having an array with all tile types on screen. \'a0This really comes down a little under a page of memory for 17x11 tiles. Thanks for pointing this out, it saved me a lot of headache for sure, and made this key decision much easier!\
+\
+\
+BTW, since the Apple IIe/IIc/IIgs have 128k of RAM, with the 2nd chunk of 64k in an auxiliary bank, can you think of any reason not to tap into the auxiliary? If not, then I'm thinking memory might be a much more abundant resource than speed in many cases. My thoughts on that come from the fact that many RPGs including Ultimas I-V would run on a 48k Apple II plus, so it seems like they must not have been using auxiliary memory or even swapping out the ROM routines normally resident in the upper 16k of the first 64k of RAM. I suspect the reason they did that (if my guess is correct) was to keep compatibility with the Apple II plus. At the time, that was probably a big chunk of the audience, but I'm thinking that now, that's not really the case. Most people playing CRPGs are doing so in emulators. Of those doing so on physical computers, I'm sure there are some II+ units out there, but probably not nearly as many as the collective untis of IIe/IIc/IIgs.\'a0\
+\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 At the point you have that game-interaction array, you also have your darkness map, with less complexity. Tiles will have a value for what they are, e.g. 12=mountain, 6=city. Somewhere you need to also indicate whether or not they block view, per your algorithm that removes them. So perhaps you set the high bit. If the high bit is set, they block visibility, if not then they don\'92t. Then you can scan through all the types in the array and just get that tidbit of info without looking it up anywhere else. You\'92d still have 128 possible tile types. Similarly, if you need 2 flags per tile you\'92d still have 64 tile types, etc.
+\f1\fs26 \cf2 \
+\
+I love it! I'm not nibble based on the tile data so I can have lots of variety, so I think this should work great.\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 I don\'92t know whether you\'92re copying (page1)<->(page 2) or if you\'92re redrawing all the tiles every time. When you add in darkness I think you pretty much end up having to redraw from scratch, as the swathes of the screen that are revealed/hidden can change pretty dramatically with each move you make.
+\f1\fs26 \cf2 \
+\
+Currently it's setup to draw the background page then flip to the foreground. At launch, a routine draws each tile on the screen. For movement, the screen scrolls (copying to the background page) and then drawing either a column or row of new tiles to the background.\
+\
+The idea of redrawing the whole screen on each move to accommodate darkness is scary to me from a speed standpoint, but I think I see the point. I was envisioning that tiles effected by darkness would get erased, maybe via logical OR, and the the screen would be scrolled, but maybe the darkness calculation routine makes that impractical. Thanks for the foresight on this front, it wasn't on my radar and I'll now be sure to think it through.\'a0\
+\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Also, specifically on your algorithm, consider not just the picture you sent but what if there was also a mountain at #115, not just #111. It will cast diagonal lines to the right, up and down. Now when your algorithm evaluates, how do you know whether to fill darkness horizontally from #67 to #75, or whether to fill vertically from #67 to #151?
+\f1\fs26 \cf2 \
+\
+You're right, the approach I described doesn't work for exactly that reason! What do you think of the following modified approach, assuming I have all tile_types on screen in an array (screen.tiles)?\
+\
+\
+1. Move command read\
+2. the screen is scrolled, copied to background. The screen.tile array is updated to reflect tiles that will be on the screen after the move command is processed. New row/column is drawn on background. No page flip yet.\'a0\
+\
+3. Calculate Darkness\
+\'a0 \'a0 \'a0a. iterate through screen.tiles until view obscuring tile tile is encountered.\
+\'a0 \'a0 \'a0b. on each "hit", in the direction way from the player, calculate the darkness effect as follows and update the screen tile array\
+\'a0\
+darkness axis = obscure tile + X tiles away from player (in the attached update diagram the player is to the east of obscuring tile 111, so the darkness axis is shooting out west, from 110 to 106.\
+\
+additional dark tiles = Y tiles away from the darkness axis in both directions..i.e. if the axis projecting west then the additional dark tiles would be to the north and south of the axis.\
+\
+Run a loop, X+1 and Y+2 until the edge of the screen is reached.\
+\
+End result:\'a0\
+\
+Axis = 110, dark tiles = 89, 110, 131\'a0\
+Axis = 109, dark tiles = 67,88,109,130,151\'a0\
+etc.\
+\
+\'a0 \'a0c. as darkness tiles are identified, a tile erase routine is called to erase the tile at that location on the screen and update tile_type in the screen.tile array, recording the darkness tiles (I'm not 100% sure the array update is even needed)\
+\
+4. Flip pages\
+\
+\
+\'a0\
+\
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Two alternative approaches occur to me, evaluation is left to the reader:
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 1.
+\f4\fs18 \'a0\'a0\'a0\'a0\'a0\'a0 
+\f2\fs30 You need to cast from your starting position to each edge, sort of like an A* (called \'93A-Star\'94) search algorithm. So you start at #92, moving upward, then evaluate #71, #50, etc. Similarly, you start at #92 and move up to the right, going #92, #72, #51, etc. You could make an algorithm to figure it out, or you could just list N number of radial search paths to be evaluated for darkness out and traverse them through lookup into your game-array. Back of the envelope says there\'92s 56 possible paths, each taking on average 8 bytes, so you\'92d blow about 450 bytes of memory to save an algorithm and associated computation time.
+\f1\fs26 \cf2 \
+\
+This sounds very interesting! The idea of being able to reduce the CPU impact of darkness in exchange for memory, by using lookup tables, sounds attractive at this point.\
+\
+Using the lookup tables it sounds like the concept is to map out every possible darkness scenario? I'm struggling a bit to understand the implementation though since an obscuring tile could be any tile of the screen.....that's 187 different possible darkness patterns I'd think. And with multiple obscuring tiles that's even more patterns.\
+\
+It sounds like you see a way to simplify and reduce the number of darkness patterns?\
+\
+\
+\'a0\
+\
+
+\f2\fs30 \cf4 2.
+\f4\fs18 \'a0\'a0\'a0\'a0\'a0\'a0 
+\f2\fs30 You build a bunch of \'93darkness stencils\'94. One for every possible position. You\'92d have to OR them with each other, and apply them based on a scan of every tile. Back of the envelope says each will cost you maybe 11 bytes, there\'92s 227 of them\'85okay, forget it. That\'92s over 2k, plus all the time to OR all the bits\'85forget I said this one, bad idea.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 Okay, hopefully that\'92s something to keep you thinking. Good luck, and thanks so much for sending along the video! It sure made me smile!
+\f1\fs26 \cf2 \
+\
+You're welcome! I'm glad you enjoyed the video, there were definitely a few bloopers before it where the screen flipped to a single type or went blank completely LOL\
+\
+Thanks again for your advice and ideas, I really appreciate it!\
+\
+\
+\'97\'97\'97\'97\'97\'97\
+\
+\
+\
+
+\f2\fs30 \cf4 Mark,
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 I don\'92t have a lot of time right now, but I did read through your response (it\'92s all good, glad I could help!) and wanted to clarify this:
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf5 \
+This sounds very interesting! The idea of being able to reduce the CPU impact of darkness in exchange for memory, by using lookup tables, sounds attractive at this point.\
+\'a0\
+Using the lookup tables it sounds like the concept is to map out every possible darkness scenario? I'm struggling a bit to understand the implementation though since an obscuring tile could be any tile of the screen.....that's 187 different possible darkness patterns I'd think. And with multiple obscuring tiles that's even more patterns.\
+\'a0\
+It sounds like you see a way to simplify and reduce the number of darkness patterns?\
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf5 \
+
+\f2\fs30 \cf4 Yes, so my way of reducing was to trace all the paths starting from the center character position to any end tile on the visible edge of the screen. Thus the \'93radial\'94 concept. You have a set of paths, each one of which is like a spoke on a bike wheel. It\'92s these paths you have to store as the various lookup tables.
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 And on further reflection and really working through an example for myself, I think you\'92re right. You end up with a lot of possible lookup tables. So many, in fact, that conceptually it\'92s probably easier to reduce the whole matrix to a graph \'96 and now I\'92m thinking in ways that shouldn\'92t be attempted on the Apple.
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 So your algorithm and approach is certainly a better starting point. Agreed you shouldn\'92t update the array afterward, no point in wasting the time. One thing I don\'92t see though is how you plan on casting the darkness starting at position #70? Might be you want to come up with a few different algorithms and apply them based on relative location of the tile. For example, if it\'92s #69 (on the diagonal) you only need to cast to look diagonally thereafter.
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 Also, I\'92d suggest you build a dirty-flag array. Use this so that you never double-erase any tile. Create an array (a bit array, like my shadow mask example, one bit per tile location) and clear it at the start of every draw. Before you go to draw black to erase a tile, check the value of the bit. If it\'92s clear, you draw the black then set the bit. If the bit is already set, skip the draw. That way if you have multiple, overlapping darkness blocks due to different algorithms you will never double-or-triple erase any given tile. At least that saves a bit of effort.
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 As another pass of optimization you can start your algorithm evaluation from the tiles immediately bounding the player position (so just start with #91, 92, 93, 112, 114, 133, 134, 135). Then expand out in successive rectangles. You don\'92t have to do any shadow algorithm evaluation for any tile with the dirty bit set, as it\'92s hidden.
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 Finally, yes, use all 128k. Lucky man, I remember desperately trying to stay within the 48k for compatability reasons, just like you call out. 
+\f3 J
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 Best wishes!
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 \'a0
+\f4\fs32 \cf2 \
+
+\f2\fs30 \cf4 -
+\f4\fs18 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 
+\f2\fs30 Beth\
+\
+\'97\'97\'97\'97\'97\'97\'97\'97\
+\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf2 Hi Beth,\
+\
+Thanks taking the time out of your busy schedule to give a few more ideas, I really appreciate it!\
+\
+Regarding the dirty flag array to make it so my darkness routine doesn't erase tiles already flagged as dark; that's brilliant! I was definitely thinking about how much redundant work the "Axis and Rod" algorithm would be doing, and eliminating the redundancy in erasing tiles I think was probably the most CPU intensive part.\'a0\
+\
+\
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 So your algorithm and approach is certainly a better starting point. Agreed you shouldn\'92t update the array afterward, no point in wasting the time. One thing I don\'92t see though is how you plan on casting the darkness starting at position #70? Might be you want to come up with a few different algorithms and apply them based on relative location of the tile. For example, if it\'92s #69 (on the diagonal) you only need to cast to look diagonally thereafter.
+\f1\fs26 \cf2 \
+
+\f2\fs30 \cf4 \
+\pard\pardeftab720\partightenfactor0
+\cf2 Part of my answer to\'a0this question\'a0is with a question, if you have\'a0time at some point. No rush.\'a0There\'a0are a number of game\'a0components I'm working on before making my attempt on\'a0darkness so this is all in the\'a0context of planning ahead.\'a0
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf2 Regarding position #70. If there was a\'a0mountain/wall/etc at #70, I'd\'a0envision the attached darkness result from\'a0the "axle and rod" algorithm. It seems straight forward, so I maybe misunderstood the\'a0question? I really appreciate these questions too, it really helps to\'a0identify problems with the algorithm before sitting down to write code!
+\f1\fs26 \cf2 \
+\
+
+\f2\fs30 \cf2 Regarding #69.....you had mentioned possibly scanning for\'a0obscuring tiles outward from the player in a\'a0rectangle as the tiles that would create the most darkness are those\'a0closest to the player, which I think\'a0is a\'a0benefit\'a0because it result in those tiles being flagged as darkness in the dirty array early, avoiding the CPU time to\'a0calculate the darkness\'a0pattern for any obscuring tiles that are in positions already covered by darkness.\'a0
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf2 It sounds like with the\'a0comments on #69, you are also suggesting that if the tiles on the diagonal from the player are\'a0evaluated for\'a0obscuring tiles early (perhaps even before the rectangle\'a0scan\'a0approach?) that might also aid\'a0the early detection of\'a0obscuring tiles with a high darkness impact?
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 \
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 >Finally, yes, use all 128k. Lucky man, I remember desperately trying to stay within the 48k for compatability reasons, just like you call out.\'a0
+\f3 J
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f3\fs30 \cf4 \
+\pard\pardeftab720\partightenfactor0
+
+\f2 \cf2 Thanks for confirming!\'a0
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf2 Wow, what am I going to do with all this memory LOL :-) I'm sure I'll find something. My first\'a0thought is lots and lots of different tile types. It seems that the trick will be to find functionality that enhances gameplay, which is memory\'a0intensive but not CPU\'a0intense, at least not CPE intensive during the bottlenecks like map movement. Fun :-)
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf2 I have the utmost\'a0respect for programmers like\'a0you and Richard Garriott who did\'a0amazing things while managing challenges like staying within 48k of RAM and the process of creating bitmapped tile graphics with graph paper, and maybe high end pocket calculator.\'a0
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf0 \
+\pard\pardeftab720\partightenfactor0
+\cf2 I did one tile that way to test out the process (and experience what it was like), and\'a0then I promptly created the magic scroll of cheating (a spreadsheet with a tile\'a0grid where I can plug a 1 into any cell (pixel) I want turned on, and the\'a0spreadsheet\'a0calculates the\'a0exact string of hex I need to paste into my source code :-). Draw time (if I know what I'm drawing) to onscreen = ~5\'a0minutes.
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf0 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf2 Mark
+\f1\fs26 \cf2 \
+\pard\pardeftab720\partightenfactor0
+
+\f2\fs30 \cf4 \
+\
+\pard\pardeftab720\partightenfactor0
+
+\f1\fs26 \cf2 \
+\
+}

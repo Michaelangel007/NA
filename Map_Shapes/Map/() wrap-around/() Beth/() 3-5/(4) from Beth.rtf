@@ -1,0 +1,100 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf130
+{\fonttbl\f0\fnil\fcharset0 Calibri;\f1\fnil\fcharset0 HelveticaNeue;\f2\froman\fcharset0 TimesNewRomanPSMT;
+}
+{\colortbl;\red255\green255\blue255;\red24\green55\blue106;\red25\green25\blue25;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs30 \cf2 \expnd0\expndtw0\kerning0
+Mark,
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 Apologies, but your question about having the loading threshold reaching the edge of the play region memory map confuses me. The point of my statement was to keep that from happening. The loading threshold never moves, when the player visible region crosses the loading threshold, everything gets shifted to re-center the player visible region, then wherever there\'92s new data needed, that is filled in either from a secondary pre-loaded source (e.g. Zones 0-n) or from a file on disc.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 At the point you have that, you don\'92t ever run into the situation where you have to wrap it using memory (which is problematic and requires math tricks, or 256 boundaries like you\'92re suggesting.) Instead, you can wrap arbitrarily on any boundary.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 So going back to my example using Zones on the Excel I previously sent. Let\'92s say that there only exist the 4 zones, labelled 0, 1, 4, 5, as I show. The left edge of 4 connects to the right edge of 5, the top of 0 connects to the bottom of 4, etc. Further, I\'92m going to posit that you are giving up enough memory to hold all 4 of these zones in memory at the same time. Note that each zone is 5 \'93rows\'94 high \'96 arbitrary number, it\'92s some subdivision of the zone.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 As the visible reason moves south through zone 4, you\'92re eventually going to want to enter into the top of zone 0. You can do one of two things in this case:
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 1.
+\f2\fs18 \'a0\'a0\'a0\'a0\'a0\'a0 
+\f0\fs30 As the player crosses any wrapping edge, figure out how to do the relative byte shift to lookup tile values, per all the math you\'92ve previously sent
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 2.
+\f2\fs18 \'a0\'a0\'a0\'a0\'a0\'a0 
+\f0\fs30 As the player approaches an edge, shift the data.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 Approach #1 is the one I\'92m trying to avoid, but as with anything, ymmv. Might be in the long run that\'92s the approach you really want.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 For approach #2, let\'92s say you shift when the player hits two rows from the edge. You need to have an extra buffer somewhere that is two rows high by one zone wide. You copy the top two rows of Zone 0 into the buffer, shift all of the other 3 Zone 0 rows up, shift all of Zone 4 up by two, then copy from the buffer into the bottom two rows of Zone 4.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 Now, let\'92s make a different mental shift. Let\'92s say we can\'92t or don\'92t want to hold all the Zones in memory, the world map is too large. No worries. At this point, imho, you need to go to 9 zones at a minimum (3x3). This looks like so:
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 Zones
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 1\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 2
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 3\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 4\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 5
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 6\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 7\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 8
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 The player visible region is always safe in zone 4. As it reaches the edge of zone 4 or crosses into 7 to some amount (again moving south towards 7) you shift all zones up \'96 so 3 moves to 0, 6 moves to 3, etc. You then load from disc zones 6 through 8. Just for the sake of argument, you could make the world wrap itself very succinctly if the new zones you loaded to fill in 6-8 were made up of the data for the zones that were previously in 0-2!
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 Going the other way and making a larger world - at this point your torus size is limited only by the amount of disc space you burn, and you never have to do an edge-wrap lookup computation. Regardless of # of zones of size (N x N) of your world, you should only need to hold 9 zones in memory per the above. Then you will have to create a wrapping algorithm that knows which edges of the on-disc zone data to wrap. That\'92s the only wrap you need. Per the above, that algorithm needs to know that zone 3 is to the right of 5, and 1 is to the bottom of 7. If you\'92re doing 1:1 associations of zones with files, you can make that algorithm directly give you the file name of the zone to load as a return.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 -
+\f2\fs18 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 
+\f0\fs30 Beth}

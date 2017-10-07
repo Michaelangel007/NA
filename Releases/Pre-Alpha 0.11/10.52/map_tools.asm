@@ -1,0 +1,500 @@
+;************************INCLUDE FILE*****************************
+;(do not assemble stand-alone. For a stand-alone version of this routine see examples/rwts2)
+
+
+LOAD.NEW.LOCATION	; ==========LOADS NEW SHAPE TABLES FROM DISK INTO AUX=====
+;PARAMETERS: PLAYER.MAP.LOCATION_CODE, PLAYER.MAP.LOCATION_TYPE
+;RETURN: updated shape tables and map data
+;ENTRANCE: DIRECT
+
+	;JMP LOAD.NEW.MAP
+LOAD.NEW.SHAPES
+@START
+	LDA PLAYER.MAP.LOCATION_TYPE
+	CMP #LOCATION.TYPE.SURFACE
+	BEQ .LOCATION_TYPE.SURFACE	
+	CMP #LOCATION.TYPE.BUILDING
+	BEQ .LOCATION_TYPE.BUILDING	
+	CMP #LOCATION.TYPE.UNDERMAP
+	BEQ .LOCATION_TYPE.BUILDING ;**TEMPORARILY DUNGEONS USE THE BUILDING TILE SET. 
+	
+	
+.ERROR
+;UNEXPECTED LOCATION TYPE DETECTED IN LOAD.NEW.SHAPES
+	LDA TEXT
+	LDA $C082
+	BRK
+
+	
+.LOCATION_TYPE.SURFACE
+@START
+;LOAD FILE "DATA.SHP.SURF"
+
+;set command type (READ | WRITE)
+	lda #$81 	;([$1=read drive1, | $2=write drive1], [$81=read drive2 | $82=write drive2])
+	sta reqcmd
+
+;set destination memory address
+	lda #SHP.TBL.START.ADDRESS
+	sta ldrlo
+	lda /SHP.TBL.START.ADDRESS
+	sta ldrhi
+	
+;set filename to read from	
+	lda #DATA.SHP.SURF	;load LO address
+	sta namlo
+	lda /DATA.SHP.SURF	;load HO address
+	sta namhi
+		
+	JMP .CALL.LOADER
+@END
+	
+.LOCATION_TYPE.BUILDING
+@START
+;LOAD FILE "DATA.SHP.BLD"
+
+;set command type (READ | WRITE)
+	lda #$81 	;([$1=read drive1, | $2=write drive1], [$81=read drive2 | $82=write drive2])
+	sta reqcmd
+
+;set destination memory address
+	lda #SHP.TBL.START.ADDRESS
+	sta ldrlo
+	lda /SHP.TBL.START.ADDRESS
+	sta ldrhi
+	
+;set filename to read from	
+	lda #DATA.SHP.BLD	;load LO address
+	sta namlo
+	lda /DATA.SHP.BLD	;load HO address
+	sta namhi
+
+	JMP .CALL.LOADER
+@END
+
+
+.LOCATION_TYPE.DUNGEON
+
+
+;LOCATION_TYPE.02
+;LOCATION_TYPE.03
+;ETC	
+	
+.CALL.LOADER
+		LDA #$01	;PARM: $00=main, $01=aux
+	JSR PRODOS.IO		
+			; LDA #$01		;skipping $01 header sector because the data to be read from disk was written to disk by Apple Commander which adds a header. 
+		; JSR DISK.READ.AUX
+		
+		;**FALLS THROUGH**
+		
+
+			
+@END
+
+LOAD.NEW.MAP
+@START
+	LDA PLAYER.MAP.LOCATION
+	CMP #$00
+	BEQ LOCATION_CODE.00	
+	CMP #$01
+	BEQ LOCATION_CODE.01	
+	CMP #$02
+	BEQ .LOCATION_CODE.02_STEP
+	
+.ERROR
+;UNEXPECTED LOCATION TYPE DETECTED IN LOAD.NEW.SHAPES
+	LDA TEXT
+	LDA $C082
+	BRK
+
+.LOCATION_CODE.02_STEP
+	JMP LOCATION_CODE.02
+	
+LOCATION_CODE.00 
+@START
+;LOAD FILE "DATA.MAP.SURF"
+
+;set command type (READ | WRITE)
+	lda #$81 	;([$1=read drive1, | $2=write drive1], [$81=read drive2 | $82=write drive2])
+	sta reqcmd
+
+;set destination memory address
+	lda #WORLD.COMPRESS.AUX_MEMORY.START_LO
+	sta ldrlo
+	lda #WORLD.COMPRESS.AUX_MEMORY.START_HO
+	sta ldrhi
+	
+;set filename to read from	
+	lda #DATA.MAP.SURF	;load LO address
+	sta namlo
+	lda /DATA.MAP.SURF	;load HO address
+	sta namhi
+
+		LDA #$01	;PARM: $00=main, $01=aux
+	JSR PRODOS.IO
+	
+
+		LDA #DATA.MAP.SURFACE.TOTAL.SECTORS
+		STA TOTAL.SECTORS
+	JSR ZONE_TOOLS.BUILD.WZONE_HEADERS
+	
+	JSR REGION.UNCOMPRESS.ALL				;Load surface map, it is stored in auxiliary memory.
+	RTS
+	
+@END
+	
+LOCATION_CODE.01
+@START
+;LOAD FILE "DATA.MAP.L1"
+
+;set command type (READ | WRITE)
+	lda #$81 	;([$1=read drive1, | $2=write drive1], [$81=read drive2 | $82=write drive2])
+	sta reqcmd
+
+;set destination memory address
+	lda #SWAP_SPACE.MAIN_MEMORY
+	sta ldrlo
+	lda /SWAP_SPACE.MAIN_MEMORY
+	sta ldrhi
+	
+;set filename to read from	
+	lda #DATA.MAP.L1	;load LO address
+	sta namlo
+	lda /DATA.MAP.L1	;load HO address
+	sta namhi
+
+		LDA #$00	;PARM: $00=main, $01=aux
+	JSR PRODOS.IO
+
+	JMP LOOP.RZONE.LOAD.ENTRANCE
+@END
+
+		; LDA #$01		;skipping $01 sector because the data to be read from disk was written to disk by Apple Commander which adds a header. 
+		; JSR DISK.READ.AUX
+LOCATION_CODE.02
+@START
+;LOAD FILE "DATA.UMAP.L1"
+
+;set command type (READ | WRITE)
+	lda #$81 	;([$1=read drive1, | $2=write drive1], [$81=read drive2 | $82=write drive2])
+	sta reqcmd
+
+;set destination memory address
+	lda #WORLD.COMPRESS.AUX_MEMORY.START_LO
+	sta ldrlo
+	lda #WORLD.COMPRESS.AUX_MEMORY.START_HO
+	sta ldrhi
+	
+;set filename to read from	
+	lda #DATA.UMAP.L1	;load LO address
+	sta namlo
+	lda /DATA.UMAP.L1	;load HO address
+	sta namhi
+
+		LDA #$01	;PARM: $00=main, $01=aux
+	JSR PRODOS.IO		
+		
+		LDA #DATA.MAP.UNDERMAP_LV1.TOTAL.SECTORS
+		STA TOTAL.SECTORS	
+	JSR ZONE_TOOLS.BUILD.WZONE_HEADERS
+	
+	JSR REGION.UNCOMPRESS.ALL				;Load surface map, it is stored in auxiliary memory.
+	RTS	
+@END
+
+
+;LOCATION_CODE.02	
+;LOCATION_CODE.03
+;ETC
+
+
+	
+LOOP.RZONE.LOAD.ENTRANCE
+@START
+
+			
+;INIT VARIABLES
+	LDX #$00	;init load loop counter
+	
+	LDA #SWAP_SPACE.MAIN_MEMORY
+	STA SWAP_SPACE.MAIN_MEMORY.POINTER
+
+	LDA /SWAP_SPACE.MAIN_MEMORY
+	STA SWAP_SPACE.MAIN_MEMORY.POINTER+$1
+
+	LDA #$00					;SET STARTING REGIONAL ZONE
+	STA RZONE.UNCOMPRESS.CURRENT
+			
+.LOOP.LOAD
+	LDY #$00	;init copy loop index
+			
+.LOOP.COPY
+	LDA (SWAP_SPACE.MAIN_MEMORY.POINTER),Y	;read byte from swap space, which contains the map data read from disk
+	STA NEW.MAP,Y							;save byte into the input buffer used by ZONE_TOOLS.RCOPY
+	INY	;increment copy index
+	BNE .LOOP.COPY
+	
+	
+	JSR ZONE_TOOLS.RCOPY					;copy data from buffer (NEW.MAP) into regional zone array, into the array elements for the current zone
+
+;INCREMENT RZONE INDEX & COUNTER
+	INC SWAP_SPACE.MAIN_MEMORY.POINTER+$1	;increment ho byte of swap space index
+	INC RZONE.UNCOMPRESS.CURRENT	;increment zone counter
+
+			; CPX #$00
+			; BNE .TEMP
+			; LDA RZONE.UNCOMPRESS.CURRENT
+			; ; LDX SWAP_SPACE.MAIN_MEMORY.POINTER
+			; ; LDY SWAP_SPACE.MAIN_MEMORY.POINTER+$1
+			; ;LDX #NEW.MAP
+			; ;LDY /NEW.MAP
+			; JSR PREP.BRK
+			; BRK
+; .TEMP	
+		
+	INX 							;INCREMENT TOTAL SECTORS READ	
+	CPX #RZONE.TOTAL
+	BEQ .EXIT
+	JMP .LOOP.LOAD
+
+.EXIT
+
+	RTS	
+@END
+@END	
+
+
+MAP.CALCULATE.SS_FLAGS ;CALCUALTE SS MAP REGIONAL FLAGS BASED ON RMAP.X/Y 
+@START
+;PARAMETERS: RMAP.X, RMAP.Y
+;RETURN: MAP_OBJECTS.SS.X_FLAG.UPPER, MAP_OBJECTS.SS.Y_FLAG.UPPER, MAP_OBJECTS.SS.X_FLAG.LOWER, MAP_OBJECTS.SS.Y_FLAG.LOWER
+;ENTRANCE: DIRECT
+
+;Note: the principle in play is that flags to detect when a mob x,y value (relative to the player) is off the 
+;regional map needs to float depending on the player position withing the region. 
+	
+	LDA RMAP.X												;PLAYER'S REGIONAL MAP X-AXIS POSITION
+	CMP #RZONE.LOAD.X.START									;X-AXIS VALUE WHEN PLAYER IS CENTERED IN REGI0NAL MAP
+	BCC .XLESS
+	
+	LDA RMAP.X		
+	SEC
+	SBC #RZONE.LOAD.X.START
+	STA MAP_OBJECTS.X_ADJ
+	
+	LDA #MAP_OBJECTS.SS.X_FLAG.LOWER.START					;LEFT EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	SEC
+	SBC MAP_OBJECTS.X_ADJ
+	STA MAP_OBJECTS.SS.X_FLAG.LOWER
+
+	LDA #MAP_OBJECTS.SS.X_FLAG.UPPER.START					;RIGHT EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	SEC
+	SBC MAP_OBJECTS.X_ADJ
+	STA MAP_OBJECTS.SS.X_FLAG.UPPER
+	
+	
+	JMP .YTEST
+	
+.XLESS	
+	LDA #RZONE.LOAD.X.START									;X-AXIS VALUE WHEN PLAYER IS CENTERED IN REGI0NAL MAP
+	SEC
+	SBC RMAP.X	
+	STA MAP_OBJECTS.X_ADJ
+	
+	LDA #MAP_OBJECTS.SS.X_FLAG.LOWER.START					;LEFT EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	CLC
+	ADC MAP_OBJECTS.X_ADJ
+	STA MAP_OBJECTS.SS.X_FLAG.LOWER
+	
+	LDA #MAP_OBJECTS.SS.X_FLAG.UPPER.START					;RIGHT EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	CLC
+	ADC MAP_OBJECTS.X_ADJ
+	STA MAP_OBJECTS.SS.X_FLAG.UPPER						
+	;**FALLS THROUGH**
+	
+.YTEST
+	LDA RMAP.Y												;PLAYER'S REGIONAL MAP X-AXIS POSITION
+	CMP #RZONE.LOAD.Y.START									;X-AXIS VALUE WHEN PLAYER IS CENTERED IN REGI0NAL MAP
+	BCC .YLESS
+	
+	LDA RMAP.Y		
+	SEC
+	SBC #RZONE.LOAD.Y.START
+	STA MAP_OBJECTS.Y_ADJ
+	
+	LDA #MAP_OBJECTS.SS.Y_FLAG.LOWER.START					;BOTTOM EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	SEC
+	SBC MAP_OBJECTS.Y_ADJ
+	STA MAP_OBJECTS.SS.Y_FLAG.LOWER
+
+	LDA #MAP_OBJECTS.SS.Y_FLAG.UPPER.START					;TOP EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	SEC
+	SBC MAP_OBJECTS.Y_ADJ
+	STA MAP_OBJECTS.SS.Y_FLAG.UPPER
+	
+	
+	JMP .DONE1
+	
+.YLESS	
+	LDA #RZONE.LOAD.Y.START									;Y-AXIS VALUE WHEN PLAYER IS CENTERED IN REGI0NAL MAP
+	SEC
+	SBC RMAP.Y	
+	STA MAP_OBJECTS.Y_ADJ
+	
+	LDA #MAP_OBJECTS.SS.Y_FLAG.LOWER.START					;BOTTOM EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	CLC
+	ADC MAP_OBJECTS.Y_ADJ
+	STA MAP_OBJECTS.SS.Y_FLAG.LOWER
+	
+	LDA #MAP_OBJECTS.SS.Y_FLAG.UPPER.START					;TOP EDGE OF REGION WHEN PLAYER IS CENTERED IN REGIONAL MAP
+	CLC
+	ADC MAP_OBJECTS.Y_ADJ
+	STA MAP_OBJECTS.SS.Y_FLAG.UPPER	
+.DONE1
+	RTS
+@END
+
+
+;CALCULATE DISTANCE BETWEEN X,Y COORDINATES
+;see .CALCULATE.DISTANCE (NPC.PATHFINDER)
+;(designed for RMAP/GMAP but may work for player relative X,Y too)
+
+
+CONVERT.GMAP_XY.RMAP_XY ;CONVERTS A PLAYER START GMAP.XY VALUE INTO AN RMAP.XY 
+@START
+;PARAMETERS: PARM.GMAP.X, PARM.GMAP.Y
+;RETURN: RETURN.RMAP.X, RETURN.RMAP.Y
+;ENTRANCE: DIRECT
+
+;FORUMLA: RMAP.XY = $10 + REMAINDER(GMAP.XY/#WZONE.SIZE)
+;Note: $10 is the starting x/y value in the upper left corner of the center RZONE.
+;The player will start in the center RZONE once arriving at the destination location so we can make this assumption. 
+	
+	LDA PARM.GMAP.X
+	STA DIVIDEND
+
+	LDA #$00
+	STA DIVIDEND+$1
+	LDA	#WZONE.SIZE
+	STA DIVISOR
+	LDA #$00
+	STA DIVISOR+$1
+	STA DIVIDEND32
+	STA DIVIDEND32+$1
+		
+	JSR DIV.16						;**OPT** Speed. Replace with in-line code
+	
+	LDA RESULT+$2					;REMAINDER
+	STA TEMPX							
+	
+	LDA TEMPX
+	CLC
+	ADC #WZONE.SIZE
+	STA RETURN.RMAP.X
+	
+	
+	LDA PARM.GMAP.Y
+	STA DIVIDEND
+	LDA #$00
+	STA DIVIDEND+$1
+	LDA	#WZONE.SIZE
+	STA DIVISOR
+	LDA #$00
+	STA DIVISOR+$1
+	
+	JSR DIV.16						;**OPT** Speed. Replace with in-line code
+	
+	LDA RESULT+$2					;REMAINDER 
+	STA TEMPY						;**OPT** Speed. Memory. TEMPY isn't really needed just use RESULT for next calculation	
+	
+	LDA TEMPY	
+	CLC
+	ADC #WZONE.SIZE
+	STA RETURN.RMAP.Y
+
+	RTS
+@END
+	
+
+CONVERT.RMAP_XY.RMAP
+@START
+;PARAMETERS: PARM.RMAP.X, PARM.RMAP.Y
+;RETURN: RETURN.RMAP(2)
+;ENTRANCE: DIRECT
+
+	LDY PARM.RMAP.Y
+	LDA RMAP.MULTIPLY_TABLE.HO,Y
+	STA RETURN.RMAP+$1
+	LDA RMAP.MULTIPLY_TABLE.LO,Y
+	STA RETURN.RMAP
+
+;16-BIT ADD
+	CLC
+	ADC PARM.RMAP.X
+	STA RETURN.RMAP					
+	LDA RETURN.RMAP+$1
+	ADC #$00
+	STA RETURN.RMAP+$1
+	
+	RTS
+	
+@END
+
+CONVERT.GMAP_XY.WZONE
+@START
+;PARAMETERS: PARM.GMAP.X, PARM.GMAP.Y
+;RETURN: RETURN.WZONE
+;ENTRANCE: DIRECT
+
+;FORMULA: WZONE = (GMAP.Y/#WZONE.SIZE * #WZONE OFFSET)+(GMAP.X/#WZONE.SIZE)
+;	Remainder form division is discarded, only use quotient. 
+
+
+	LDA PARM.GMAP.Y
+	STA DIVIDEND
+	LDA #$00
+	STA DIVIDEND+$1
+	LDA	#WZONE.SIZE
+	STA DIVISOR
+	LDA #$00
+	STA DIVISOR+$1
+	
+	JSR DIV.16						;**OPT** Speed. Replace with in-line code
+	
+	LDA RESULT						;QUOTIENT
+	ASL	;X2
+	ASL ;X4
+	ASL ;X8
+	STA TEMPY
+	
+	LDA PARM.GMAP.X
+	STA DIVIDEND
+
+	LDA #$00
+	STA DIVIDEND+$1
+	LDA	#WZONE.SIZE
+	STA DIVISOR
+	LDA #$00
+	STA DIVISOR+$1
+	STA DIVIDEND32
+	STA DIVIDEND32+$1
+		
+	JSR DIV.16						;**OPT** Speed. Replace with in-line code
+	
+	LDA RESULT						;QUOTIENT
+	CLC
+	ADC TEMPY
+	STA RETURN.WZONE
+	
+	RTS
+	
+
+@END
+
+;.CONVERT.GMAP.TO.PLAYER_RELATIVE.XY
+; see .CONVERT.GMAP.TO.PLAYER_RELATIVE.XY (MAP_OBJECTS.MANAGEMENT>)
+
+
+;CONVERT COLUMN,ROW TO SCREEN ARRAY INDEX 
+;(I think this is already done via a lookup table, no subroutine needed)

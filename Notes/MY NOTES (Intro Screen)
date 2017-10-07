@@ -1,0 +1,15 @@
+Assuming that $2000 becomes the hand-off address
+where the bootloader expectes NOXARCH.MAIN to be
+here is my plan:
+
+Write the intro and any game settings menus
+as part of the main game files (game.loop.ASM being the primary which has the includes),
+at $A000-$BFFF. This space won't be used until after the game
+is loaded and a module using the swap (like combat, inventory, merchant transactions) is loaded.
+ 
+This solves the problem of trying to put the intro in the loader when the
+the loader occupies the graphics memory ($0000-$5FFF), and solves the problem in a way
+where the intro still gets clobbered when it is no longer needed (i.e. when the swap is used for the first time after launch)
+
+*Seed Random number generator
+See thread "ProRWTS2 zero-page question" in gmail, with Peter Ferrie

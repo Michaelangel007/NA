@@ -1,0 +1,112 @@
+*Other questions for San
+	*Is there a downloadable version of the documentation? First check his website throughally and look in the
+	 downloaded zip file
+
+
+UAL = Using Assembly Language (by Randy Hyde)
+		
+INCLUDE FILES
+		*Use the .IN directive, 4 tabs from left screen edge. 
+						.IN 	C:\MY_CODE\INCLUDES_LIBS\routines_graphics
+		*Put .IN directive after main program and subtroutines in the primary source code file, and just before the variable definitions.
+		*Don't put any headers in the include file. Just the source code. 
+		*Define variables in the include file for routines located in the include file
+			*Make the first variable EMPTY and the second variable .EQ an offset of EMPTY. 
+				This is so that HEX tables (using the .HS) directive will overwrite the EMPTY variable 
+				and not one that will actually be used. Since lables don't take up any memory, EMPTY won't 
+				either. This situation comes up when the .IN directive for the include files is at the end 
+				of the main program, followed immediately by variables definitions and the .HS directives 
+				for HEX tables come first in the variable definitions. This is the typical program structure
+				for me.
+		
+LABELS
+	ARRAYS
+		array, array+$1, array+$2, etc works the same as Lisa
+		
+	CONSTANTS
+		CONST	.EQ $40
+		LDA #CONST							;loads the value #$40 into ACC. Same method as in Lisa, other than using .EQ instead of .EQU
+
+	MEMORY ADDRESS ASSIGNMENT 
+		(EQU/EPZ)		= .EQ			; LBL	.EQ		$FDF0	;assigns label to a specific memory address
+		
+	  *1(DFS x)			=	LBL1								;SBASM's method isn't fully automated like Lisa's DFS pseudo opcode
+							LBL2 .EQ LBL1 +$1					;In SBASM, you have to do the bookkeeping for the variable byte sizes
+							LBL3 .EQ LBL2 +$100					;so it is best to do them all in one section of the code
+							LBL4 .EQ LBL3 +$2
+							etc.
+							
+	TABLES
+		*HEX				=	.HS 			
+							TABLE1 .HS	00.01.AA.FF				;all values must be on the same line (as far as I know), and be comma delimited. 
+																;*NOTE: Put .HS tables at beginning of variable definitions, otherwise it will overwrite the other variables.
+																;this is because .HS tables start at the current position of the program counter and there is no way to offset it
+																;that I am aware of. 
+
+MISC
+	DISPLAY ERRORS
+		Use .ERR to redirect to a file and/or .LI directive to supress the assembler screen output so error notices stand out.  
+	OPTIMIZE CODE
+		I TAG SECTIONS WITH **OPT** I THINK CAN BE REMOVED OR FINE TUNED DURING CODE OPTIMIZATION
+		For sections where the optimization is for code clarity only I put **CLARITY***
+		look for save/load register routines, eliminate the save/load for registers not used by the subroutine
+	REDIRECT ASSEMBLY LISTING OUTPUT TO A FILE
+		Use .LF directive
+	PROGRAM COUNTER, CHANGING
+		Use .NO directive. Don't use .ORG directive with binary output files (which is what is needed for Apple II portability)
+	STORE MEMORY ADDRESS OF LABEL IN A VARIABLE
+		LDA #RWBUFF											;LO byte. no change from Lisa
+		LDA /RWBUFF											;HO byte. no change from Lisa
+	VIEWING MACHINE CODE CORRELATION WITH ASSEBMLY CODE
+		After running the assembler in the dos window, scoll up. It's right there. 
+
+ERRORS
+	Code Doesn't Work in Program, But Works Isolated
+		Assuming you've verified all the values feeding into the routine, check to see if a loop is bypassing the code in the program	
+	Branch Out of Range
+		Fix with *. $5 for branch operand, with a JMP to the original operand in the next line. 
+		The type of branch also needs to be changed. See UAL p. 75
+	Length of Code seems to Matter
+		Sometimes an error or hang occurs, but inserting an instruction before or after a particular location results in the error occuring or not occuring.
+		This indicates a problem with memory and variables. A few possibilities:
+			The program is using a variable as though it had a larger definition that it does, which causes data to end up in a different variable, clogging up the works.
+			The is a hard coded reference for a particular memory address somewhere in the program (like STA $9100), perhaps accidentally left in from earlier testing. As the program gets larger eventually the code (variables or operational code) overlaps with the memory address of the hard coded reference. 
+	Loop won't stop on BRK for testing
+		I've seen this happen because the counter (usually X or Y) used by the loop is also used by
+		a subroutine called by the loop, which either causes the loop to terminate early or the value
+		or the counter to skip over the CPX/CPY test before the BRK. Note that when looking to see
+		if a subroutine is using the counter register, consider that a subroutine could be using the
+		X/Y register for something other than as in an index or counter. Look for any LDX/LDY/STX/STY in 
+		addition to INX/INY/DEX/DEY and indexed by references in LDA/STA statements. 
+	No Cross Assembler Loaded
+		Check the headers, make sure the usual ones are there. This has come up when convering code from Lisa. SBASM
+		will generate this error on the first line of code because no headers told it what it was looking at.
+	New Code doesn't show up as machine instructions after assembly, when debugging a program
+		This can happen if the disk image isn't ejected from the AppleWIN drive 1 before making the source code
+		modification. The go2 batch file will hit a file lock conflict when copying the new version of the disk image
+		into the AppleWIN folder. 
+	Out of Range
+		*If this error is reported on a variable being used in an address mode that required a zero page address, such as indrect indexed by Y, double check that the variable is in fact assigned a zero page address.
+		*It can also mean a branch is out of range (calling a location too far away in memory)
+	Screen Clear Stops Working
+		*I've seen this happens when the .ORG statement in the source file and the memory location AppleCommander sets up the binary to load at are out of syc. 
+			The Apple Commander memory load location is specified in go2.bat
+	Subroutine Doesn't Seem to Receive a parameter 
+		*If it's a parameter passed via a register, check to see if the subroutine has a save/restore register
+		routine which pushes the parameter's register to the stack.
+	
+	Twilight Zone
+		*If it seems like the feedback from the monitor stops making sense, check ALL variables for a) proper space reservations in definitions
+		 and b) proper init values. Really, make a list of ALL program variables and go through the code and account for the init values for each one. 
+			-examples
+				*If contents of memory address values appears to be changing as a result of inserting or removing an instruction
+				*General inconsistent results..sometimes the program works and sometimes it doesn't for no apparent reason.
+			*these examples could be caused by an unitialized variable, and the value in memory it points to changes based on the length of the program
+				
+	Unexpected values in variables
+		1) 	Verify enough space has been reserved in the variable definition. Since more bookkeeping is required in SBASM than in Lisa,
+			it is easy to not reserve enough space, often causing the first byte of one variable overwrite the last byte of the previous
+			variable defined. Particularily common is to define a variable as 1 byte when it should be something else. 
+			
+			
+	

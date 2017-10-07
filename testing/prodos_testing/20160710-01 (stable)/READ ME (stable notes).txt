@@ -1,0 +1,28 @@
+
+8/8/2016; 
+
+This driver could likely have been used for the entire Nox Archist Game. The only issue with it was a very obscure 
+CFFA virtual port bug (see notes below), and I asked Peter to add a feature to allow for reading in partial files.
+His doing that increased the driver size by 2 pages and significantly changed the procedures for calling it. 
+
+For an example and documentation of this version, see C:\My_Code\Examples\6502 ASM Examples\ProDOS\pdriver\Version (20160710-01) for 
+
+
+Fully tested on:
+
+Real Floppy
+Mame
+AppleWIN/floppy
+AppleWIN/HD
+CFFA/hard Drive
+
+Virtual2/floppy
+
+
+Problems with:
+
+
+CFFA/floppy: breaks at random address if CFFA is physically in slot 7 with virtual Disk ][ on slot 5. This problem
+was resolved with one of the versions between 20160725-01 and 20160802-02, probably the last one.
+However, whichever one it was, I didn't test it other than to verify the CFFA port fix so other problems may have
+crept in. 

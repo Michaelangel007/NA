@@ -1,0 +1,164 @@
+ORIGINAL NOTES
+
+	i think for tile graphics I need to track RMAP (raster X/Y), 
+	TMAP (tile X/Y, relative location on the screen of the current tile ), 
+	SMAP (X/Y of the location on the game map of the current tile. This is how the tile type is pulled from data), 
+	and GMAP (X/y on game map of character icon at center of screen). 
+
+
+	Each value is relative to the value above it...so SMAP is derived from GMAP, etc.
+
+
+***CHANGES TO EXISTING DRAW.TILECODE***
+	xREDUCE TILES TO 17 wide
+	xTILES PLOT LEFT TO RIGHT, THEN DOWN A ROW. THIS IS SO TMAP CAN BE INC WITH EACH TILE DRAW INSTEAD OF A MATH CALC. 
+	xdraw.tile should become the entrance, consider when the init routine should be called and what it should do. 
+	xdraw.tile should become draw.screen....this will be the initial screen draw routine when game is loaded or surface map is reentered
+		use this at first to test movement, but then create a DRAW.MOVE to do screen scolling
+	
+***Version 2***
+	I'll need to upgrade the calculate TMAP procedure to 16 bit subtraction to accomidate a 64x64 map or larger, up to 256x256
+	
+
+GMAP					***16-BIT
+GMAP.X					8 BIT			(FOR COMPASS TRACKING)
+GMAP.Y					8 BIT			(FOR COMPASS TRACKING)
+SMAP					***16-BIT
+SMAP.CURRENT			***16-BIT
+(?) SCREEN.TILES.LO 	.EQ $B8		;***16-bit LO
+(?) SCREEN.TILES.HO		.EQ $01		;***16-bit HO
+
+(?) SCREEN.TILE.DATA 	.EQ			;next var is +$1B9
+
+
+;*****REVIEW THESE OFFSETS, MAY NEED TO START TABLE AT 1, SEE SPREADSHEET NOTE
+OFFSET.UP			.EQ $40		;NEGATIVE OFFSET
+OFFSET.DOWN			.EQ $40	
+OFFSET.LEFT			.EQ $01		;NEGATIVE OFFSET
+OFFSET.RIGHT		.EQ $01
+OFFSET.SCREEN		.EQ	$148		;!112
+
+
+GMAP (2byt) = player X/Y on game map
+SMAP (1byt) = array element of the upper left corner screen tile (GMAP - OFFSET.SCREEN)
+
+
+(what is this for since I'm reading one row at a time? probably gets updated once after each row is drawn
+	SMAP.CURRENT (1byt) = current tile number. used by tile drawing routine to lookup the tile type for each tile on the screen. Value 0 equates to element 0 of the SCREEN.TILE.DATA array.
+
+	
+(is this needed now?) SCREEN.TILES = Constant. number of tiles in the view screen. The last array element on screen +1 (in the spreadsheet)
+
+(probably n/a now) SCREEN.TILE.DATA = holding area containg the tile types for each tile on the view screen
+
+(future) TILE.TYPES: perhaps store tile type ID and a collision value. The collision value would be used to determine the 
+circumstances which the tile can be traversed. For example: 
+	0=all, 
+	1=land transport (walking, horse etc, for grass, forest, etc), 
+	2=boat (i.e. water)
+	3=none (i.e. mountains)
+	
+
+TILE.TYPES
+
+DRIVER  (****NEEDS MORE WORK, SEE NOTE)
+	load GMAP
+	Calcualte SMAP (GMAP - OFFSET.SCREEN)
+
+		
+KEYIN SCAN
+	*if any key is pressed (for now), assume move down
+	*later insert if/then logic for four directions
+	
+
+MOVE.DOWN
+	update SMAP
+	update GMAP
+	JSR DRAW.SCREEN
+
+
+DRAW.SCREEN (updates to existing)
+	JSR GET.TILE.DATA		; loads current screen tile data from GMAP.TILE.DATA array, and save is somewhere
+	
+	SMAP.CURRENT = $00 (start by drawing the tile in upper left corner)
+.LOOP
+
+
+
+
+
+
+
+
+
+
+
+
+;I DON'T THINK ANY OF THIS APPLIES ANYMORE
+
+
+	load tile type of current tile into X-REG
+		LDA SCREEN.TILE.DATA+SMAP.CURRENT
+		ADC SCREEN.TILE.DATA+SMAP.CURRENT			;the index is tile type *2
+		TAX
+	load shape table address of current tile into SHAPE & SHAPE +$1
+		do indirect index by X lookup (TILES.TYPES.LOOKUP,X)
+		STA SHAPE, 
+		INX
+		LDA (TILES.TYPES.LOOKUP,X)
+		STA SHAPE+$1
+	
+	INC TMAP.CURRENT (I think this can inc through end of screen because array flows horizontally, then down a row, horizontally etc)
+	
+		
+GET.TILE.DATA
+	;initially just copy from the GMAP.TILE.DATA array, eventually this routine (I think) would uncompress a portion of the tile data
+	 to serve it up for TILE.DRAW. Reread Beths' comments on data compression....I'm not quite clear on how to uncompress just the portion
+	 of the tile data assocaited with the current map screen without uncompressing the whole map, and if i do that, where are the memory savings.....
+	
+	OFFSET.SCREEN is the first element to copy, into the first element of SCREEN.TILE.DATA. 
+		Loop until SCREEN.TILES.LO/HO is reached
+	
+			TEMP16 & $+1 =00
+			
+			LDA GMAP.TILE.DATA+#SCREEN.OFFSET
+			STA SCREEN.TILE.DATA,X
+			INX
+			INC COMP16.OP1
+			loop until X=$00   ;X flipped over
+			INC COMP16.OP1+$01
+			
+			
+			TEMP16+$1
+			
+			loop until X = SCREEN.TILES
+
+	LDA #GMAP.TILE.DATA
+	STA LINE.BASE.ADDR			;borrow zero page location
+	LDA /GMAP.TILE.DATA
+	STA LINE.BASE.ADDR+$1
+	
+	do a 16-bit add: LINE.BASE.ADDR+#SCREEN.OFFSET
+	
+CLR1 NOP
+	LDY #$00
+	LDA	#$00
+CLR	NOP
+	STA	(LINE.BASE.ADDR), Y
+	INY
+	BNE CLR
+	INC LINE.BASE.ADDR+$1
+	LDA LINE.BASE.ADDR+$1
+	CMP #$60
+	BCC	CLR1		;is acc less than cmp
+	
+	
+
+
+	
+SCREEN.TILES.LO 	.EQ $B8		;***16-bit LO
+SCREEN.TILES.HO		.EQ $01		;***16-bit HO	
+	
+	
+	RTS
+	

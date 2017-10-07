@@ -1,0 +1,25 @@
+
+**decide whether we want mobs to be able to 
+	open doors. right now they can.
+	
+===PUZZLE/CLUE MECHANICS===
+
+See MY NOTES (Game Design Phase)
+
+
+		
+===NOTES===
+
+
+--complex general map objects----
+(SEE BELOW FOR CODE IMPLEMETNATION IDEAS)
+
+*complex general map object: i.e. a maybe a door that requires a specific key. May be possible in this game 
+
+set high bit on flag byte for map object to allow map object to use 8 bytes instead of 4. There are two values in use $FE and $FF which would need to be moved to values below $80. 
+
+This means that the adjacent record shouldn't be treaded as a map object. Add code to the general map objects routine to check the flag byte of the previous map object and if high bit set, skip processing for the current map object (skip to increment index to next record)
+
+The extra 4 bytes could be used for all sorts of things. For example, to make a specific door require a specific key, one of the extra bytes could be set to an item_ID (if misc is assumed) or use two bytes to set the item_type and idem_ID. 
+
+It may make sense to think through a number of uses for this feature and then plan out a datagram for the the extra 4 bytes to have some consistency. 

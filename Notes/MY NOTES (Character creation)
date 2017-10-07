@@ -1,0 +1,52 @@
+
+
+
+*add hands (fists) (item type $00, item code $00) and skin (item type $01, item code $00) to player inventory with a quantity equal to the number of players in the party. 
+	*when players are added/removed to the party, adjust the quantity of hands/skin in the player inventory. 
+
+*For all PCs, must set readied equipment table hands slots to "hands" (fists) for left hand (item type $00, item code $00) and to hand-in use for right hand. Which hand
+actually doesn't matter, but the two different settings are needed so that the player only gets one attack when "hands" are readied and this gets
+the other hand set to $03 which flows into how the ready/unready routine works. 
+		*update player inventory
+			*add the hands item to the player inventory and set the readied flags for the hands item for all players
+			
+			
+			
+;***INIT PLAYER INVENTORY DATA***	
+;(current located at .INIT.INVENTORY in game_loop.ASM)	
+;I think this eventually should go in the character creation routine
+;so that the open record value gets set in the player inventory table. Note
+that the above code doesn't address writing the data to the inventory file
+;after init. The labels such as INV.PLAYER.INVENTORY.TEST_DATA.END probably also
+;would be different too. 
+; .INIT.INVENTORY.DATA
+			; LDA #INV.PLAYER.INVENTORY.TEST_DATA.END
+			; STA FILL.START
+			; LDA /INV.PLAYER.INVENTORY.TEST_DATA.END
+			; STA FILL.START+$1
+			; LDA #INV.PLAYER.INVENTORY.DATA.PATCH_END
+			; STA FILL.END
+			; LDA /INV.PLAYER.INVENTORY.DATA.PATCH_END
+			; STA FILL.END+$1
+			
+			; LDA #$FF 	;$FF is the open record value in INV.PLAYER.INVENTORY.DATA array (byte $5)
+			; STA FILL.VALUE
+		
+		; JSR MEMORY.FILL
+		
+		
+-Calculate stats for the first time via CALCULATE.COMBAT.STATS.PROCESS_ALL_ENTRANCE
+		*Note: right now I'm assuming this is necessary. When the time comes, review the assumtion, which depends on 
+		;the values in the character sheet when it's init. Maybe damage and TO-HIT and defense on the char sheet can be set to the 
+		;corret values in the character creation module via a template or something. Basically, I'm thinking if]
+		;PCs start with fists readied in left/right hand and skin readied in all other equipment slots, then damage and defense will be $00. The kicker might be if races gives bonuses
+		;to something like DEX which could affect TO-HIT. But in that case, I could call 
+		;CALCULATE.COMBAT.STATS.LEVELUP_ENTRANCE or even a special character cretion entrance which sets
+		;both INV.RE.UPDATE_DAMAGE.FLA and INV.RE.UPDATE_DEFENSE.FLAGs to $00, which means
+		;only DEX will be calculated since it runs always. 
+		;Actually, regarless of race bonuses, all players will have a DEX value so that might
+		;nececitate the stats calc for DEX at least. Unless the start DEX value is below a floor
+		;for when DEX is effecitve. I don't rememebr if there is a floor. To find out just set a character
+		;to the start DEX value and see if their TO-HIT is > !50 after the stats calc runs. 
+		;
+		;Note: this is all about avoiding the 4 second disk load for calc stats to run, if possible

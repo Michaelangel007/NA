@@ -1,0 +1,252 @@
+-----Inventory interconnect--- (UPDATED, summarized 7-17-2017)
+Merchant transaction window will be a menu, this avoids a lot of complications on what happens
+when the enter key is pressed (i.e which window does the enter key apply do, which starts to get into issues of making the cursor dissapear in the inactive window, which gets into how to switch the active window, which leads back to the scheme of treating the mechant window as a menu)
+
+When the player talks to a mechant, the following describes the initial screen:
+	*the intro text is displayed. It doesn't ask a buy/sell question. Maybe just
+		How can I help you today? (B)uy, (S)ell is permenantly displayed at the bottom of the merchant window (just above scroll window separator line)
+	*the Inventory window is displayed with either nothing in it or the weapons list, without the item selector
+	
+-Navigation
+	*TAB, 2-5 hotkey to the player inventory window
+			*the item selector disappears from the merchant buy list (if it's displayed)
+			*enter is treated as a sell request on the item selected
+	*TAB, 7 hotkey to merchant window
+			*changes to buy mode if not buy mode already.
+			*if not already buy mode
+				*displays merchant buy list
+			*put item selector back in merchant window. 
+	*(B)uy
+			*if merchant window is not active
+				*switches active menu to merchant menu
+				*sets buy mode
+				*displays merchant buy list
+				*put item selector back in merchant window.
+			*if merchant window is active
+				*executes buy request on selected item
+	*(S)ell 
+			*if buy mode is not set   (8/17/2017; huh?)
+				*if merchant menu is active  (this may essentially be a case that only applies on initial launch)				
+					*display text instructing the player to press enter on selected item to sell
+					*switch active menu to weapons
+			*if merchant window is not active
+				*execute sell request on the item selected
+
+	*Enter Key ***I think! (added 8/17/2017 after I was away from the code for a month)
+			*if inventory window is active
+				*execute sell request on the item selected
+			*if merchant window is active
+				*execute buy request on the item selected
+				
+				
+*NOTE: the function of the (B) and (S) keys are different depending on whether the player inventory
+or merchant window is active. This is probably just a matter of having (B) and (S) in keys in both
+the INV_4 and merchant transaction state loop, each which triggers different functionality. 
+
+
+-Selling readied items
+	*player inventory window displayes all items owned. 
+	*QTY displayed is the total owned - the number readied
+	*display an asterisk for each unit of the item that is readied
+	*if the player attempts to sell an item which is readied (i.e. no unreadied units of the item are owned), then unready the item.
+		the game will pick a player to unready the item from. i.e. the player with the highest character slot number (ie. if players 1-4 have item readied then player 4s item is sold). Alternative: lowest player slot #, though I think highest is better. 
+		NOTE: to unready a spell item, unready it in PLAYER.HOTKEYS.SPELLS. For reference, the process to verify whether spell is readied is (iterate through hotkeys and compare value to spell code on the item's master record)
+		
+	
+	*ideally scroll text is displayed indicating which PC #'s item will be sold, either in the prompt askig the player to confirm they want to 
+		sell a readied item, or after the item is sold. something like "player X longsword sold"
+
+-Merchant Inventory Window (upper right)
+	*Player Gold: XXXX
+	*(B)uy      (S)ell
+	
+-Scroll Text Window
+	*<item name> purchased!
+	*<item name> sold!
+	*<item name> is readied. Must unready item first. 
+	*<item name> is readied, sell it anyway? (Y/N)
+	*see "Selling readied items" for another example. 
+	*I don't usually deal in <item>, somebody else could probably pay you more but I'd give you X gold for it.
+			*or something ruder. I don't deal in that crap. All I'll give you for it is X. 
+
+	-Item information
+		*item weight
+		*add functinality for spells info for both player and merchant inventory windows. 
+
+*Merchant window. Add icon to represent merchant menu. 
+
+-Unresovled
+
+Do the left/right arrows control player inventory and up/down only control merchant buy list? or will
+either set of arrows keys work in either menu, with the menu that the arrows keys scroll be determined by
+which menu is active? 
+
+One thing I think we shouldn’t do is allow the merchant window to be scrolled when the player inventory window is active, and vice-versa. That is what led us down the rabbit hole the other day.
+
+
+
+-----Deeper Details-----
+
+-menu icons
+*Inventory Window. restrict to just weapons/armor/misc_items/spells. Game settings isn't appropriate and the status menu
+is dependant on active player, and the character roster space is occupied by the merchant window.
+
+But, display and empty icon border in place of stats and settings so that the hotkeys can be
+2-5 without being confusing.
+
+
+-inventory menu navigation
+in menu change routine (INV.NEXT.MENU), in code that launches stats, advance to weapons (if merchant active), if menu
+game settings, advance to weapons (if merchant active)
+
+
+-inventory item display
+for INV_4, display all items regardless of qty/readied status. display an * for each time item
+is readied. Either don't permit sale of readied items or have the routine unready. the code for
+all of this can be put in subroutines(s) stored in the merchant module, and just call them from INV_4
+
+-data structures
+
+I’m thinking that the master price list and merchant profile should be loaded from disk upon entrance to merchant trans so that the player can execute a sell without a disk load. the merchant profile loaded would be for the specific merchant the player is transacting with. 
+Identify the merchant profile using the Merchant_ID.Matrix. 
+
+8/17/2017; Can I clobber Merchant ID Matrix after identifing the merchant profile ID?.
+		   It seems like ideal load order would be Merchant ID Matrix (get profile ID), clobber merchant ID matrix with master price list, then load the merchant profile into it's own dediated memory. 
+8/17/2017; I think that only one record of the merchant profile data needs to be in memory; i.e. the record for the active merchant,
+which I think means I need to plan for the sell list (4 pages) + merchant profile (!43 bytes) in memory.
+
+
+-Merchant ID Matrix (in merchant ID order)*  (!16 towns/castles, * 4mechants each = !128 bytes)
+map_ID, NPC_RECORD#**)
+
+*so the first record is merchant_ID 0, second record is merchant_ID 1, etc. 
+**NPC record # is the value store in the sprite screen array (SCREEN.MO_SPRITE.DATA), whiched is loaded into the X-REG by TALK.COMMAND
+		Use the NPC list in the building spreadsheet for list of the NPC records which sprite they correspond to.
+		This is also used in NPC.TALK to identify the correct text section in the TLK data file for the NPC the player is talking to and also for th schedule arrays.  
+		
+-Master price list (item_type, item_ID, sell_price_lo, sell_price_ho)       (!256 record = !1024 bytes, 4 pages)
+
+-Merchant profile (in merchant_profile_ID order): merchant type*, buy price factor**, known sell price factor, unknown sell price factor***, item list****    (see **** for size estimate) 
+
+
+*Might be used to differentiate between a shop merchant/inn/pub/trainer merchant. Might be used to indicate the item_type a merchant sells. 
+
+**(% up/down from list….maybe use high bit to denote negative)
+
+***Unknown sell price factor: for items not in the merchants buy/sell list. Merchant text: “I’ve never heard of that item. I’ll give you $x for the junk”
+Also note that sell should automatically be a % less than list, the sell price factor is cummulative with the base sell %. For example if the base sell % was 25% and the sell price factor was 5%, then when the player sells items
+to the merchant, the merchant would pay 30% less than listl
+
+Excerpt from email with Beth “saved games”: Nice. This sounds like a great design. If I have enough memory to hold the full master price table, I'm thinking it might be useful for the merchant to have a 3rd price factor, which would be the price merchants pay for times not on their buy/sell list. For example , maybe a specific merchant pays 50% of base price for items on their buy/sell list but will only pay 10% for items not on their list (except quest items set with a base price of $0). The idea here is that for players who don't want to spend the time tracking down different merchants can "dump" all their stuff after a dungeon crawl to the first merchant they find, but they do so at fire sale prices. May also be useful if the player just wants to uncluttered their inventory.
+
+
+
+****two fields if merchants can sell a mix of items types. If just one field, then merchant type field (or another field) would need to indicate the item_type the merchant sells. (20 item sell list + profile header files = !43 bytes)
+
+
+
+-misc notes
+
+
+
+
+
+--Available Memory (for merchant module)....
+
+$2FB bytes available in INV_0 (stats)
+
+$941 bytes available in INV_6 (ready/unread), INV_7 (calc combat stats), filler up to $BA00
+
+
+
+--Memory Required
+
+Other than the data tables, the operational code of the merchant module will probably 
+be in the ball park of INV_4 if I just duplicate all functionality. 
+
+Maybe some of the INV_4 subroutines can be modified to take more parameters so they can be used by merchant trans module. 
+i.e. HTAB/VTAB to print stuff. I think that is a better approach that trying to create
+a merchant/player mode within INV_4. 
+
+
+roughly 11 pages
+A521-            I   216       INV_4.DISPLAY_PLAYER_INVENTORY.PATCH_START
+B0B2-            I   220       INV_4.DISPLAY_PLAYER_INVENTORY.PATCH_END
+
+
+-----OLD NOTES------
+(from when I was contemplating not having merchant trans. as its own menu)
+
+
+
+-Keys
+
+Left/right arrows: scrolls the item list in the active menu in the inventory window
+Up/down arrows: scrolls the item list in the merchant window (if in BUY mode). Dumb ass in sell mode
+Enter: buys selected item in merchant window (BUY mode). sells selected item in inventory window (sell mode)
+B/S: toggles buy and sell mode within the merchant menu
+
+
+
+
+--Psedo Code
+
+
+
+
+----------GENERAL NOTES (1st set)---------
+
+-Screen
+ *setup text window underneath the roster summary. Use the 
+ same window setup as combat scroll test. This will be for mercant
+ interactions. 
+
+-restricted item sales
+*don't permit the sale of readied items. Must unready the item first. 
+*to prevent quest items from being sold, set their base price to $0 and then check for that
+when the player tries to sell the item. 
+*In both cases, have merchant print an "error" response to the
+text window.
+
+-Misc
+ *Have one merchant who sells less than somebody else buys, 
+        (see "Arbitrage Merchant Implementation ideas" on game ideas spreadsheet for details)
+ *If I have merchants pay a lesser % for items not on their list, then
+ customize the response from the merchant to something like:
+ "I don't usually deal in <item>, somebody else could probably pay you more but I'd give you X gold for it"
+ 
+ *don't permit sale of readied items. For spell items, having it "readied" doesn't result in readied flags set (otherwise it 
+	would count against the qty and spells aren't player specific). check PLAYER.HOTKEYS.SPELLS to verify whether spell is readied (iterate through hotkeys and compare value to spell code on the item's master record)
+		
+		
+-Data Structures
+See email from Beth in thread "saved games" dated 5/25/17 at 9:53am
+
+---excerpt from Beth---
+1) The offset by which they look up the range of items they buy/sell in the master table and 
+2) The multiplier(s) they apply to the master table prices.
+
+So that way you can specify a 
+2x buy multiplier and maybe a 0.5 sell multiplier. In that way a particular merchant 
+might pay twice as much for items than the base price and sell for half as much cost. 
+Players would love that guy compared to the average merchant!
+
+And you’ve pulled that 
+off without having to write out a whole list of item values for the particular merchant 
+in question, making merchants easy to stamp down in the game engine by just specifying a 
+few custom values: Your intro text blurb, item range in which they deal, pricing multipliers, done!
+---------------------------
+
+My summary: 
+
+so basically, have a master price list for buy and sell instead of just 
+sell like I was thinking. This is possible by using a factor of the base price for both buy and sell. (i.e maybe 200% for buy and 50% for sell). 
+Additionally, by using an item ID range (for each item_type unless merchant only sells weapons or only sells armor, etc) that eliminates the need for a customer buy list. 
+
+The ranges can also be used to calculate offsets to load only a portion of the master buy/sell list for the items the merchant will buy/sell. 
+However, if I have enough memory to load the full list I could then allow players to sell any item to all merchants OR, give merchants a 3rd factor 
+for items the player sells which aren’t on the merchants list (i.e. much lower price if player wants to just dump their stuff). To do this I’d need 
+to use the item_ID range to calculate the range in the master price list that is for the merchants list so we can identify what is not on the list. 
+
+So the fields for the merchant profile seem to me: item_ID.LO, item_ID.HO, buy facor, sell.known factor, sell.unknown factor, ASCII intro text
+....have other customer ASCII or is the rest the same?

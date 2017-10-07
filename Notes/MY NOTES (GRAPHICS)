@@ -1,0 +1,85 @@
+
+COLORS (MAKING SENSE OF THEM)
+	*The books talk about the odd/even column thing, and the high bit on/off for selecting color (all this info is on my tile template spreadsheet)
+	-Here are some wierd things no talk about in the book.
+		*two pixels turned on with one pixel between them will form a color line of what appears to be 3 dots. This only seems to be the case in emulators
+			physical Apple IIe shows the two pixels. 
+		*the odd/even columns flip in the adjacent screen byte. So if you plot the same hex value in screen byte 0 and 1 you will see different
+		 colors. The patter repeats every two screen bytes, which is part of why tiles are 2 screen bytes wide.
+		*There appears to be a lot of color bleed around the edges of shapes, much more so in emulators, but still a little on a physical
+		 Apple IIE. "Color bleed" referes to any presense of color that I can't explain by one of the book rules and that I haven't
+		 identified enough of a pattern on to define an undocumented rule. 
+
+
+MAP LOAD ZONES
+		Make it so each load zone has overlap on N,S,E,W....so that when boundry is cross, the next load zone has the tile data for the entire screen
+		you are on. Need to think this through for corners where 4 load zones meet. 
+	
+	
+TEXT ON HI-RES
+	It looks like a text charater is 8x8, or 1 screen byte x 8 lines (1/2 tile depth). 
+		So this is 8 bytes per text character. 
+	
+TILE GRAPHICS
+	TILE & SCREEN SIZE
+	*U3 has 11x11 tiles on the screen at one time. 
+	*U3 map is 64x64 tiles
+	*Joe (Ultima I revisted) say he's using 20x10 tiles but that may be before he put in the background
+	*I'm thinking 14 pixel (2 screen bytes) x 16 tiles. Reserving 16 lines for top/bottom border would result in 11 tiles deep. 
+	 Reserving 2 screen bytes for left/right border would result in 19 tiles wide.
+	
+	*I think the main question for me is how am I doing text and where will my text window be. I think the top/bottom border leaves enough
+	 room for text to be inserted in a break (like wind/moons is done in Ultima), if desired. If I'm going to have a small static right side
+	 window for a few things like food/gold, I probably need more than 1 non-tile screen byte on the right side to do that, especially considering the border. 
+	
+	
+	*In one post Beth says the tile should be 7 pixels X 8 rows (i.e. 1 screen byte). http://ultima-revisited.blogspot.com/2011/05/more-great-info-from-beth.html
+	I think she comments on it again later. I'm confused because at 7 pixels wide, the same shape bytes plotted in the
+	next screen byte (tile) over would have different colors. 
+	
+	*12/4/15; For now, I settled on 17wide X 11deep tiles, 14 bytes (2 screen bytes) X 16 lines 
+	
+	
+OPTIMIZATION IDEAS
+		SPEED
+			*Instead of having Y Reg double duty in the DRAW.TILE routine, see if the .EQ directive can be used to change the
+			address of SHAPE on the fly to point to the shape table for the current tile. It might work if the shape tables
+			are placed at the front of the program (when I tried it, the assembler said it can't be a forward reference), which
+			I don't like to do because it makes the start of the main program hard to find in the monitor if needed.
+			*I read somewhere about how to use indirect index by X in a graphics context to avoid Y doing double duty. I thought it
+			was the Ultima I revisted blog by I didn't see it in any of my saved links. My best guess is it was one of the graphics
+			books, probably the 1st one I read (acrade graphics design, the one we used to have in Neenah)
+	
+
+GENERAL GRAPHICS NOTES
+
+;Hi-Res screen is !40 (!0-!39) ($0 - $27) screen bytes wide and !192 (!0-!192) ($0 - $BF) lines deep. 
+;
+;
+;DRAW-DRAW vs. EOR (see HGUA p. 52-53 )
+;							EOR		Draw-Draw	
+;Speed						slower	faster
+;Memory/Disk				same	same*		
+;Flicker					some	none
+;Draw over backgrounds		yes		no
+;Collision detection		yes		difficult
+;
+;*unless the shape will move reappear at top of screen after reaching the bottom (or vice-versa). This is because and EOR erase routine is required to erase the shape at the screen edge.
+;
+;Conclusion: Draw-Draw seems the best choice for tiles graphics RPG animation. EOR (Draw-Ease) appears most useful in arcade game development. 
+;
+;DRAW-DRAW Concept
+;
+;By placing a border byte of #$00 at the top of the shape (if shape is moving down), the need for an special erase routine
+;is eliminated. Because, after incementing the line, the shape bytes are redrawing over the top of the old shape.
+;the only byte that wouldn't normally be replaced in this process is the top byte of the shape. Adding the border
+;ensures that the top byte of the shape is erased by the redraw of the border shape byte.
+;
+;Exception: if a shape is moving looping from bottom of screen to top (& vice-versa), then an EOR erase is needed
+;when the shape reaches the top/bottom of the screen. 
+;
+;The border is always place on the side (top/bottom) of the shape opposite of the diretion of movement. For example, if the shape is moving down, the border would be on the top of the shape.
+;The border should be equal to the maximum number of lines the shape will move at a time. 
+;	
+
+	

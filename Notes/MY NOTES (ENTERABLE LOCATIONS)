@@ -1,0 +1,220 @@
+
+
+**Key question: is a seperate game loop needed to can we just expand
+on the exiting came loop...add new commands and use a global location code
+to prevent the commands from being used at the wrong time. 
+
+Conclusion: I wrote the below assuming that the same game loop would be used
+and the managers would be modified to accomidate enterable locations
+
+(DONE) 1) Split game onto Program Disk and Main Player Disk
+
+LOADER.BIN loads GAME.BIN from a location on drive 1. This needs to be changed
+to a location on drive 2. 
+
+In addition to modifying the call to RWTS, this requires that GAME.BIN
+be written to a 2nd disk image by the batch files and the 2nd disk image
+needs to be copied everywhere the 1st/current disk image is copied.
+
+Once that is done, use Ciderpress to take note of the start/end track & sector
+and then modify LOADER.BIN
+
+I don't think any of the other track/sector locations will change except
+for maybe VARIABLES.BIN if it comes after GAME.BIN on the disk. Check on 
+this. 
+
+
+
+(DONE) 2) Setup "E" command in game loop
+
+a) firm up a plan for how GMAP.X/Y will work. Where is 0,0? I think the main 
+consideration is imagine how it will work if we do a wrap around world and also if we don't.
+
+
+b) setup a new hex table? The Enter routine should check a list of enterable locations against the
+GMAP.X/Y of the player to determine if the player is at an enterable location.
+
+Will the enter routine use conditional logic to determine what to JSR or JMP to?
+Should the hex table contain a location code in addition to x,y?
+
+
+Update: Record should probably have x,y and location code. May need a 4th byte
+for location type which is used to determine whether to JSR the town/castle
+or dungeon routine, etc. If only two types then could use the high bit on the location
+code and still have 128 locations. 
+
+the location code would be used to determine which map data to load in by the 
+routine that takes control from the primary game loop. 
+
+3) Plumb a building routine into BS memory. 
+(****I don't think this section applies if I'm going to try to move 
+existing routines into BS memory)
+
+
+just before JSR to building routine,
+a) enable BS RAM, upon return disable BS RAM
+b) read building routine from disk into BS RAM
+	;****I'm tempted to check a flag to see if it's already there but
+	;maybe it's best to treat BS as a place where nothing is permenant,
+	;we'll just load stuff in from disk as needed, overwriting whatever
+	;is there. This way any remaning module left to write can be as large
+	;as BS ram if need be. 
+	;**The key: check the delay entering a town to do it this way. 
+
+Then
+
+c) Setup include file which starts by opening a new Target file with a
+.ORG in BS RAM
+
+d) insert some test code
+
+If the test code runs then I've established a beach head in BS memory.
+
+After that, incorporate the MY.COUT routine and verify HRCG works. Then,
+make the modificaiton to MY.COUT mentioned in my notes (see examples/memory/BSM/advanced/game3),
+by loading it in to a fixed location. 
+
+
+
+
+4) Create loader routine (seems like this could be shared by all enterable location types?)
+
+a) based on location code, load the following
+		i) new tiles (whole set, just a range?)
+		ii) map data
+		iii) NPC arrays (into BS memory?)
+		iv) location transport array, usually empty. (into BS memory?)
+		
+*********
+What will BS memory be used for? should I try to move existing managers
+into BS memory and continue development in main memory? Consider implications
+if the manager needs modication. For example darkness....if we need to
+add algorithms to consider street lights. 		
+*****
+
+	
+5) Modify Map Objects Management Routine
+
+
+I think the way to go is existing MO MGR will also handle enterable locations, or at least towns and castles.
+
+Use a pointer to access either mob or NPC array and the correct transport array.
+This will require an indirect Y lookup at top level of the loop to load
+next MO record.
+
+Rename the existing index by X lookups to use a different array 4 bytes in size. This array will 
+get filled by the indirect by Y lookup. I think to cover towns we just need to add a 
+section to MOB.Movement to handle NPCs that follow a defined path (see map objects spreadsheet/NPCs).
+When NPC is returning to the current anchor we need to be able to use the
+existing aggressive algorithm. 
+
+We need something to flip guards into a hostile status so they use the existing mob movement routines and chase the player
+
+
+(DONE) 6) Modify Movement Manager Routine
+
+*one consideration is how map boundaries will work. Can this be intergrated into
+existing movement routine or is it better just to use a different movement routine? 
+
+7) Consider Map Objects
+
+Map objects will also be handled a lot differently. 
+Normal NPC movement vs. hostile gaurds etc. Do guards remember they are hostile?
+
+I really need to think through how the different town/castle activities
+will be managed before deciding whether a new game loop is needed and/or
+new manager modules are needed. 
+
+
+UPGRADE DARKNESS
+	Order of Algorithms:
+	
+	1) TOD (time of day)
+	2) ELS (External Light Source)
+	3) PLS (Player Light Source)
+	4) OBS (Obscuring Tiles)
+	
+	TOD	
+		The time of day sets a sunrise or sunset counter, which counts up from $00 or down from $X. Default value is $FF or something not in the counting range.
+		The counter is used as an index to darkness stensils in AUX memory. One stencil for increment of darkness between no dark and full dark.
+
+		Think about how this affects screen.tile.before. 
+		
+	ELS
+		interate screen.tile.data for ELS tiles. When found apply an 
+		algorthim which uses predefined offsets to calculate each screen tile # 
+		that is made light by the ELS. Record these screen tile #s in an hopper array.
+		Iterate through the hopper array to flip tiles from dark to light in the screen.tile.dark array.
+		
+		Think about how this affects screen.tile.before. 
+		
+	PLS
+		Same approach as ELS but it's based on whether the player has an active light source
+		(for now create a single variable toggled by a playtest key) and no need to iterate screen.tile.data
+		since the light is always, and only, sourced from the player location. 
+
+	OBS
+		Same as current. Needs to come last because Obscring tiles 
+		create absolute darkness, irrespective of time of day or light sources. 
+		For example, you can't see through a wall regardless of the time of day or lamps in the room. 
+		
+		
+TOWNS/CASTLES/SETTLEMENTS
+
+Multiple Floors
+	I think they should be on the same X,Y grid as the rest of the town. 
+	For example, if the main level of the town takes up on regional map
+	area, just load the map data for the other floors into other regional
+	map sections (i.e. 9 loader zones elsewhere on the world map).
+	
+	Then a ladder up or down is effectively a teleporter that adjusts
+	the town version of RMAP and GMAP X,Y. 
+	
+	This design seems useful because it avoids needing to treat the other
+	floors as separate enterable locations and all the overhead to load everything.
+	It also is useful for managing the destination anchors of NPCs (see map objects spreadsheet)
+
+
+DUNGEONS
+
+	in a same game-loop design, it may make sense for dungeons to have
+	their own mob generation routine as the differences could be signficiant.
+	If so, it may make sense for MOB.GENERATION to be in a permenant 
+	location in BS memory so that code for dungeons and surface map can 
+	be swapped in and out of this memory range. 
+	
+	I'm not sure yet how NPCs in dungeons would work. It seems there
+	would need to be an NPC array. Probably a more stripped down version
+	than in towns/castles (i.e. no schedules). 
+	
+	Then somehow map objects would need to process the NPC array in addition
+	to the mob array. Swap out the target of the pointers and call 
+	the MOB/NPC routine twice, one for each? 
+	
+	are multiple dungeon levels treated as an enterable location or are
+	they part of the same world map?
+	
+	
+	DUNGEONS TOWNS WITH MULTIPLE ENTRANCES
+	
+	**See .LOCATION.ENTERABLE (ENTER) in GAME_LOOP.ASM 
+	for comments on how to impliment locations with 
+	multiple entrances. Also see Map Objects.xls, datagram
+	for MAP.LOCATIONS.START.POSITION_DATA
+
+	
+***If dungeons will have mob towns, which are enterable 
+without pressing enter (i.e.) the corridor just transitions
+into them, then I think the best way to set that up
+is a routine that examines the X,Y position of a player
+after a move. probably called from MOVE.ROUTINES.COMMON.
+
+I think it would update variables in a simular manner
+to the ENTER command, the trigger is just different.
+
+LOCATION.EXIT seems like it would work as normal. I don't
+see a nee for location.exit to record information into
+PLAYER.MAP.LOCATION.LAST because if the player reenters
+the routine described above that triggeres based on X,Y would
+determine where the player ends up.
+

@@ -1,0 +1,165 @@
+=====TERM DEFINITIONS=====
+
+Obscuring tile: a tile that creates darkness (i.e. wall, mountain, etc)
+
+====New Variables/Arrays====
+screen.dark.data (compressed?)	.EQ  <specific memory address>
+	mirrors screen tile layout. 
+	Values for each tile are 0 (normal), 1 (dark)
+
+screen.dark.data_before (compressed?)	.EQ  <specific memory address>
+	the data from screen.dark.data the move before
+screen.column.index & screen.row.index
+	The screen.tile.data element # is the index to this array, the return value is the column or row number respectively
+	
+		
+===Draw Single Tile===
+
+Need an array that stores screen.tile.data element #, start line, start screen byte
+so lookups can be done using the current element # as the index
+
+This through other scenarios where a single tile draw may be useful, and make
+sure this index lookup approach makes sense in any other foreseeable contexts
+as well.		
+	
+===Darkness: Draw.Screen====
+
+===Darkness: Movement====
+1. (EXISTING( Move command read
+
+2. (DONE) Scroll screen.tile.data & scroll screen.dark.data_before
+		Note: I think the process could go something like this
+			setup a scrolling loop between data and data_before much like with video memory (i.e page 1 and page 2)
+			after the copy from data to data_before is complete for a given element, 
+			then set the data array element to #$00.
+			This gets the scroll, copy, and init done in one loop. 
+	
+4. (DONE) Review darkness for entire screen
+		*Iterate through screen.tile.data (use rectangle method?) looking for obscuring tiles
+			*Evaluate tile 
+				*IF tile == SCREEN.ARRAY.PLAYER_LOCATION, next tile
+				*If $01 in screen.dark.data, next tile
+				*If non-obscuring tile_type
+					If $01 in screen.dark.data_before, then draw tile, else next tile
+			*Calculate Darkness for the obscuring tile
+				*axle/rod algorithm notes (also see notes below)
+					if screen.dark.data = $01 (dark), leave tile proceed with calcualtion
+						otherwise, for any tile in scope of the algorithm, erase the tile (unless dark before) and update screen.dark.data with $01 (dark) for that tile
+					I think we'll go through a series of <> on the current element screen.dark.data (.e. the index value) and the center of screen in order
+						to determine which of several variations of the axle/rod algorithm to apply. 
+				*Erasing Tile Notes
+					If tile was dark before, don't erase. next
+5. Load new row/column tile data into screen.tile.data
+		At the same time, load 0s into the screen.dark.data and screen.dark.data_before arrays for the new column positions...for the new row positions, it was done in the scrolling routine
+		**WAIT, now that darkness review comes before tile.lookup for single column/row, this is happening too late. 
+		does it need to be done at all or does it all have to get done in graphics_scrolling.asm?
+		**actually maybe this is okay because I think's only draw.row and draw.column that would be affected by the darkness values on the screen edge
+		
+5. Draw new row/column to background
+	As tile_types are parsed in draw routine, check screen.dark.data
+	if $01 (dark), then don't draw tile. next tile
+		This should work because the axle/rod algorith will erase dark tiles unless they were dark before
+
+6. **side note, don't forget to integrate the draw tile and erase tile calls from darkness.calcualte into
+actual code to accomplish those tasks
+		
+		
+7. Flip Page
+
+
+=======Calculate Darkness for Obscuring Tile=======
+assumes Y-REG is the index being used to iterate through screen.tile.data array
+to look for obscuring tiles. 
+
+x-REG is used as the floating index to screen.dark.data & screen.dark.data_before
+
+*Deterine algorithm Type
+	*Determine row and column # based on the value of Y (screen position of obscuring tile)
+	*Use condition logic on the column & row # to calcualte the algorithm type #
+			SCREEN.DARK.ALGORITHM.ROW, SCREEN.DARK.ALGORITHM.COLUMN
+	*save algorithm Type # to SCREEN.DARK.ALGORITHM_TYPE? (may not be needed)
+
+*Based on conditional logic	outcome of prior routine, branch/jmp to 
+	a label Type0-7
+
+The following "Type" section refer to the corresponding labeled charts in 
+the darkness spreadsheet.
+
+Type0
+		STY SCREEN.DARK.ALGORITH.LOCATION
+	loop
+		LDA SCREEN.DARK.ALGORITH.LOCATION
+		ACC-#SCREEN.ARRAY.OFFSET_LEFT_DIAGONAL
+		STA SCREEN.DARK.ALGORITH.LOCATION
+		TAX
+		SET SCREEN.DARK.DATA,X == $01
+		IF SCREEN.DARK.DATA_BEFORE,X == $01, CONTINUE
+			ELSE: JSR ERASE TILE ROUTINE		
+		UPDATE ROW # BASED ON X (SCREEN.DARK.ALGORITHM.ROW)....I think it can use the same row variable as in the routine above
+		IF ROW =0, EXIT, ELSE LOOP
+
+Type1
+		;SCREEN.ARRAY.OFFSET_LEFT_DIAGONAL .EQ $12
+		;SCREEN.ARRAY.OFFSET_RIGHT_DIAGONAL .EQ $10
+		;SCREEN.DARK.ALGORITHM.LOCATION_STOP	.BS $1
+		;SCREEN.DARK.ALGORITH.LOCATION_START	.BS $1
+		
+		;X-REG is the starting value at top of column and the floating index value to screen.data.dark
+		;SCREEN.DARK.ALGORITHM.STOP_VALUE is the stop value
+		
+		STY SCREEN.DARK.ALGORITH.LOCATION_START
+		DEC SCREEN.DARK.ALGORITH.LOCATION_START
+		CLC
+		ADC #SCREEN.ARRAY.OFFSET
+		STA SCREEN.DARK.ALGORITHM.STOP_VALUE
+		
+		STY SCREEN.DARK.ALGORITH.LOCATION_START
+		LOOP
+			LDA SCREEN.DARK.ALGORITH.LOCATION_START
+			IF ROW =$0A, BRANCH TO LOOP2 (SKIPS INCREASE TO START VALUE)
+			
+			ACC-#SCREEN.ARRAY.OFFSET_LEFT_DIAGONAL
+			STA SCREEN.DARK.ALGORITH.LOCATION_START
+			TAX
+				LOOP2
+					SET SCREEN.DARK.DATA,X == $01
+					IF SCREEN.DARK.DATA_BEFORE,X == $01, CONTINUE
+						ELSE: JSR ERASE TILE ROUTINE		
+					IF X != STOP VALUE CONTINUE LOOP2
+					UPDATE COLUMN# BASED ON X (SCREEN.DARK.ALGORITHM.COLUMN)....I think it can use the same row variable as in the routine above
+					IF COLUMN = $00 THEN .EXIT
+					UPDATE ROW # BASED ON X (SCREEN.DARK.ALGORITHM.ROW)....I think it can use the same row variable as in the routine above
+					
+					IF ROW =$0A, BRANCH TO LOOP (SKIPS INCREASE TO STOP VALUE)
+					INX		
+					LDA SCREEN.DARK.ALGORITH.LOCATION_STOP
+					CLC
+					ADC #SCREEN.ARRAY.OFFSET
+					STA SCREEN.DARK.ALGORITHM.LOCATION_STOP
+					
+					JMP LOOP2
+		.EXIT	
+
+Type2-6 (haven't written the pseudo code yet)		
+	
+				
+
+		
+====CALCUALTE DARKNESS DETAILED NOTES=====
+
+3. Calculate Darkness
+     a. iterate through screen.tiles until view obscuring tile tile is encountered.
+     b. on each "hit", in the direction way from the player, calculate the darkness effect as follows and update the screen tile array
+ 
+darkness axis = obscure tile + X tiles away from player (in the attached update diagram the player is to the east of obscuring tile 111, so the darkness axis is shooting out west, from 110 to 106.
+
+additional dark tiles = Y tiles away from the darkness axis in both directions..i.e. if the axis projecting west then the additional dark tiles would be to the north and south of the axis.
+
+Run a loop, X+1 and Y+2 until the edge of the screen is reached.
+
+End result: 
+
+Axis = 110, dark tiles = 89, 110, 131 
+Axis = 109, dark tiles = 67,88,109,130,151 
+etc.
+

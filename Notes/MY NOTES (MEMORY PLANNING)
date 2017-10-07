@@ -1,0 +1,53 @@
+
+*Options to free up more main memory
+	*There may be some space left in the $C00-$1FFF range. When I initially moved graphics engine and npc building mgr over there there was ~$400bytes left
+	*Review variables, and have more of them borrow space from large ranges like input/output buffer and the shape table.
+	*NPC Building Mgr may be able to be loaded from disk, freeing up more room in $C00-$1200 for other routines
+	*Designate a 2nd main memory swap. Load NPC building mgr into it when towns are loaded. Load mob generation into it when surface and undermap are loaded. The difference in size between the mob gen and NPC mgr could be memory used for surface/undermap code, which would have to be swapped to aux memory when a town was loaded.	
+	*Review the library routines. It seems they take up a fair amount of space and maybe there are some subroutines which aren't in use. 
+	*Move more of the driver from GAME.BIN to LOADER.P.BIN. Anything I put in LOADER.B is memory savings because it gets clobbered by graphics data once GAME.BIN launches. 
+	        This should be very doable because after LOADER.P.BIN loads GAME.BIN all variables and subroutines should be available for any subsequent code in LOADER.P
+	*Move GENERATE.DEBUG.LOG code to aux memory and copy it into main memory to execute as part of the QUIT.PREP routine. 
+	*think of other routines that aren't needed on the surface and can be loaded from disk into the main memory swap region when needed. 
+	*think of routines that do not need to be in main memory other than surface location. Any such modules could be allowed to overflow into main memory swap area, and then be copied to aux memory when a location is loaded requiring main memory swap
+	*think of things that could take the speed hit of being swapped in and out of aux memory when used
+
+---------------------------
+ADD TO MAIN PROGRAM
+	NPC movement
+	Event Managemnet (maybe split this by location type)
+	Default screen layout
+	Expansion to mob generation (sea mobs for sure, 
+			if there is a lot of custom stuff for undermap, consider swapping that part in/out)
+
+SWAP IN/OUT OF MAIN OR BS MEMORY
+	NPC arrays for each building and undermap. 
+		it probably gets loaded from disk into the swap space and then copied 
+		into .BS reserved variables, since the game will use this same swap space
+		for other items on this list. 
+		ALTERNATIVE
+		Keep the NPC arrays in the swap area of main memory, 
+		and swap it to aux memory when another module like inventory or merchants
+		gets loaded into the main memory swap area.
+	
+	NPC conversation
+	Combat
+	Inventory
+	Merchant Interaction (does all part of inventory need to be loaded at the same time?)
+
+	
+
+(DONE) SHUFFLE MEMORY AFTER PRODOS CONVERSION
+
+*move HRCG character set to $800-$AFF (text page2)
+*move one of the screen arrays + some misc vars to $B00-$BFF
+*MY.RWTS will be gone
+*Use $C00-$1FFF for one or more of the current include files
+*The 8 pages leftover in $D000, not used by prodos driver is trickier. 
+	It seems inconvenient to store variables there but maybe
+	could fine a small include file to put there or even split
+	off a stable portion of a include file to put there. I probably
+	want to hold off on this until I really need the memory. 
+	
+	small modules: tile_functions2 ($E436-E57B), zone_functions ($E57B-$EA89)
+		other possibities are routines_disk, and the other library files

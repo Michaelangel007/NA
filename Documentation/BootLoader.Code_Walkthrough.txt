@@ -1,0 +1,72 @@
+GOAL OF BOOTLOADER
+
+Enable assembly code to run without DOS loaded, thus freeing up more memory in the lower 48k.
+The bootloader will free up memory from $9600 (or wherever DOS3.3 start, I've had trouble with code above $93FF) 
+to $B7B4. The direct entrance to RWTS is at $B7B5. I've confirmed the memory is useable up thru $B700.
+
+As a practical matter it is tough to use the last $B4 bytes because RWTS reads data in sectors, which
+are 1 page in size. It should be possible though, the game loader would just need to read the last
+sector of the GAME.BIN file seperately from the rest of the file. It would read the last sector in
+a temporary memory space, and then use a memory copy routine to copy exactly $B4 bytes to $B700-$B7B4
+
+
+
+BOOT LOADER Code Walkthrough
+
+$0800 - BEGIN REGULAR BOOT1 CODE
+$084A - Jump changed from boot2 vector to $08B3, first empty memory address after regular boot1 code
+$08B3 - BEGIN CUSTOM BOOT1 CODE*
+		**simple call to RWTS to read MY.RWTS.BIN (track $01, sector $0A-$0F) into $0F00
+$08FB - END CUSTOM BOOT1 CODE
+
+
+*Updating Custom Boot1
+
+Insert the latest version of the BOOTLDR.DSK disk image in drive 2. 
+Run the BOOTLDR_EDITOR.DSK disk image in drive 1 (located in the same folder as this document).
+
+You should see #$FF in the X/Y-REG which indicated success reading in T0,S0 from drive 2 into $7000, 
+the former which is the location of the Custom Boot1 code. 
+
+Modify the machines instructions in custom boot1 directly from the monitor. While still in the monitor, 
+change the command code to drive 2 ($6007: 02) and run my.rwts again (6000G). 
+
+The my.rwts code on BOOTLDR_EDITOR.DSK was based on ..examples/rwts2.1
+
+**The routine in T0,S0 of Custom Boot1 routine is much simpler than MY.RWTS, but it can still read as many tracks and sectors as desired, it just has to do them sequentially. It's a one shot deal. This effectively means that the information read from disk will be placed sequentially in memory.
+The starting point in memory can be controlled. 
+
+-Changing parameters used for RWTS call in Custom Boot1 (used to load Custom Boot2 or main program)
+
+See Custom boot1.xls in the same folder as this file. 
+
+
+==========LEFT OFF=========
+
+The main program launched by custom boot1 should do two things immediately. 
+
+1) Save #$00 to $48. After custom boot1 calls RWTS, this step was skipped to save space. 
+2) Setup RWTS vectors. See RWTS.MANUAL.VECTOR.SETUP.png in the same folder as this document. 
+
+
+
+
+;notes I made for the RWTS setup, may be able to use them in the future
+
+;update, since I forgot once what the above note meant. The memory addresses on the left refer to RWTS.MANUAL.VECTOR.SETUP.png (location
+;(mentioned above), which contains a program designed to write a program at
+;$03E3 & $03D9 equivilent to that which DOS normally places here, making these memory addresses vectors for RWTS.
+;My custom boot 1 code doesn't take care of this. I'm planning on putting code to take care of this
+;at the start of my custom boot 2 so that MY.RWTS can work as-is (using the DOS vectors)
+
+
+$08B8 - Artificially create the master IOB table vector at $03E3
+$08D6 - Artificially create the entry point to RWTS at $03D9
+$08E8 - 
+
+
+
+====NEW NOTES====
+
+MY.RWTS & Custom Boot2 are loaded at the same time, with Custom Boot2 on the 
+back-end so that it gets overwritten as game modules are loaded. 

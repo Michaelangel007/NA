@@ -1,0 +1,13 @@
+
+
+*Disable Sea Mob gen
+*Disable location entry (it's in movement manager)
+*Disable Playtest keys for day/night/pls (double check list)
+	*KEY 0, KEY 6-8
+
+*Make sure no quicksand, crocs, multi-tile frigates, or multi-tile mobs are on the map
+
+
+other
+
+*update version number in game code and readme file

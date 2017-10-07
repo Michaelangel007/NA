@@ -1,0 +1,43 @@
+
+
+Working on bug causing sound to break by turning the around $8BD7 to $00s.
+
+
+I've narrowed it down to the JMP in 
+
+.COLLISSION_EXIT_TEST
+
+
+
+if I comment it out, even with CPX $00 (so the BEQ should be taken) it the problem happens.
+But if I put a JMP to .test2 (ahead in the program) just before it, the problem doesn't happen.
+
+If I change the JMP address (the one that's breaking things) to a label above, like .MOVE.PERMITTED, the problem occurs...but not if I use a label above like MO.DRAW. No problem using .EXIT below either.
+
+
+If I put in an LDX/Y $AA + BRK after the BEQ, the program takes the branch. And, as of that BRK, the
+$8BD7 (now at $8EB7) memory area is erased. 
+
+  If I move the LDX/Y $AA + BRK up to the start of .COLLISSION_EXIT_TEST, just a few lines about the suspect JMP,
+  the $8ED7 memory area is intact. 
+
+If I remove the entire collission check except for the section .COLLISSION_EXIT_TEST (which includes the suspect JMP) then
+the crash doesn't happen (implying the memory area is intact).
+  Leaving .COLLISSION_EXIT_TEST (which includes the suspect JMP), removing parts of the reset of collision check
+	.COLLISSION.LOOP.MOB_LAND       , problem still occurs
+	.NEXT_COLLISSION_TEST, .MOVE_PERMITTED, .MOVE_BLOCKED, & above, problem doesn't occur
+	problem doesn't occur with just these removed: .MOVE_PERMITTED, .MOVE_BLOCKED.....confirmed with CPX=$00, and CPX=$03
+
+
+Other ideas
+
+(DONE) *change the BEQ to go to an isolated area, load $AA and then BRK to see if it's actually being taken as a result of CPX #$00.
+
+*just before the collision check area, do a .BS of a page or so. See if forcing the code further up into memory works, effectively changing the address the JMP goes to....of course it might result in the sound working but other issues occurring, like I saw when I changed the order of the include files. 
+
+*move the collision check further down in the code....I think it could also be after the screen section of the MOB is calculated
+
+*unroll the loop so the JMP goes away. 
+
+
+

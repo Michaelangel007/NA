@@ -1,0 +1,8 @@
+
+(ADDED TO GOOLGE DOCS) *Map object animation on/off based on bit flag setting in the MO record. 
+	*example: drawing attack target hit shape. We want to pause to keep the hit shape on screen, 
+	but we can't update screen animation during the pause or the S_ENTITY hit will get redrawn by 
+	the animation update, erasing the target hit shape. There are probably other uses too. 
+	
+
+*See Tile Draw Speed in "MY NOTES (MEMORY, SPEED PLANNING)"

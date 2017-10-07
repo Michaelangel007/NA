@@ -1,0 +1,11 @@
+Fully tested on:
+
+AppleWIN/hardrive
+AppleWIN/floppy
+CFFA/harddrive
+CFFA/floppy
+
+real floppy has issues. 
+
+
+didn't test on mame or virtual2

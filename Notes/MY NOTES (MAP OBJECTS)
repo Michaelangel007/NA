@@ -1,0 +1,376 @@
+
+***For colission rules and tile_type ranges, see world map spreadsheet, tile_type worksheet
+
+
+*to check for collission with MOB objects, check the SCREEN array for MOBs, if
+!=$FF then collission occurs. the Y-REG positions to check should be static, always
+adjecent to player. 
+				  
+
+		
+Mob Generation, Movement, and Map Object Tracking/Drawing
+————————————————---------------------------------------------
+
+OTHER NOTES
+	Animation.manager currently only checks the screen array for map object for animated tiles
+	and only checks the screen array for transport for static tiles. 
+
+
+
+
+-Preperation
+
+(done) *turns
+	*init GAME.MOB_GEN.CONTROL to $00 in DRIVER
+
+*start from the inner layers and work outward, testing each, like I did with darkness
+	*I a good place to start is the routine that compares x/y to player positin to 
+	identify MO's on the view screen and then calcualtes the tile #.
+	*Next do MO.DRAW
+
+*Reorganize tile types
+	*Put collision tiles for walking in !0-!50
+	*Put skiff in !51
+	*Put land/shallow water tiles at !119-126
+	*Put ship icon at !127
+	*Put shallow water and 8 river tiles in 128-134
+	
+
+
+-Overview
+
+*Game Loop Changes
+	*Monster Generation
+	*Animation.Update
+	*Key scan
+			
+*New Routines
+	*Map_Object.Management.ASM
+		*Mob.Generation
+			*skip and return to game loop if GAME.MOB_GEN.CONTROL = $00 (player turn)
+			*Generate random number to determine if generation occurs this turn.
+				*exclude player_tile location, in addition to any other collision tiles for the type of mob to generate
+				*If yes
+					*generate another random number to determine the Mob_Tile Type
+						*eventually there could be more complex logic here based on region, player level, etc. 
+					*iterate MAP_OBJECTS.MOB, until $00 is found for Mob_Tile Type
+						or until index flips to $00 (meaning the array is full)
+					*insert new monster at that record
+					*GAME.MOB_GEN.CONTROL gets set back to $00 (player), so that monsters
+					 won't generate until player moves again
+			*Make sure that the .pass routine in game loop sets GAME.MOB_GEN.CONTROL = $01 so monster generation can happen2
+			RTS
+(DONE)	*MO.Location_Update (called after player moves)
+			iterate through MAP_OBJECT.MOB & MAP_OBJECTS.GENERAL
+				for each record, increment x,y to reflect player move
+				skip any record if the index == PLAYER.TRANSPORT.ACTIVE because that means 
+				it's the active transport for the player
+				
+		*Map_Object.Erase
+			iterate through SCREEN.MO.DATA and for any tile locations with a value != $FF
+				execute new code to draw the terrain the mab object is located on. 
+					I think this essentially is a lookup of the tile_type in SCREEN.TILE.DATA 
+					and then JSR DRAW.TILE.SINGLE
+			RTS
+		*Mob.Move
+			iterate through SCREEN.MO.DATA (which was scrolled net of player move)
+				for each position with a value !=$FF
+					calculate a move, if possible, then  (**See Mov.Move.Calculate)
+						update the mob's x,y if changed
+							Use the value in SCREEN.MO.DATA a index to the map object arrays. X is first field, Y is +$1
+						no need to update the mob's position in SCREEN.MO.DATA as it will be recalcualted from x,y in MO.DRAW
+					the collission detection should be done on SCREEN.TILE.DATA
+						collision should also not permit any move onto a transport MO
+			Fall through to MO.DRAW or do JSR
+							*Mob.Move.Calculate
+								only applies for mob's on the view screen
+								init MOB.MOVE.OPEN_PATHS(0-3) = $FF and MOB.MOVE.OPTIONS_FINAL (0-4) (move direction code is index)
+								init mob.move.total_options $00
+								set preferred move ;#$00=north, $01=south, $02=east, $03=west
+**note: for hot pursuit, set a second preferred move based on x,y, rule out pass (for example guard alerted)
+		in addition to gameplay, this my be important for efficiency for moving large quantities of objects not on view screen 
+									if mob.x >  player.x then mob.move.preferred  = $03  (West)
+									if mob.x <  player.x then mob.move.preferred  = $02  (East)
+									
+									if mob.y >  player.y then mob.move.preferred  = $00  (north)
+									if mob.y <  player.y then mob.move.preferred  = $01  (south)						
+								if preferred move == ok, 
+										then mob.move_current = preferred move, 
+										goto make move
+									
+								if preferred move == blocked (JSR MOB.COLLISSION.CHECK or integrate it)
+								,decide alternate move
+									set open paths rule out move directions
+									evaluate each move direction and set direction code for open paths
+										MOB.MOVE.OPEN_PATHS(0-3) = $00 - $03	
+											for each hit, inc mob.move.total_options
+										set weight for direction of mob.move.last to $00....MOB.MOVE.OPEN_PATHS, mob.move.last (as X/Y index) = $00					
+										if mob.move.total_options = $00, then mob.move_current == $04 (pass), got make.move
+										setup options
+											if MOB.MOVE.OPEN_PATHS(x) != $FF then MOB.MOVE.OPTIONS_FINAL(y) == mob.move.weight(x)
+											(i.e use two indexs and only INY when there is a hit)
+											once the above iteration is done, put pass at the end as $04
+											
+										branch based on number of options (always 2 because pass is an option, and if all paths blocked exit already occured)
+											1 option
+												error, for reason mentioned above
+		
+											2 options
+												generate random number (use default, $00 - $FF)
+												select option # base on random # (2 ranges)
+												mob.move.current == MOB.MOVE.OPTIONS_FINAL, option # as index
+											3 options
+												same as above, with 3 ranges
+											4 options
+												same as above, with 4 ranges
+								
+								make.move
+									record mob.move.current in mob.move.last (including pass)
+									proceed to existing code to implement move
+									***OPT** Speed. once logic above works, try creating a routine called by game loop to generate random numbers in advance and store them in an array (1 page long) 
+										that can be accessed by other routines as a random number source. on each call generate 1 number and increment the array index (it will flip to 0 automatically so the page of random numbers gets refreshed)
+
+(done)		*MO.Draw
+			Init SCREEN.MO.DATA to $FFs
+			.Calculate.Screen.Location
+			iterate through MAP_OBJECT.MOB & MAP_OBJECTS.GENERAL, using index (X)
+				identify mobs and boats that are on view screen (using tracked x/y value for MOs that is relative to players position)
+					calculate Y (tile #)
+					save X to SCREEN.MO.DATA,Y (x is the first field in the current record)
+				(not needed since we did an init of the array) if current record not on view screen, save $FF to SCREEN.MO.DATA (this value should never be on a record boundary)
+				Draw Map Object at the calculated tile location.
+					skip if dark tile
+					skip if player tile
+					if a mob, draw first animation frame
+	
+			RTS
+			
+	
+*Existing Routine Modification
+	(done) *Animation.Update
+		*currently it skips any tiles with a map object.
+		*instead, when it loads the tile type at very begnning, modify so it
+		checks SCREEN.MO.DATA for $FF, if != $FF use the MO tile type instead of the 
+		screen.tile.data tile type.
+		*we want it to skip tiles that aren't animated (currently boats), and that should
+		occur automatically because boats aren't in the animated tile range. double check
+		that this will work.
+		
+	*Draw.Screen
+		*After screen is drawn
+		*JSR MO.DRAW
+		
+	*Movement Manager
+		*Just after GMAP update
+			*JSR MO.Location_Update
+		*Before JSR SCROLL
+			*JSR MO.Erase
+		*After darkness & draw column/row
+			*JSR Mob.Move
+		*last set turn to mob (GAME.MOB_GEN.CONTROL = $01)
+			this enables monster generation 
+	*Scrolling_Functions
+
+**actually, I don't think this is needed. MOs are erased based on values last turn, and the arrays are calculated again each turn based on the x,y. so I don't see a point in scrolling them. 
+		Scroll SCREEN.MO_GENERAL.DATA and SCREEN.MO_SPRITE.DATA at the same time as the other routines. It should scroll
+		the same way as SCREEN.DARK.DATA
+*OPTIMIZE
+	*I think that SCREEN.DARK.DATA/before and SCREEN.MO.DATA can be consolidated as SCREEN.FLAG.DATA/before.
+		Since the JSR to Mob.Move is after the column/row draw, I don't think SCREEN.DARK.DATA is needed
+		as I think it is rebuilt by DARKNESS.REVIEW on the next move. the "before" darkness data is needed
+		but that wouldn't be modified
+		...wait: I think the copy from dark.data to dark_before occurs at the beginning of the scroll routine, but maybe
+		that could be changed to happen after the scroll routine completes, and then update it after screen.draw completes the first time
+	
+Boats
+————————————————
+	
+*move player icon to a tile #
+*make player icon drawn based on value of PLAYER.TRANSPORT.ACTIVE
+	*if $FF use PLAYER.MAP.ICON for tile_type, otherwise use the value as an index to MAP_OBJECTS.GENERAL to obtain tile_type
+*init PLAYER.TRANSPORT.ACTIVE to $FF in driver. Init PLAYER.MAP.ICON
+to whatever the default walking icon is. 
+	note that this should eventually be loaded from disk. note that for GMAP too.
+
+
+
+(B)oard command triggers a loop of MAP_OBJECTS.GENERAL
+	Iterate MAP_OBJECTS.GENERAL
+		If a transport is at player x,y (!128,!128) 
+			If PLAYER.TRANSPORT.ACTIVE (current) == skiff
+				& TILE_TYPE in current record of MAP_OBJECTS.GENERAL = ship
+					increment +1 skiffs for that transport record.
+				that location. I think if Skiffs are a blocked tile (for ships and other 
+				skiffs) that prevents skiffs boarding skiffs or ships boarding skiffs. 
+			If PLAYER.TRANSPORT.ACTIVE (current) == horse
+		
+			All Cases
+				Copy MAP_OBJECTS.GENERAL index to PLAYER.TRANSPORT.ACTIVE
+				Update player icon based on PLAYER.TRANSPORT.ACTIVE (this may happen automatically, consider what happens next in game loop)
+	Movement Manager Changes
+		For movement in each direction, increment the x,y value of the transport record so the object moves with the player
+	
+	DRAW.TILE.PLAYER Changes
+		Load the appropriate shape table based on the value in PLAYER.TRANSPORT.ACTIVE
+			and the value in MOVE.CURRENT
+		PLAYER.TRANSPORT.ACTIVE = $FF use default player icon
+		
+(X)xit command
+	If PLAYER.TRANSPORT.ACTIVE (current) == ship
+		check skiff qty in current record of MAP_OBJECTS.GENERAL = ship
+			if qty = 0, don't permit exit. For now, no noise, just don't do it.
+			if qty !=!, then decrement skiff qty by -1
+	
+	I don't think any change is needed to the transport record. the x/y will remain at player position until the player moves
+		
+	PLAYER.TRANSPORT.ACTIVE == PLAYER.MAP.ICON
+	Update player icon based on PLAYER.TRANSPORT.ACTIVE (this may happen automatically, consider what happens next in game loop)
+	
+	RESET PLAYER.TRANSPORT.TILE TO #$00
+		
+		
+
+-New Variables
+GAME.MOB_GEN.CONTROL		.BS	$1		;HOLDS $00 FOR PLAYER TURN, HOLDS $01 FOR MOB/NPC TURN
+MAP_OBJECTS.MOB			.BS	$100
+MAP_OBJECTS.GENERAL	.BS	$100	
+SCREEN.MO.DATA			.BS	$BA		;TRACKS TILE LOCATION OF MAP OBJECTS WHOS X,Y IS ON VIEW SCREEN
+PLAYER.TRANSPORT.ACTIVE	.BS $1		;TRACKS AN INDEX TO THE TRANSPORT OBJECT BOARDED. IF SET TO $FF, PLAYER IS WALKING AND PLAYER.MAP.ICON IS USED TO DETERMINE TILE_TYPE FOR PLAYER ICON. 
+PLAYER.MAP.ICON			.BS $1		;HOLDS THE TILE_TYPE OF THE PLAYERS WALKING ICON (NOT BOARDED TRANSPORT)
+MAP_OBJECTS.BOARDED		.BS $1		
+
+
+
+-SS
+
+(DONE) .MOB.NOTONSCREEN_STEP
+;	hook: if type SS, continue to .MOB.IDENTIFY.LOCATION (NEW)
+
+(DONE) .MOB.IDENTIFY.LOCATION (NEW)
+	
+;	based on SS or not SS, branch to .MOB.IDENTIFY.TILE_LOCATION or
+;	.MOB.IDENTIFY.MAP_LOCATION
+
+(DONE) .MOB.IDENTIFY.MAP_LOCATION
+; CONVERT TO 16-BIT
+; USE GMAP INSTEAD OF #SCREEN.ARRAY.PLAYER_LOCATION 
+;	 expand multiplication table to 64. can be reduced to 48 if I convert to loader zones
+
+
+
+
+(DONE) .MOB.MOVEMENT
+	testing: do a dry run to see if the MAP_OBJECTS.MAP_LOCATION variable to see if calcualtions are working
+
+	
+	branch to .MOB.MOVEMENT.COLLISSION_CHECK_SS if SS tile type
+
+(DONE) .MOB.MOVEMENT.COLLISSION_CHECK_SS
+	using offsets to MAP_OBJECTS.MAP_LOCATION, check each adjacent tile for collission
+	and record results in the same array as current routine. MOB.MOVES.BLOCKED
+	
+	I think a good starting point is to copy the existing routine. Lots of stuff liek the
+	darknes check won't apply.
+	
+	JMP TO .IDENTIFY.SCREEN_SECTION
+
+(DONE) *****NOTE, CURRENTLY i'VE ONLY GOT IT SETUP FOR THE MAP POSITION OF AN SS MOB TO BE 
+CALCUALTD. HOWEVER, IF THE SS MOB IS VISIBLE, THE SCREEN TILE LOCATION NEEDS TO BE IDENTIFFIED
+TOO. SEE IF ONE ROUTINE CAN FALL TRHOUGH TO THE OTHER (PUT MAP ON TOP, THEN DO A CHECK AND EITHER
+BRANCH OF FALL THROUGH)
+
+.IDENTIFY.SCREEN_SECTION
+	NORMAL
+
+(done) .MOB.MOVE.MAKE
+	HOOK: if type SS JMP to .MOB.MOVE.IMPLIMENT
+	
+	in the code for each direction, decide which of the tests apply and skip those that do not.
+	instead of an automatic JMP to .drawtile at the end, for SS type instead JMP to
+	increment.index
+	
+
+-Multi Tile Mobs
+
+Flag3 = $01
+
+
+the x,y in the map objects array refers to the position of the upper left tile. 
+
+the game assumes the other 3 tiles sequentially follow the tile ID of the upper left tile,
+in the following order: upper left, upper right, lower left, lower right
+
+
+Phase I: multi-tile mobs cannot be SS
+
+
+(DONE) MOB.IDENTIFY.TILE_LOCATION
+	at end, if multi-tile flag is set, calculate values for MOB.MT.TILE_LOCATIONS
+	
+(DONE) COLLISION_CHECK_ONSCREEN
+	not sure if multi tile can be intergrated or if a special routine is needed
+	check the 4 tiles to the n/s/e/w of the mob, if any one of the 4 tiles in a given direction
+	is blocked, record blocked for that direction in MOB.MOVES.BLOCKED
+	
+
+(DONE) MOB.DRAWTILE.ENTRANCE2
+	modify this routine or branch off to special multi-tile drawtile routine?
+	if multi-tile, loop through 4 times. 
+	load MAP_OBJECTS.TILE_LOCATION from an array holding all 4 values (MOB.MT.TILE_LOCATIONS)
+	
+	for the following part saving the tile type, increment the saved_tile_type so that the mobs other 3 tiles are sequential from the 1st. 
+		LDA MAP_OBJECTS.MOB+$2,X
+		STA SAVED_TILE_TYPE
+
+		
+(DONE) .MOB.NOTVISIBLE
+	if multi-tile flag is set, save the index for all 4 values in MOB.MT.TILE_LOCATIONS
+			TXA										;ACC = MAP_OBJECTS.MOB INDEX
+			STA SCREEN.MO_SPRITE.DATA,Y
+	
+	
+	
+ANIMATION.UPDATE
+	CREATE AN ARRAY TO HOLD MULTI-TILE MOB PROCESSING. tWO BYTES. INDEX AND MT # (0-3). 
+		is there an existing array I can borrow for this? it's only needed for the duration of the animation update
+		94 bytes would accomidate 47 mobs, the max that can fit on a screen.
+		
+	When a multi-tile is encountered, check the array. if the index is found, then grab the MT#
+	and use that to get the tile_type
+		If the index is not found, add it and set the MT # to 0. Grab the tile_type for the current mult-tile using MT #0
+		
+
+MOB.GENERATION
+	random number refers to a GMAP position.
+	Check GMAP position for collision values.
+	
+	If new MOB;
+	
+	GMAP/!64; quotient = map row (Y), remainder = map column (X)	
+	Obtain map x,y for new mob and player. 
+	
+	if map X(player) < X(mob) 
+		X.ADJ = X(mob) - X(player)
+		MOB.X = $80 + X.ADJ
+		
+	if map X(mob) < map X(player)
+		X.ADJ = X(player) - X(mob)
+		MOB.X = $80 - X.ADJ
+
+	if map map Y(player) < Y(mob)
+		Y.ADJ = Y(mob) - Y(player)
+		MOB.Y = $80 + Y.ADJ
+		
+	if map Y(mob) < map Y(player)
+		Y.ADJ = Y(player) - Y(mob)
+		MOB.Y = $80 - Y.ADJ
+		
+
+----NEW VARIABLES/ARRAYS
+
+MOB.MT.TILE_LOCATIONS			.BS $4
+
+
+
+
+

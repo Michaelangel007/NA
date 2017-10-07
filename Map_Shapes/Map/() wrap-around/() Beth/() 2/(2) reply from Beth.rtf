@@ -1,0 +1,44 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf130
+{\fonttbl\f0\fnil\fcharset0 Calibri;\f1\fnil\fcharset0 HelveticaNeue;\f2\froman\fcharset0 TimesNewRomanPSMT;
+}
+{\colortbl;\red255\green255\blue255;\red24\green55\blue106;\red25\green25\blue25;}
+\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs30 \cf2 \expnd0\expndtw0\kerning0
+Mark,
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 Thanks, I hope your holidays went well, also! I\'92ve modified one of your excel sheets and attached it as a response (Sheet2).
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 When I did this I went with my option #1, as I didn\'92t have memory to have multiple larger zones stored off separately. I doubt that\'92s as much an issue for you however. My approach was interesting, but it had the unfortunate side effect of making the disc drive work nonstop \'96 it was kind of noisy and disconcerting. I think approach #2 might be better in that regard.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 The bottom line is that you have all the concepts right and you also call out the difficulties. My suggestion is that you can ignore all the weird memory-wrap issues (and you should) by simply periodically shifting the location of your in-memory tiles to always keep the player approximately centered in a memory area, and thus on an infinite treadmill bounded only by the amount of data you can store on a disc. Trying to deal with the wrapping issues is only going to cause bugs and grief.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 In my approaches the balance you end up playing with is the tradeoff between how far you let a player go towards an edge of the in-memory map before you trigger the loading and memory shift. If you can more-or-less simultaneously load a strip and keep the game moving, you end up working towards a streaming solution but like I was mentioning you also end up spinning the drive endlessly. I never really got that working until I was able to work on a system with more than one CPU, so I could offload the File I/O Streaming to another process (PS2, I\'92m saluting you). More likely on the Apple you should pick something that doesn\'92t feel too obnoxious for the game player, gives them a fair degree of movement in whichever direction before the pause of a loading hit. That\'92s why I like your Zone idea, it gives you another tweakable control in terms of how big those zones are and what the best tradeoff is between free-moving gameplay and loading game-pause hits.
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 \'a0
+\f1\fs26 \cf3 \
+
+\f0\fs30 \cf2 -
+\f2\fs18 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 
+\f0\fs30 Beth
+\f1\fs26 \cf3 \
+}

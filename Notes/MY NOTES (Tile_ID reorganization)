@@ -1,0 +1,60 @@
+
+*NOTE: make sure to put some common lables in each tile set .ASM file because SBASM will kick an error
+if the common labels don't point to the same memory address (said another way, SBASM errors if there are two or more labels or the same name, unless they point to the same memory address)
+For example, in each tileset .ASM file put a common label every 16 tiles. That way if something gets out of sync the errors will
+narrow down the source of the problem to a section of 16 tiles. 
+
+-Optimization considerations
+	*Each tileset type (building, undermap, etc) should be organized into a fixed group and dynamic group.
+		the fixed group tiles appear in all tilesets of the time, which provided continuity of tile_IDs. The dynamic group
+		are the tile_IDs whose contents will vary, or somtimes very, between tile sets
+	
+	*consider what to do about summonable S_ENTITIES. Either their tiles must be in all tile sets or I need to implement another
+	solution. I came up with something and made notes somewhere; probably in the summon spell routine. 
+
+-Sub-grouping
+Tile design sub-group
+	*Have a column in the sheet to designed the tile design sub-group, such as castle gate setup, so that a sort can quickly show all tiles associated with a particular group
+
+Functionality sub-groups
+	*Merchants. I think merchants will just have one tile but if we have more than one, they should be in a range. Maybe reserve a couple tiles for this. 
+			Assuming we just use 1 mechant tile, setup two copies of it in two tile_IDs. One of them will have the merchant Tile_ID pointer assigned to it so that NPC Talk can detect when the player is 
+			talking to a merchant and so it checks an addition tile out if the adjacent tile is a counter. 
+	*Merchant NPC icons. Group together in same range on all tilesets so that the Talk command subroutine can easily detect if an NPC is a merchant. Ties in with Merchant counters group below.
+	*Merchant counters. Group together so support talking to mechants accross counters. If adjacent tile_ID = merchant_counter than check next tile out for an NPC. If NPC = non-merchant then to normal talk. If NPC = merchant then launch merchant transaction sub_module of inventory	
+	*mob_tiles (seperate land, sea, and MTT mobs)
+			*Seperating MTT may not be needed but might as well
+			*--Warning--: mobs used in more than one tileset must have the same tile_ID in all tilesets because the mob database holds a single tile_ID for each mob. 
+	*transport objects (which must be in all tile_sets except undermap)
+	*obstacles
+	*obscuring tiles
+	*secret doors 
+		;(see "secret doors" in finishing game engine. I think the important thing here may be for secret doors to be outside of the obstacle range since that would cause no collission to occur, but grouping them together is probably a good idea)
+	*ELS light source tiles
+	*tiles which player can use as map icon (if this is permitted; think about UI for changing)
+		*the reason is because any tile used as map_icon must have same tile_Id on all tilesets
+		
+	*animated tiles that aren't really animiated (like in buildings, where we ran short on static tiles, I may want to expand the static range at some point to save speed)
+	*player icon suppressed (not drawn) tiles. i.e. archways
+	*animation supressed (such as player icon suppressed tiles, not sure if these will be the only ones). There are other tiles, such as cots, which supress the animation
+	of the player and sprites but I'm not quite sure how it happens. .TEST.COT seems to handle it, but it's not in the .TEST.PLAYER_LOCATION section so it seems like it would only apply to NPCs, but somehow animation is supressed when a player is standing a cot, bed, etc.  
+	*occupied tile swaps (i.e beds, anvil, bellows, outhouse hole, chairs). So if tiles in are that range, automatically do the Tile_ID=Tile_ID+1 if NPC present. Alternative: instead of a range, detect if bit 7 & 6, or 7 & 5, or something else,  if a workable pattern can be found. Keep in mind that testing anything other than bit 7 might be no more efficient than a BCS/BCC check. It might be possbile to lump the croc into this range because it operates on the same mechanic. but, that doesn't work if buildings have their own tile swap range defined, which they do now because it is so much larger than for any other map.  
+		*keep in mind that in animation manager occupied tiles swaps should only be exempt if the occupied tile is not animated (i.e. beds). Such tiles can be part of a the unoccupied tile swap range in map objects mgr and suppressing the drawing of player icon but also need to have tile_Id labels for direct addressing in animation mgr. 
+		*setup separate tile ID range for player occupied tile swaps, exclude wizard shop crystal ball and cauldron
+	
+	*day/night swaps
+		*Right now this involves an aux memory copy but I'm not sure that's necessary as long
+		 as we've got the tile space. 
+		 Once setup in a range use the same principle as empty/occupied swaps
+         If TOD=dusk/night and tile ID in swap range then TileID= TileID+1
+
+	*storm tiles are probably in their own group, but down forget about them. Since they are a tile_ID range it should probably be a group in the spreadsheet. 
+	*Nox A* grid tiles (the tile ID area of the variables file has a section for this type of tile. Also see .CHECK.FOR.PATHFINDER_GRID.TILES in NPC building mgr ASM file)
+	*tiles for which animation is disables (see TEST.TILE_TYPE, this includes things like tall grass and unoccupied tiles)
+	
+	*NOTE: There are some tiles that get special treatment like tall grass which only apply to one map type but aren't part of a large range. So rather than restricting them to the one map type 
+		another option is to mark those tile_IDs on other tile sets with a warning not to use or only to use for certain things which wouldn't cause a problem. 
+		
+	**NOTE: make each of these groups a column in the spreadsheet with X if the tile is in the group
+then sort the sheet differnt way to find an efficient order. Tiles which are only in one catagory should be easy to group together. The trick part are tiles which are in multiple groups. Then 
+one group has to take priority, which should be based on the group which yeild the most speed/memory gains. 

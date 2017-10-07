@@ -1,0 +1,11 @@
+
+Fully tested on:
+
+Mame
+AppleWIN/floppy
+AppleWIN/HD
+
+
+Virtual2, CFFA/floppy, CFFA/harddrive not tested
+
+Real floppy not tested, but likely doesn't work

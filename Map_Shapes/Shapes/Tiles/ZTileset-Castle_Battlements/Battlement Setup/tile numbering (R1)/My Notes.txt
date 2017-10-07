@@ -1,0 +1,9 @@
+I'm don't remember off hand why thre are 3 shape files. At one point we were experiementng with making the battlements
+wider so there wouldn't be a transition to the floor tile, thus reducing the number of day/night swap tiles needed but
+it didn't look as good. Maybe one of the files was that setup.
+
+I'm not sure if the map files correspond with these shape files or not, but they likely do.  
+
+
+UPDATE (6/23/17); I'm pretty sure the 3rd spreadsheet was from when we were experimenting with the transitions as noted above.
+I moved it to the archive folder. The map files do correspond with the tile spreadsheets. 

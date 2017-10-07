@@ -1,0 +1,1 @@
+copy c:\sbasm3\errors.err c:\my_code

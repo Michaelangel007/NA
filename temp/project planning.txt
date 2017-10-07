@@ -1,0 +1,88 @@
+
+
+DRAW.COLUMN.SINGLE
+
+	TILE.LOOKUP.COLUMN
+		UPDATES SCREEN.TILE.DATA WITH NEW TILE TYPES
+		COPIES SCREEN.TILE.DARK TO SCREEN.DARK.HOPPER
+
+
+	DRAW.COLUMN.ROW
+		DOESN'T DRAW TILES FLAGGED AS DARK IN DARK.HOPPER
+
+DARKNESS.REVIEW
+	**IT DOESN'T REVIEW THE EDGES FOR OBSCURING TILES***
+	FLAGS TILES (INCLUDING EDGE ROWS/COUMNS) AS DARK.
+	DOESN'T ERASE TILES IF THEY WERE DARK BEFORE (NET OF SCROLL)
+		NOTE: IT WILL ERASE TILES ON EDGES, IF DARK NOW, AS LONG AS NOT DARK BEFORE
+
+	DRAWS TILES THAT A) ARE NOT FLAGGED DARK NOW AND B) WERE FLAGGED DARK BEFORE (NET OF SCROLL)
+
+
+
+-----------
+
+
+;INDEX GMAP.TILE.DATA
+
+
+USE TILE.LOOKUP.INDEX TO LOOKUP THE VALUE FOR EACH ROW
+
+SAVE GMAP.LOOKUP TO GMAP.INDEX(2)
+
+RECORD THE LO/HO OF GMAP.ADDRESS.INDEX (VERIFY WHETHER Y IS ADDED
+TO INDEX AT THIS STAGE) TO GMAP.INDEX (2)
+
+
+SET GMAP.TALLY == INDEXED LOOKUP VALUE?
+
+SO THIS IS A PAGE OF MEMORY TO MAKE COMPRESSION FASTER?
+
+AND, EVEN WITH THE INDEX, THERE ARE STILL >< CALCUALTIONS TO 
+DETERMINE WHICH INDEX TO USE. 
+
+
+
+
+
+
+
+
+
+
+Xmake tile.lookup.row use X value from last call
+Xcreate tile.lookup.screen
+
+xtest screen.draw
+
+
+Xmove mgr should continue taking care of updating GMAP
+
+Xtile.lookup.screen updates SMAP and setting SMAP_CURRENT == SMAP
+	because it is called in all scenarios...from move mgr and screen.draw
+
+Xmove mgr should call tile.lookup.screen
+
+xdraw.column.single, draw.row.single, should no longer do anything
+with GMAP, SMAP. They should set SMAP_CURRENT = SMAP as a precaution
+and then increment SMAP_CURRENT using offsets to iterate throught the
+screen.tile.data array and load the current row.column into screen.tile.hopper. This avoids 16-bit iteration 
+by the downstream routines. 
+
+Xdraw.screen stops setting SMAP & SMAP_CURRENT because that is now handled by tile.lookup.screen.
+Xdraw.screen uses SMAP_CURRENT to iterat screen.tile.data so it can call draw.row
+
+
+xdraw.row and draw.column then iterate through screen.tile.hooper using 8-bit index and feed the correct shape table address to
+draw.tile (using the tile_type)
+
+
+
+
+xtile.lookup.column currenly writes to screen.tile.array which it
+cannot do. And, it looks like it's no longer needed anyway since
+the column tile data will be in the screen.tile.data array
+
+
+xWrite routine to copy screen.tile.array data when moving instead of calling TILE.LOOKUP.SCREEN each time which does 11 index lookups. 
+ 

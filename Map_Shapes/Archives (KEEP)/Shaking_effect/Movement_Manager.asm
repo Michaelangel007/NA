@@ -1,0 +1,314 @@
+;************************INCLUDE FILE*****************************
+;(do not assemble stand-alone. For a stand-alone version of this routine see examples/rwts2)
+
+
+MOVE.NORTH
+	;**OPT** Speed memory. Maybe SMAP can get dervied from GMAP on boot. Then SMAP gets incremented along with GMAP in this routine, which for east and west is an INC/DEC rather than 16-BIT addition/subtraction. SMAP CURRENT would just get set to SMAP when it needed to be reset. 
+;UPDATE MAP POSITION	
+	LDA #$00
+	STA MOVE.CURRENT			;SOUTH
+	
+	DEX GMAP.Y					;LATITUE -1 POSITION NORTH (UP)
+
+	LDA GMAP			
+	STA OP1
+	LDA GMAP+$1
+	STA OP1+$1
+	LDA #OFFSET.UP
+	STA OP2
+	LDA #$00
+	STA OP2+$1
+	
+	JSR SBC.16					;GMAP(2) - #OFFSET.UP(1)
+	
+	LDA RESULT
+	STA GMAP
+	LDA RESULT+$1
+	STA GMAP+$1
+	
+	;UPDATE SMAP/SMAP.CURRENT
+	LDA GMAP					;LOAD TILE_ID OF CURRENT MAP POSITION (CENTER/PLAYER TILE)
+	STA OP1
+	LDA GMAP+$1
+	STA OP1+$1
+	
+	LDA #OFFSET.SCREEN			;CALCULATE TILE_ID OF TILE IN UPPER LEFT CORNER OF SCREEN
+	STA OP2
+	LDA /OFFSET.SCREEN
+	STA OP2+$1
+	
+	JSR SBC.16					;GMAP(2) - SCREEN.OFFSET.LO/HO (2)
+			
+	LDA RESULT					;SAVE TILE_ID OF UPPER LEFT SCREEN TILE
+	STA SMAP
+	STA SMAP.CURRENT
+	LDA RESULT+$1
+	STA SMAP+$1
+	STA SMAP.CURRENT+$1
+	
+	
+	
+	;FUTURE: LOGIC FOR REACHING MAP EDGE...EITHER STOP PLAYER FROM DOING SO, TRIGGER AN EVENT OR IMPLEMENT 
+	;LOGIC FOR A ROUND WORLD.
+	;
+	;IDEA: fill the edges of the map with at least 1/2 screen width of tiles of the same type as are on the
+	;		opposite edge. then it doesn't really matter if the array calcualtions are skewed a bit.
+	;		It seams like this is what U4/U5 did, but then again, it seems like seas creature and pirate ship
+	;		movement would get thrown off.
+	
+.NOFLIP
+		;**OPT** Speed. Instead of calling TILE.LOOKUP.SCREEN, which uses 11 indexed lookups, maybe create a routine to copy the values up/down 1 row in screen.tile.data. This means there is only 1 indexed lookup. 
+;	JSR TILE.LOOKUP.SCREEN
+
+
+	LDY #$5D				;REMOVE PLAYER ICON SO IT DOESN'T GET DUPLICATED BY SCROLL
+	JSR DRAW.TILE.SINGLE
+
+	JSR SCROLL.ROWS
+	JSR DARKNESS.REVIEW				;UPDATE THE HIDDEN (DARKNESS) TILES ON THE SCREEN BASED ON THE TILE_TYPE VALUES IN SCREEN.TILE.DATA 
+	
+	LDX #$00
+	JSR DRAW.ROW.SINGLE
+	
+	LDY #$6E				;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED
+	JSR DRAW.TILE.SINGLE
+
+	JSR DRAW.TILE.PLAYER
+	JSR FLIP.PAGE
+	
+	RTS
+	
+MOVE.SOUTH
+
+;UPDATE MAP POSITION	
+	LDA #$01
+	STA MOVE.CURRENT			;SOUTH
+	
+	INC GMAP.Y					;LATITUE +1 POSITION SOUTH (DOWN)
+
+	LDA GMAP			
+	STA OP1
+	LDA GMAP+$1
+	STA OP1+$1
+	LDA #OFFSET.DOWN
+	STA OP2
+	LDA #$00
+	STA OP2+$1
+	
+	JSR ADC.16					;GMAP(2) + #OFFSET.DOWN(1)
+	
+	LDA RESULT
+	STA GMAP
+	LDA RESULT+$1
+	STA GMAP+$1
+	
+	;UPDATE SMAP/SMAP.CURRENT
+	LDA GMAP					;LOAD TILE_ID OF CURRENT MAP POSITION (CENTER/PLAYER TILE)
+	STA OP1
+	LDA GMAP+$1
+	STA OP1+$1
+	
+	LDA #OFFSET.SCREEN			;CALCULATE TILE_ID OF TILE IN UPPER LEFT CORNER OF SCREEN
+	STA OP2
+	LDA /OFFSET.SCREEN
+	STA OP2+$1
+	
+	JSR SBC.16					;GMAP(2) - SCREEN.OFFSET.LO/HO (2)
+			
+	LDA RESULT					;SAVE TILE_ID OF UPPER LEFT SCREEN TILE
+	STA SMAP
+	STA SMAP.CURRENT
+	LDA RESULT+$1
+	STA SMAP+$1
+	STA SMAP.CURRENT+$1	
+	
+	;FUTURE: LOGIC FOR REACHING MAP EDGE...EITHER STOP PLAYER FROM DOING SO, TRIGGER AN EVENT OR IMPLEMENT 
+	;LOGIC FOR A ROUND WORLD.
+	;
+	;IDEA: fill the edges of the map with at least 1/2 screen width of tiles of the same type as are on the
+	;		opposite edge. then it doesn't really matter if the array calcualtions are skewed a bit.
+	;		It seams like this is what U4/U5 did, but then again, it seems like seas creature and pirate ship
+	;		movement would get thrown off.
+	
+.NOFLIP
+;**OPT** Speed. The code for flip.page and draw.tile.player could get put in-line instead of JSR.
+;check to see where else these routines are called.
+
+;	JSR TILE.LOOKUP.SCREEN
+	
+;	JSR FLIP.PAGE
+;	LDY #$5D				;REMOVE PLAYER ICON SO IT DOESN'T GET DUPLICATED BY SCROLL
+;	JSR DRAW.TILE.SINGLE
+;	JSR FLIP.PAGE
+	
+	JSR SCROLL.ROWS
+	
+	JSR DARKNESS.REVIEW				;UPDATE THE HIDDEN (DARKNESS) TILES ON THE SCREEN BASED ON THE TILE_TYPE VALUES IN SCREEN.TILE.DATA 
+
+	
+	LDX #$0A
+	JSR DRAW.ROW.SINGLE	
+	
+	LDY #$4C				;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED
+	JSR DRAW.TILE.SINGLE
+	
+	JSR DRAW.TILE.PLAYER
+	JSR FLIP.PAGE
+	;JSR PAGE.MIRROR
+	
+	RTS
+	
+MOVE.EAST
+
+;UPDATE MAP POSITION	
+	LDA #$02
+	STA MOVE.CURRENT				;EAST
+	
+	INC GMAP.X					;LONGITUTE +1 POSITION EAST (RIGHT)
+	INC GMAP
+	BNE .NOFLIP
+	INC GMAP+$1
+
+.NOFLIP	
+	;UPDATE SMAP/SMAP.CURRENT
+	LDA GMAP					;LOAD TILE_ID OF CURRENT MAP POSITION (CENTER/PLAYER TILE)
+	STA OP1
+	LDA GMAP+$1
+	STA OP1+$1
+	
+	LDA #OFFSET.SCREEN			;CALCULATE TILE_ID OF TILE IN UPPER LEFT CORNER OF SCREEN
+	STA OP2
+	LDA /OFFSET.SCREEN
+	STA OP2+$1
+	
+	JSR SBC.16					;GMAP(2) - SCREEN.OFFSET.LO/HO (2)
+			
+	LDA RESULT					;SAVE TILE_ID OF UPPER LEFT SCREEN TILE
+	STA SMAP
+	STA SMAP.CURRENT
+	LDA RESULT+$1
+	STA SMAP+$1
+	STA SMAP.CURRENT+$1
+
+	
+	;FUTURE: LOGIC FOR REACHING MAP EDGE...EITHER STOP PLAYER FROM DOING SO, TRIGGER AN EVENT OR IMPLEMENT 
+	;LOGIC FOR A ROUND WORLD.
+	;
+	;IDEA: fill the edges of the map with at least 1/2 screen width of tiles of the same type as are on the
+	;		opposite edge. then it doesn't really matter if the array calcualtions are skewed a bit.
+	;		It seams like this is what U4/U5 did, but then again, it seems like seas creature and pirate ship
+	;		movement would get thrown off.
+	
+	
+
+
+;	JSR TILE.LOOKUP.SCREEN
+	LDY #$5D				;REMOVE PLAYER ICON SO IT DOESN'T GET DUPLICATED BY SCROLL
+	JSR DRAW.TILE.SINGLE
+
+	JSR SCROLL.COLUMNS
+	JSR DARKNESS.REVIEW		;UPDATE THE HIDDEN (DARKNESS) TILES ON THE SCREEN BASED ON THE TILE_TYPE VALUES IN SCREEN.TILE.DATA 
+
+	LDX #$11				;SPECIFY 1ST COLUMN FOR DRAW ROUTINE
+	JSR DRAW.COLUMN.SINGLE
+	
+	LDY #$5C				;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED
+	JSR DRAW.TILE.SINGLE
+
+	JSR DRAW.TILE.PLAYER
+	JSR FLIP.PAGE
+
+	RTS
+	
+MOVE.WEST
+;UPDATE MAP POSITION
+	LDA #$03
+	STA MOVE.CURRENT				;WEST
+	
+	DEC GMAP.X					;LONGITUTE -1 POSITION WEST (LEFT)
+	DEC GMAP
+	BNE .NOFLIP
+	DEC GMAP+$1
+.NOFLIP
+	
+	;UPDATE SMAP/SMAP.CURRENT
+	LDA GMAP					;LOAD TILE_ID OF CURRENT MAP POSITION (CENTER/PLAYER TILE)
+	STA OP1
+	LDA GMAP+$1
+	STA OP1+$1
+	
+	LDA #OFFSET.SCREEN			;CALCULATE TILE_ID OF TILE IN UPPER LEFT CORNER OF SCREEN
+	STA OP2
+	LDA /OFFSET.SCREEN
+	STA OP2+$1
+	
+	JSR SBC.16					;GMAP(2) - SCREEN.OFFSET.LO/HO (2)
+			
+	LDA RESULT					;SAVE TILE_ID OF UPPER LEFT SCREEN TILE
+	STA SMAP
+	STA SMAP.CURRENT
+	LDA RESULT+$1
+	STA SMAP+$1
+	STA SMAP.CURRENT+$1
+	
+	;FUTURE: LOGIC FOR REACHING MAP EDGE...EITHER STOP PLAYER FROM DOING SO, TRIGGER AN EVENT OR IMPLEMENT 
+	;LOGIC FOR A ROUND WORLD.
+	;
+	;IDEA: fill the edges of the map with at least 1/2 screen width of tiles of the same type as are on the
+	;		opposite edge. then it doesn't really matter if the array calcualtions are skewed a bit.
+	;		It seams like this is what U4/U5 did, but then again, it seems like seas creature and pirate ship
+	;		movement would get thrown off.
+	
+
+	LDY #$5D				;REMOVE PLAYER ICON SO IT DOESN'T GET DUPLICATED BY SCROLL
+	JSR DRAW.TILE.SINGLE
+		
+	JSR SCROLL.COLUMNS
+			;		STA TEMP
+;			LDA GMAP
+;			CMP #$54
+;			BNE .TEMP
+			;CPY #$88
+			;BNE .TEMP
+;			JSR FLIP.PAGE
+;			JSR KEYIN
+;			LDA TEXT
+;			LDA PAGE1
+;			BRK
+;.TEMP
+		
+	JSR DARKNESS.REVIEW				;UPDATE THE HIDDEN (DARKNESS) TILES ON THE SCREEN BASED ON THE TILE_TYPE VALUES IN SCREEN.TILE.DATA 
+
+	;		STA TEMP
+;			LDA GMAP
+	;		CMP #$54
+;			BNE .TEMP
+			;CPY #$88
+			;BNE .TEMP
+;			JSR FLIP.PAGE
+;			JSR STOP
+			;LDA TEXT
+			;LDA PAGE1
+;			BRK
+;.TEMP
+	LDX #$00				;SPECIFY 1ST COLUMN FOR DRAW ROUTINE
+	JSR DRAW.COLUMN.SINGLE
+	
+	LDY #$5E				;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED
+	JSR DRAW.TILE.SINGLE
+
+	JSR DRAW.TILE.PLAYER
+	JSR FLIP.PAGE
+
+.MAP_EDGE
+.BLOCKED
+	;BLOCKED (ONCE IMPLEMENTED) AND REACHING MAP EDGE CURRENTLY WILL FOR AWHILE PRODUCE THE SAME RESULT
+	
+.EXIT
+
+	RTS
+	
+
+;=================DEFINE VARIABLES===============
+
+MOVE.CURRENT .BS		$1		;CONTAINS THE DIRECTION OF THE CURRENT MOVE

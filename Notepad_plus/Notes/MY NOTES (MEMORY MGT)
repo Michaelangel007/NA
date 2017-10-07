@@ -1,0 +1,235 @@
+
+MEMORY RANGES USEABLE FOR PROGRAMS
+	*See below, "WHAT MEMORY RANGES CAN BE USED FOR PROGRAMS?"
+
+MEMORY MAP (Main)
+			$0300		controller.hrcg, ends at $038D
+			$0C00		Hi-RES Character set, should end at $0EFF (there is a hook to this location in controller_hcgs loaded to $300 by the master disk image
+			$0F04		MY.RWTS, should end around $108E, if RWBUFF is removed. $118E with it in. I'm going to reserve 3 pages of space, up to $11FF, figuring it won't hurt to have a little extra just in case I need some else for the bootloader. 
+			$1200-1FFF 	variables and hex tables (some, not all)	
+			$6000-9FFF 	Main Program (Game_loop.asm, Graphics_engine, all the associated INCLUDES) 
+			$A000-BFFF 	*Swap Space (the load location for modules such as combat, npc conversation, view/manage inventory, merchant transactions)
+MEMORY MAP (Bank Switched, main)
+			$D000-DFFF 	Main Program ($D000 bank 1)
+			$D000-FFFF	Main Program ($D000 bank 2)
+
+*SWAP SPACE MAP
+			$A000-A0FF	MAP_OBJECTS.MOB		
+			$A100-A1FF	MAP_OBJECTS.GENERAL
+			$A200-A2FF	MAP_OBJECTS.NPC
+			$A300-??	NPC.SCHEDULE
+			$B000-B8FF	RZONE.ARRAY data is loaded here from disk temporarily when a new location is entered. Once loaded various zone tools subroutines are used to reorder and copy the data into the permenant RZONE.ARRAY memory location. 
+			
+MEMORY MAP (Aux)
+	$0200-2200(est)		Compressed World Map Zone data. After seeing the compression ratio, guess at a total allocation and fill in the ?????, maybe set an error trap if the compression routine goes over
+	$4900-58FF			AUX Swap space
+	$5900-5BFF			Hi-RES Character set
+	$5C00-6BFF			Pathfinder: Saved NPC Paths
+	$6C00-6FFF			Sunrise_Sunset Stencils
+	$7000-7FFF 			Tile (regular) shape tables. 128 tiles
+	$8000-BFFF 			Tile (animated) shape tables. 128 tiles, 4 frames. 
+	
+	
+MEMORY DEPENDANCIES
+
+ROM ROUTINES (Can't be run by programs in B/S memory)	
+	$C311 (aux move) Graphics_Engine.ASM: DRAW.ROW, DRAW.COLUMN, DRAW.TILE.SINGLE
+	$FDED (COUT) 	 Graphics_Engine.ASM: DRAW.SCREEN (for HRCG)*
+	
+
+*I wrote a routine (MY.COUT) that can be used by programs in B/S memory to do HRCG.
+	
+		
+ZERO PAGE USAGE
+
+*LOCAL: does the routine use the variable only during the routine, or does the routine need the contents of the variable preserved for furter iterations (I think GMAP.ADDRESS.INDEX is one of those)
+		Note: it may be a problem for a routine and a subroutine it calls to both use the same zero page variabel
+		even if they do so locally 
+		ZONE_TOOLS.OUTPUT
+		
+*RANGES IN USE: $EA - $EE, $FA - $FD
+
+ADDRESS	LOCAL?*	VARIABLE
+													ROUTINE
+$E0/$E1			COPY.FROM_END						memory.copy
+$E0/$E1			HRCG.TABLE.OFFSET					COUT
+
+$EA/$EB Y 		RZONE.ARRAY.INDEX.SCROLL_FROM 		Zone_Functions						
+$EA/$EB			LINE.BASE.ADDR1						Routines_Graphics
+$EA/$EB	Y		UNCOMPRESS.ZONE_INPUT 				Zone_Functions, ZONE_TOOLS.INPUT	
+$EA/$EB			BUBBLE.SORT.LIST.POINTER			.Sort.Priority.Que (NPC.PATHFINDER)
+$EA/$EB	Y		NPC.PATHFINDER.CLOSED_SET.POINTER	NPC.PATHFINDER
+$EA/$EB Y		NPC.SCHEDULE.POINTER				NPC.SCHEDULER & NPC.PATHGENERATOR
+$EA/$EB			NPC.PATHFINDER.CLOSED_SET.POINTER	NPC.PATHFINDER
+
+$EB/$EC Y		RZONE.ARRAY.INDEX.SCROLL_TO 		Zone_Functions
+$EB/$EC			IOB									MY.RWTS
+$EB/$EC			IOB									MY.RWTS
+$EB/$EC	Y		FILL.START							Routines_General
+
+
+$EC/$ED			LINE.BASE.ADDR2						Routines_Graphics
+$EC/$ED	Y		NPC.PATHFINDER.SEARCH.PATHS.POINTER .Path.Open (NPC.PATHFINDER)
+$EC/$ED	Y		NPC.PATHFINDER.FINAL.PATH.POINTER	SAVE.PATH.AUX_MEMORY (NPC.PATHGENERATOR)
+
+$ED/$EE			DEST.ADDR 							MY.RWTS
+$ED/$EE y		SWAP_SPACE.MAIN_MEMORY.POINTER		load.new.map, maybe others
+
+
+$FA/$FB			SHAPE								Graphics_Engine
+$FA/$FB 		RW.BUFF.VECTOR 						MY.RWTS (I think my plan was to eliminate this, see sticky note on monitor)
+
+$FA/$FB			J									.SORT.PRIORITY_QUE (NPC.PATHFINDER)
+$FA/$FB			COPYTO								Routines_Graphics, PAGE.MIRROR (not currently in use)
+$FA/$FB	Y		COPY.TO								Routines_General, MEMORY.COPY
+							Routines_General, MEMORY.COPY
+$FA/$FB	Y		MOB.MT.ADJACENT_TILES.POINTER		Map_object_management.asm
+$FA/$FB	Y 		TRANSPORT.MT.ADJACENT_TILES.PTR		Movement_manager.asm
+
+$FC/$FD	Y		RZONE.ARRAY.INDEX_ROW 				Zone_Functions (ZONE_TOOLS.RCOPY) Tile_Functions2 (TILE.LOOKUP.SCREEN), LOAD.NEW.MAP (LOAD.COPY)*WHICH ALSO CALLS RWTS
+$FC/$FD	Y		PRINT.STR			 				Routines_Text
+$FC/$FD	Y		NPC.PATHFINDER.SEARCH.PATHS.POINTER2 .Path.Open (NPC.PATHFINDER)
+$FC/$FD			COPYFROM							Routines_Graphics, PAGE.MIRROR (not currently in use)
+$FC/$FD	Y		COPY.TO		
+$FC/$FD			GMAP.ADDRESS.INDEX					tile_functions	
+$FC/$FD			j_plus_h							.SORT.PRIORITY_QUE (NPC.PATHFINDER)
+
+
+WHAT MEMORY RANGES CAN BE USED FOR PROGRAMS?
+
+	MAIN MEMORY: DOS 3.3 DISK IMAGE
+		Developed code run on a DOS 3.3 disk image should be 
+		placed between $400 and $93A7.
+		
+		IF TEXT/LO-RES ONLY IN USE THEN LO BOUNDRY IS $C00.
+		IF HI-RES IS IN USE THEN LO BOUNDRY IS $6000, + $C00 = $1FFF. I'm not sure if HRCG uses the text/lo-res area from $400-BFF
+		
+		$C00 = $1FFF: note I've had trouble running code here, when offloading subroutines. May
+					be worth trying if writing stand-alone code where I can observe results as I go.
+					I was successful in placing variables and hex tables (.HS) (including the HRCG character set) in this range 
+		
+		
+		
+		I tested actual code that filled from $6000 up to $93A7. I shifted it one page higher 
+		(to $94A7) and it didn't work. I suspect that it's probably okay to go up to
+		$93FF. I'm not sure why it doesn't seem to work to go up to $95FF since DOS
+		begins at $9600. All this said, I did notice some strange results when hard coding arrays above $9100,
+		so the true upper limit is really unclear. 
+		
+		In any event, if more main memory is needed then a boot loader is required.
+
+	MAIN MEMORY: BOOTLOADER
+		BootLoader. I succesfully used from $6000 - $B700 for program code. See bootloader folder for docs that have 
+		more info on how to possibly use up to $B7B4. 
+
+	BANK SWITCHED (BS) MEMORY
+		OVERVIEW
+		Bank Switched memory is also an option. Programs can easily be run there but
+		cannot access the ROM routines unless the ROM routine is copied into main memory (below $BFFF)
+		AUX memory is also a good option for storing large amounts of data, which its practical to
+		copy to main memory as needed (a memory swap setup). Theoretically programs can be run in 
+		AUX memory, but I have never done it. It sounds much more complicated than running programs
+		in bank switched memory (which I did do successfully with a large multi super page program)
+		
+		My testing was done on a DOS 3.3 disk image. Haven't tested yet in a boot loader environment, but 
+		I don't expect any problems. 
+		
+		DETAILS
+		In practice I found that BS memory is very effective for expanding the memory available for a program. 
+		
+		The approach I took was to create a BS_ROUTINES.ASM files which was an INCLUDE to the main program. Each module
+		I wanted to run in BS memory was added as nested include to BS_ROUTINES.ASM. BS_ROUTINES was setup with
+		a .ORG of $D0004 (the extra 4 bytes are for the disk image file structure overhead ) and a target file for 
+		of BS_ROUTINES.BIN.
+		BS_ROUTINES.BIN was added to the disk image and loaded via RWTS by LOADER.BIN in my main program. 
+		I setup BS_ROUTINES with a .NO to $FFFF at the end of the file so it would be a fixed size, the max possible in B.S memory.
+		
+		I took the approach of having BS memory enabled (ROM disabled) by default and enabling ROM anytime a ROM routine was needed, which was rare.
+		This way I could pretty much go about development normally and the fact that some routines were stored
+		in B.S memory didn't really change my process much. 
+		
+		Notable changes were these:
+			Enabled BS memory just before the call to MY.RWTS to load BS_ROUTINES.ASM into memory. This is
+			done via two LDA $C083 statements.
+
+			Disable BS memory (enable ROM) via LDA $C082 just before calling a ROM routine.
+			Disable BS memory just before the BRK in each error trap since the Apple monitor is a ROM routine. 
+			Standard practice for inserting a break becomes this:
+				LDA $C051 ; or LDA TEXT if label is setup
+				LDA $C082
+				BRK
+			It is important to put the LDA $C051 (TEXT) just befoe the LDA $C082
+			because as soon as LDA $C082 is executed, the program pointer will no longer have access
+			to the code in BS memory and instead will executed whatever is in ROM at that address. Thus,
+			Turning on text mode (LDA $C051) has to happen before BS memory is disabled.
+			This break sequence works fine for routines in main memory, so I just started always using it to get in the habit.
+			
+			Theoretically the above approach could cause a problem if the code in ROM at the address after the
+			LDA $C082 modifies a main memory address which is being observed for troubleshooting
+			before a BRK in ROM is encountered. Technically the BRK above does nothing. 
+			
+			If this becomes an issue, a STOP routine could be stored in main memory which executes the above commands, and
+			the process for inserting a break becomes to JMP STOP. 
+			
+		
+		
+	AUXILLERY MEMORY (AUX)
+		I've successfully tested $0200 - $BFFF for use as data storage (i.e not running programs, which
+		while theorectically possible looks very complicated from the manuals like "Inside the Apple IIe")
+
+		The testing was on a DOS 3.3. image. I've used aux $7000-$BFFF for data storage on a bootloader image as well. 
+
+		AUX_MOVE Notes
+			The zero page memory addresses cannot be incremented with INC
+			The zero page memory addresses are not persistent. 
+			
+			Due to the above, when using AUX_MOVE in a loop, setup variables
+			which will be incremented by the loop. And, set the values for
+			AUX_START, AUX_END, and AUX_DEST each iteration of the loop (usually
+			from the variables which were incremented, but sometimes some of the values
+			are static...but even if static, set them each iteration due to the lack
+			of persistance).
+			
+			
+
+
+
+======OLD NOTES=====
+
+	
+	
+MEMORY ESTIMATES
+
+SHAPE TABLES
+	TEXT CHARACTERS
+		!40 7x8 characters (upper case A-Z, 0-9, a few special characters liek !, ?) * 8 bytes per character = !320 bytes, $0140
+			1/2 tile depth/width. 
+			
+	TILE SHAPES
+		!128 shapes, !32 bytes per tile = $1000
+	
+	SURFACE MAP
+		64x64 tiles = $1000 (uncompressed), $0400
+		128x128 tiles = $4000 (uncompressed), $1000, 4:1 compression estimate
+		256x256 tiles = $8000 (uncompressed), $4000, 4:1 compression estimate
+		
+
+		
+		
+TOTAL
+	Text					$0140
+	Tile Shapes				$1000 (uncompressed, not sure if it's possible to compress)
+	Surface Map (64x64)		$0400 (4:1 compression)
+    Graphics tile engine	   ??
+	Game Loop				   ??
+	Inventory Management	   ??
+	MY.RWTS					   ??
+	Other programs			   ??
+		
+					TOTAL	$1540 (without ??)
+					
+
+Total memory available for programs: ~$8500 (assumes, DOS RWTS is loaded but no other part of DOS, assumes 
+	low-res graphics and test screen is overwritten, assumes Hi-Res Page 1 & 2 is used  )					
+	
+at some point describe the blocks of memory here...I think it's roughly $6000 - $B6FFF, and $400 - $19FF

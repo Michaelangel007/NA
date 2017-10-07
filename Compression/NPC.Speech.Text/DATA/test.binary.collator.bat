@@ -1,0 +1,1 @@
+CALL binary.collator.exe data.tlk.m1.00.BIN

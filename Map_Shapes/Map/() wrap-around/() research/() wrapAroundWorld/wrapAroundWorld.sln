@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{2272FB12-AC45-420A-868F-0DA3061C2C3E}") = "wrapAroundWorld", "wrapAroundWorld.amproj", "{9FA3AC7D-B845-4F1B-8FD9-4A6F2116B971}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AnyCPU = Debug|AnyCPU
+		Release|AnyCPU = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9FA3AC7D-B845-4F1B-8FD9-4A6F2116B971}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
+		{9FA3AC7D-B845-4F1B-8FD9-4A6F2116B971}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
+		{9FA3AC7D-B845-4F1B-8FD9-4A6F2116B971}.Release|AnyCPU.ActiveCfg = Release|AnyCPU
+		{9FA3AC7D-B845-4F1B-8FD9-4A6F2116B971}.Release|AnyCPU.Build.0 = Release|AnyCPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

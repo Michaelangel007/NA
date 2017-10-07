@@ -1,0 +1,50 @@
+Source file: c:\my_code\includes_libs\loader.asm
+
+*** Warning: Had to close target file because of new org
+I     4                                 .OR             $1A04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\data.shapes.surface.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $3F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\data.other.sunrise_sunset.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $3F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\data.map.surface.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $3F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\custom_boot2.asm
+
+*** Warning: Had to close target file because of new org
+I     4                                 .OR             $0F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\data.shapes.building.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $3F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\data.map.undermap_lv1.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $6F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\data.map.l1.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $1F04                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\offloaded_variables.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $1204                   **Always put before .TF directive and never use again in program
+
+Source file: c:\my_code\includes_libs\bs_routines.asm
+
+*** Warning: Had to close target file because of new org
+I     3                                 .OR             $D004                   **Always put before .TF directive and never use again in program
+

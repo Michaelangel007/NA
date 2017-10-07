@@ -1,0 +1,200 @@
+http://sinisterdesign.net/12-ways-to-improve-turn-based-rpg-combat-systems/
+
+
+===COMBAT ALWAYS IN MEMORY -NOTES=====
+*To help facilitate keeping combat module in memory permanently 
+(in the AUX BSR) Instead of storing mob.special char sheet in 
+aux BSR, store them in main memory swap, which frees up 
+4 pages of AUX BSR.  Then swap out those 4 pages when inventory 
+or spell module is loaded (assuming that everything work out as 
+expected that the weapon shapes and darkness module no longer 
+require disk loads).
+
+*Also see notes on clipboard pad, it's the 3rd page from the top
+of the pad, titled "Combat Speed Problem Analysis"
+
+*Consider that if I can hold inventory and merchant transactions
+to $9600-$BFFF instead of starting at $9000, then if combat
+were stored permenantly in AUX BSR, then 
+$2900-$2EFF		AUX Swap space expansion?? ($600 bytes)
+$2F00-58FF			AUX Swap space ($2A00 bytes)
+	
+
+*Before choosing AUX BSR as the permenant location for combat,
+consider if any routines in main BSR need to be accessed and if 
+so if bridges can be made. Also, with at least PC
+character sheet data in AUX BSR bank 1, and if combat ends up in
+AUX BSR bank2, consider if any bridges are needed there. The existing code
+for character sheets might already handle everythign needed. 
+	
+	
+-Options to free up Combat module memory	
+    *in addition to the **OPT** notes in the combat module, look at **OPT** notes in stats0 (SWAP.ROUTINES.Combat.stats_summary.ASM) 
+	*See "OVERHAUL **OPT** PLAN USING CONTROL TABLE" in stats0 for a way to possible reduce the size of stats0. It is described as borderline as to whether there would be material savings
+		but it may be worth trying if I'm out of good options. 
+	*See  **OPT** note in stats0 ".HEALTH_STATUS" about making the health status and gender codes sequential so a lookup table can be used. This would be a savings
+		even if if I don't do the overhaul plan. 
+		
+	*Freeing up aux main memory will help find a new home for the weapon shape tables which in turn helps free up aux BSR for the combat module
+		*changing the day/night floor/street tile switch to a tile swamp instead of a shape table swap may help this. And it needs to be
+		 done anyway to support the extra day/night tiles Bill did in the castle and ruined castle
+		*The character set takes up $300 bytes in aux memory. Consider whether the entire character set is needed.
+			Review ascii table. There might be a bunch of unnecessary stuff in the lower or upper ends of the range. 
+
+	
+===SCROLL TEXT===
+
+*defender distaction indicator (engaged with other defender, not engaged, enaged with defender)
+
+*critical hit!, critical hit blocked! (use critical hit flag)
+*you dodged!, mob dodged (use flag from to-hit routine)
+
+'------ORIGINAL NOTES
+Mike: have melee attacks and range attacks do different damage for mobs
+
+
+===TEXT===
+
+*Show combat math
+*Have info screen on mobs. Shows attack/defense stats on the player attacking the mob and mob attacking the player (like melee vs ragne attack damage)
+
+
+==Issues==
+
+*MTT can only move when onscreeen
+	The options I can think of are:
+		  a) The multi-tile mob won't be seen by the player until the player find it, and we just decide that is ok
+		 b) We automatically have the multi-tile mobs start on the same screen as the player, even if the battlefield is actually much larger. There could be a quick exit key for the player to use when all mobs are defeated to leave the battlefield without having to walk to the edge
+	(Mike: doesn't think it's a show stopper, ask him specifically how he'd approach this)
+
+*The screen will need to recenter on each player
+	*delay
+	*disorienting?
+	
+==Features==
+
+*Auto-targeting of the cross hairs
+
+
+==OTHER
+
+*missile weapons have ranges. If the next target in the cross hairs routine is 
+beyond range then skip to next
+
+==SPELL IDEAS / SPECIAL EFFECTS==
+
+*throwing knife shape (or some other shape) opelts mob (or mobs) from a start position of the upper left corner of screen (or some other location). 
+	Looked cool in a ranged weapon blooper. Could be called Ed's Axe of Anguish or something
+
+*Close combat. Telports all players or all mobs the requisite distance so that the closest player
+and closest mob are in melee range. Wrinkle: battle fields with collisions between players and mobs. 
+Maybe move each player individually, assessing collisions along the way and stop on collision. 
+
+*press key to abort projectile launch (at any time during launch), it then skips to hit/miss/impact
+
+*generate Bill's storm. for sure does damange to anything touching. would be cool if it shot lighting to any target within X radius (probably need a routine that returns the MO record #s of any mobs within X radius of a given tile, for this and other things)
+   and/or generate a bunch of storms that move horizontally accross the screen (top half). So mobs get periodically zapped until/if they can make there way to the lower half of the screen. This method seems workable even if the damage is only done when the storm moves onto the mob.
+*hurricane wind
+another spell idea. some kind of hurricane wind spell. it blows a random #of mobs off the screen, killing them. So the affected mobs would, at the same time, rapidly move backwards until off the screen. or maybe even move randomly up/left/right until off the screen. mobs flying everywhere!
+Need to consider what happens if the blown back mobs hits an unaffected mob. 
+
+*Mike suggested an earth/fire/wind/water thing. we've got wind and fire. .maybe a landslide for earth, dump a bunch or rock tiles onto the screen, squishing the mobs. now just need one for water
+
+
+*triple cross bow
+
+*armageddon by the cows
+
+
+*holy handgrenade (or something). thrown on one turn, explodes on next turn. ideally mobs flee from it until it explodes. 
+*creeping vine or fire thats spreads a bit each turn. 
+
+-Fireball Notes
+
+*maybe the fire explosion from fireballs on some
+spells should stay on screen for a few terms or for some spells
+permenantly.
+
+*cow fired as an animated non-angled projectile
+
+*Lightning sphere
+
+*Lightning bomb. Ligtning sphere or bolt that triggers an explosion like the fireball but the explosion is comprised of lightning sphere tiles. 
+
+*Powerful lightning bolt/fireball (animated, non-angle) that can only be fired vertically or horizontally, and everything in that column/row is hit. 
+    
+*Smite: lightning bolt (animated, non-angled) fires from top of screen (so it's always verticle) to smite the target. 
+    -maybe have storm cloud appear and source the lightning from the cloud
+
+
+*Maybe fireball size increases with level, or several spells each with different size
+
+
+*sound spells: like some kind of banshee screech. could just be a high pitched sound, but consider what our standard cast spell sound will be, assuming we have one. 
+
+*magic missle (small white ball?)
+*(DONE) flame arrow (orange version of cross bow bolt)
+
+*death beam (non-targeted, directional, hits everthing in the row or column that it is pointed in,
+shape is an all black tile). Maybe this could also be done with fire and lightning. 
+
+*(DONE) rapid fire multiple lightning bolts (with trail?)
+
+-Water Spels
+	*water projectile (I'm thinking with trail) hits target and explodes like a fireball. Not sure how damage works. 
+	*water wave. Direction based. all tiles in direction spell is cast, possible in a tile-edged cone shape, becomes water. Not sure how damage would work. 
+
+*summoning spells
+
+-non-damage spells
+
+*teleport player and/or mob
+
+*some kind of blast
+knocks a single mob back (x-y) tiles, doing some damage per tile the mob is blown backward. 
+Need to consider what happens if the blown back mobs hits an unaffected mob. 
+
+
+-spell related artifacts
+
+*resist fire
+*resist lightning
+*resist death magic
+
+
+====FINAL EFFECT SPELL LIST===
+
+
+(done) fireball -no trail	
+
+lightning -no trail, (if speeding it up looks good)
+(done) lightning -trail	
+
+(done) fire lightning -trail	
+		;maybe call this infernal blast, or something where lightning isn't in the word
+		
+mass death
+
+armagedon by the cows
+
+summon demon lord
+
+
+-Fleeing
+
+I never liked how fleeing from combat in U4/U5 resulted in the mob disappearing from the surface map, making it possible to avoid battle with basically everyone.
+
+What do you think of making it so that fleeing successfully from battle results in the player back on the map next to the mob, or maybe the mob is a couple tiles away, with it then being the players turn?
+
+If the player can get away on the surface/town/undermap from there, fine. Sometimes, having a few more turns could make the difference and the player gets away. Sometimes the player may be cornered and so be it.
+
+(Mike agrees)
+
+
+
+
+=====TECHNICAL NOTES====
+
+The chapter about color shapes on color backgrounds starts at p. 276. P.281 talks a bit about color backgrounds. 
+
+Also take a look at Michael Porehskus suggestion about EOR for sprites, on the original pre-alpha posted to google groups.

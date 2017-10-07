@@ -1,0 +1,66 @@
+
+
+BIT_SHIFT.SHAPE_RIGHT.ENTRANCE
+;=====================SUBROUTINE DOCUMENTATION====================================
+;
+;See COMBAT.FIRE.PROJECTILE for documentation on the concept of
+;off tile grid shape movement.  
+;
+;-OVERVIEW
+;This routine shifts the bits in the shape table to create horizontal hi-res movement. The hi-level aspects of the 
+;concept are documented in COMBAT.FIRE.PROJECTILE.
+;
+;The following is a low level outline of how this routine shift bits between bytes
+;and allows the color bit setting of the shape to override the background. 
+;
+;The shape table consists of 4 bytes:
+;	
+;Byte0 (buffer), Byte1 (shape data), Byte2 (shape data), Byte3 (buffer)
+;
+;The background buffer bytes do not start with any shape data. They exist because 
+;as the 2 byte shape is bit shifted, in needs another byte in the direction of movement
+;for the bits to overflow into. 
+;
+;Accordingly, when bit shifting occurs it is only applied to 3 of the 4 bytes. 
+;
+;If the shape is moving right: shift bits in bytes 1,2,3
+;If the shape is moving left: shift bits in bytes 2,1,0
+;
+;Additionally, the direction of the bit shift from a binary perspective is the opposite of the direction of shape
+;movement. For example, the opcode ASL shifts bits left and will result in horizontal movement to the right on the raster. 
+;The opcode LSR shifts bits right and will result in horizontal movement to the left on the raster. 
+;
+;
+;-Outline of the bit shifting method in this routine
+;
+;*4 byte shape table records, with the shape data in byte 1 and byte 2. Each record represents one line of the shape. Each shape is !16 lines deep. 
+;
+;*2 sets of shape tables, ORA mask and AND mask for background blending. For color shapes the background mask is set to 0, to mask-out the background, and avoid most color problems. I’m working with white and color shapes. The white shapes (i.e. arrows are narrow) and the colors shapes (i.e. fireballs) fill most of the space.  
+;
+;*Shape tables are organized with all the AND masks for each shape line (bytes 0-$3F) followed by the ORA masks for each shape line (bytes $40-$7F)
+;
+;*Depending on the direction of shape movement, LSR or ASL used to shift the bits. 
+;
+;*bit shift left only: apply shift to bytes 1,2,3 to shift the shape right on the video screen. Ignore byte 0 as its AND/ORA masks by default are setup to fully display the background unless shape is shifted into it. 
+;
+;*bit shift right only: apply shift to bytes 2,1,0 to shift the shape left on the video screen. Ignore byte 3 as its AND/ORA masks by default are setup to fully display the background unless shape is shifted into it. 
+;
+;*transfer bits between the bytes by testing the value of bit 7 (bit shift left) or carry flag (bit shift right), and then masking in value into adjacent byte. 
+;
+;*In byte 1,2, using masks, restore bit7 (color) to it’s original value by testing the carry flag (bit shift left) or bit 6 (bit shift right). 
+;
+;*bit shift left only: mask the color bit value of byte 2 into byte 3 so that the color of the shape is retained as the shape moves into byte 3. 
+;
+;byte 1, bit0 is set to 0 after the ASL. If the current shape table record is an AND mask then mask-in this bit to 1. This way the background will always displayed “behind” the shape as it moves left on the video screen. 
+;
+;*bit shift right only: mask the color bit value of byte 1 into byte 0 so that the color of the shape is retained as the shape moves into byte0. 
+;
+;byte 2, bit7 get’s set to 0 after the LSR. If the current shape table record is an AND mask then mask-in this bit to 1. This way the background will always displayed “behind” the shape as it moves right on video screen. 
+;
+;
+;*Outside of this routine, a master shape table refreshes the bit shifted shape tables every 6 bits shifted. At this time the starting screen byte for the shape is incremented +1. And, the 
+;refreshed shape table is shifted either 1 bit left or right (the opposite of the direction of movement on screen) so that color shape data stays in the correct bit positions. 
+;
+;The refresh occurs after +6 bits because at that point, the shape is in the same position as it is after a shape table refresh and a increment of one screen byte.
+;
+;=================================================================================

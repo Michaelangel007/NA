@@ -1,0 +1,140 @@
+=====TERM DEFINITIONS=====
+
+Obscuring tile: a tile that creates darkness (i.e. wall, mountain, etc)
+
+
+====New Variables/Arrays====
+TILE.SHAPES.HO		 .BS $100	; reserve space for !256bytes/!256tiles
+TILE.SHAPES.LO		 .BS $100	; reserve space for !256bytes/!256tiles
+SHAPE.POINTER (zero page variable)
+SHAPE.HOPPER1	.BS $20  	;!32 BYTES
+
+
+
+
+******IMPORTANT NOTE:
+
+I realized that having more than 256 tiles is a problem because it would require 16-bit tile type IDs. So I'm thinking 128 regular tile and 128 animation tiles. I think though that I can
+have a separate tiles set for dungerons and towns/castles, each of which could be up to 256 (memory permitting), if I setup a super page in AUX for the active tile set. Then upon
+entry, the other tile set could be copied to the active tile set addresses. 
+
+Also, for organizing tiles I'm thinking animation tiles will use tile type IDs > !127 so that an animation tile type can be detected by a > !127 test. And, I'm thinking
+of putting impassible tiles in the lower end of the range (for example, !0-10) so that an impassible tile can be detected by a < !11 test. 
+
+
+**********
+=====POC====
+
+*foreground draw test
+	*create a simple two frame animation flag
+	*try hard wiring program, after screen draw, to draw to foreground and switch between two frames....
+
+*try using the upper memory test program to fill and copy the range described below. 
+Maybe erase part of the fill data in main memory to observe the copy back from AUX worked.
+
+
+
+
+
+
+(DONE) ====Setup Game Loop===========
+CREATE GAME_LOOP.ASM
+	Essentially move the driver portion of graphics_engine to game_loop.ASM
+
+(DONE) ====Setup Loader===========
+
+Setup Loader (in game_loop.asm, at top of source)
+		.OR $900
+		.TF loader.upper-mem.bin
+		
+		<copy routine>			;copy from $1000 to $7FFF, to AUX $5000-$BFFF
+								;!128 regular tiles * 32bytes = $1000. 
+								;!128 animated tiles * 32bytes * 6 frames =  $6000
+		.NO $1000
+		
+		.PH $6000				;aux $6000
+		<tile shape tables>
+		
+		.NO $2000
+		<animated tile shape tables>
+		.EP	;end patch
+		
+		.OR & .TF (existing game code) 
+	
+Modify Disk Image
+	hello does a BRUN of loader.upper-mem, then loads the HRCG stuff
+	BRUN T (the main game, which loads at $6300, overwriting the loader)
+	
+(DONE) ====Upgrade Tile Shape Mgt===========
+
+	DRAW.ROW, DRAW.COLUMN, DRAW.TILE.SINGLE
+		After darkness evaluation, use ACC as lookup (TAX) on TILE.SHAPES.HO/LO, 
+		save HO/LO to SHAPE.POINTER (zero page variable)
+		The animation frames exist in between the shape table address in the lookup table,
+		but those can be calcualted as an offet using ASL on ANIMATION.FRAME_STATE 
+LOOP		
+		Enable AUX
+		LDA (SHAPE.POINTER),X/Y
+		Disable AUX
+		STA SHAPE.HOPPER,X/Y (same index)
+		INCREMENT
+		CHECK STOP (32 BYTES)
+		DO LOOP
+		
+		Save SHAPE.HOPPER HO/LO to (SHAPE)/+$1.
+		
+(DONE) ====Animation Implementation===========
+
+
+**NOTE(1/1/16); is SCREEN.ANIMATION.DATA needed if all animation tiles are > 127 and we 
+can easily test for them that way? it's an 8-bit compare. 
+
+	GAME.LOOP
+		JSR ANIMATION.UPDATE
+		<existing code for movement>
+	
+	ANIMATION.UPDATE
+		Loop iterating through SCREEN.ANIMATION.DATA (elements mapped to SCREEN.TILE.DATA)
+			if current tile isn't animated, NEXT TILE
+			For animated tiles
+				load tile type
+				calculate animated shape table base address
+				LDA ANIMATION.FRAME_STATE
+				use frame state to calculAte offset to base address using ASL
+				add offset to shape table base address == shape table address
+				copy animated shape table to SHAPE.HOPPER
+				Save SHAPE.HOPPER HO/LO to (SHAPE)/+$1.
+				
+				draw tile
+					animation loop should fall through to a customized veresion of draw.tile.foreground.single
+			Next iteration
+	EXISTING ROUTINES		
+	When new tiles are loaded in new/column row draw, make sure to load the current animation frame for that tile
+
+	
+	
+NEW VARS
+ANIMATION.FRAME_CURRENT	.BS	$1		
+
+
+====Animation Improvement Ideas===========
+
+*The current implementation as described in the comments at the top of animation_manager.asm
+seems to work pretty well.
+
+The main issue is that when the player moves by holding down an arrow key, the animation
+speeds up since the delay is skipped. Not skipping the delay on keypress results in movement
+that is too slow.
+
+A solution may be to only advance the animation frame every couple moves when keypress is
+detected at the bottom of the animation loop. Ultima 3 seems to have a ratio of like 4 or 5 to
+1. I'm thinking 3 or 2 to 1 may work better. 
+
+
+If the delay itself needs to be more granular (currently there are 3 different delay
+times....1/2/3 JSR WAIT all with LDA #$FF), then the best option may be to try to 
+ramp up the LDA value in between these 3 trigger points. I can't seem to tell them difference
+between #$00 and #$FF when stoping and restarting the program in between, but it might
+make a difference if applied proporationally to the number of tiles on screen.
+
+

@@ -1,0 +1,7 @@
+These tiles are desgined to split a lava flow (like a river but with lava) into 2 lava flows.
+
+I decided that the cross hair (4 way intersection) lava flow tile could be used for this purpose as well so
+these 3 way tiles don't need to be added to a tile set unless we identify a specific scenario where we want to use them.
+
+
+the files with the "-mountain" suffix are designed for surface use. The tiles with no suffix are designed for undermap use. 

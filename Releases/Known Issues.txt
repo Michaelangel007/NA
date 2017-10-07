@@ -1,0 +1,13 @@
+
+
+Emulator: AppleWIN 1.25.04
+Config: floppy drives with "authentic speed" set
+Description: breaks at $1005 (before NOXARCH.MAIN is loaded). Per Peter this is a bug in that version of AppleWIN. 
+Resolution: Upgrade to AppleWIN 1.26.2.2
+
+Notes: see email with Peter Ferrie on 5/11/2017, subject "authentic speed" triggers break before NOXARCH.MAIN"
+
+
+Emulator: AppleWIN 1.26.22
+
+Color TV mode is recommonded. Color monitor mode looks really bad. 

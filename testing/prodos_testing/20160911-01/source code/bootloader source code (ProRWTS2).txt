@@ -1,0 +1,104 @@
+
+
+See email in gmail accounts “ProRWTS2 source”
+
+Key sections of the email are below
+
+
+> I'm guessing OPENDK.S is the source for NOX.SYSTEM, and the boot loader is
+> stored in track $0, Sector $0 on the disk image, plus some additional
+> locations? If I recall you had to do something to work around the proDOS
+> filesystem starting at around T0/S3 and we needed more room than that to
+> bootstrap ProRWTS into memory.
+
+Yes, OPENDSK.S is the source for NOXARCH.SYSTEM.
+The bootloader is track $0, sectors $0 and $E.  It's a very cut-down
+version of OPENDSK.S.  Do you want that source, too?
+
+> *Once we're sure that it's all good, I'll put it on GitHub with
+> thedifferent options available like v1 has.*
+>
+> Everything has been working great. At this point I've tested ProRWTS2 as
+> rigorously as ProRWTS.
+>
+> The next level of stress testing I can generate will be early 2017 when I
+> do the actual game design, and deploy lots of different towns and castles.
+> This will significantly increase the number of files involved, the size of
+> those files will vary, and the arbitrary read and seek lengths will vary.
+
+Okay, that sounds exciting.
+
+
+
+On Tue, Sep 27, 2016 at 1:52 PM Peter Ferrie <peter.ferrie@gmail.com> wrote:
+Hi Mark,
+
+> I'm guessing OPENDK.S is the source for NOX.SYSTEM, and the boot loader is
+> stored in track $0, Sector $0 on the disk image, plus some additional
+> locations? If I recall you had to do something to work around the proDOS
+> filesystem starting at around T0/S3 and we needed more room than that to
+> bootstrap ProRWTS into memory.
+
+Yes, OPENDSK.S is the source for NOXARCH.SYSTEM.
+The bootloader is track $0, sectors $0 and $E.  It's a very cut-down
+version of OPENDSK.S.  Do you want that source, too?
+
+Sure, that would be great. I love boot loaders :-)
+
+Just curious, why did you decide on sector $0 and $E, versus say, sector $0 and $1? 
+
+
+
+
+>> The bootloader is track $0, sectors $0 and $E.  It's a very cut-down
+>> version of OPENDSK.S.  Do you want that source, too?
+>
+> Sure, that would be great. I love boot loaders :-)
+>
+> Just curious, why did you decide on sector $0 and $E, versus say, sector $0
+> and $1?
+
+ProDOS block 0 is sectors $0 and $E.  Not my choice, but the fastest
+to access (see Beneath Apple ProDOS).
+
+This is the code that loads the second sector:
+
+        !byte   1
+        ;branch if physical sector 2
+        lsr
+        bne     +
+        ;choose physical sector 2
+        inc     $3d
+        ;slot to address
+        txa
+        lsr
+        lsr
+        lsr
+        lsr
+        ora     #$c0
+        pha
+        lda     #$5b
+        pha
+        ;return to read second sector
+        rts
+
+        ;fake $BF00 interface
+        pla
+        tax
+        inx
+        inx
+        inx
+        txa
+        pha
+        rts
+
+filename
+        !byte filename_e-filename_b
+filename_b
+        !text "NOXARCH.SYSTEM"
+filename_e
++
+
+Then comes the proboot.s.
+
+***note: proboot.S is in the same folder as this text file. 
