@@ -4,6 +4,8 @@
 ;
 ; ============================================
 
+;test from PC laptop
+
 
                 .CR     6502            Use 6502 overlay
 				.EF		errors
