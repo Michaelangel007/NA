@@ -1,3 +1,9 @@
+; ============================================
+; Copyright (C) 2016-2018. 6502 Workshop, LLC
+; contact: mark@6502workshop.com
+; ============================================
+
+
 ;************************INCLUDE FILE*****************************
 ;(do not assemble stand-alone.)
 				;.OR		$1200			**Always put before .TF directive and never use again in program

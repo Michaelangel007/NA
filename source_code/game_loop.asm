@@ -1,3 +1,9 @@
+; ============================================
+; Copyright (C) 2016-2018. 6502 Workshop, LLC
+; contact: mark@6502workshop.com
+; ============================================
+
+
                 .CR     6502            Use 6502 overlay
 				.EF		errors
 				;.LI 	OFF				Switches the assembler machine code conversion listing off so errors are easier to see				

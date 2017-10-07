@@ -1,3 +1,9 @@
+; ============================================
+; Copyright (C) 2016-2018. 6502 Workshop, LLC
+; contact: mark@6502workshop.com
+; ============================================
+
+
 ;************************INCLUDE FILE*****************************
 ;(do not assemble stand-alone. For a stand-alone version of this routine see examples/rwts2)
 
