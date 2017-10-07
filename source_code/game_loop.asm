@@ -6,6 +6,7 @@
 				;				***For include files, look at end of program, before variable definitions. 
 
 
+;GIT Test1
 				
 ;===============GAME.BIN (game_loop.ASM)======================	
 @START			
