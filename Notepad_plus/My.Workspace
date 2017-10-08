@@ -51,25 +51,25 @@
             <File name="C:\My_Code\NA\source_code\LOADER.P.ASM" />
         </Folder>
         <Folder name="Data">
-            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.other.sunrise_sunset.ASM" />
-            <File name="C:\My_Code\NA\INCLUDES_LIBS\data.txt.global.asm" />
+            <File name="C:\My_Code\NA\source_code\data.other.sunrise_sunset.ASM" />
+            <File name="C:\My_Code\NA\source_code\data.txt.global.asm" />
             <Folder name="Tile Sets">
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.surface.asm" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.undermap.asm" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.undermap_town.asm" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.building.asm" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.castle_courtyard.asm" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.castle_courtyard (demo castle).ASM" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.castle_courtyard (Bill testing).ASM" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.shapes.blank_template.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.surface.asm" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.undermap.asm" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.undermap_town.asm" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.building.asm" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.castle_courtyard.asm" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.castle_courtyard (demo castle).ASM" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.castle_courtyard (Bill testing).ASM" />
+                <File name="C:\My_Code\NA\source_code\data.shapes.blank_template.ASM" />
             </Folder>
             <Folder name="UnderMap">
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.undermap_lv1.ASM" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.undermap_lv1.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.map.undermap_lv1.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.spr.undermap_lv1.ASM" />
             </Folder>
             <Folder name="Surface">
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.map.surface.asm" />
-                <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.surface.ASM" />
+                <File name="C:\My_Code\NA\source_code\data.map.surface.asm" />
+                <File name="C:\My_Code\NA\source_code\data.spr.surface.ASM" />
             </Folder>
             <Folder name="Buildings">
                 <File name="C:\My_Code\NA\INCLUDES_LIBS\data.spr.template.ASM" />
