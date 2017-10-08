@@ -24,12 +24,12 @@
             <Folder name="RWTS Version">
                 <File name="C:\sbasm3\go2c.bat" />
             </Folder>
-            <File name="C:\sbasm3\go1.bat" />
-            <File name="C:\sbasm3\go2p.bat" />
-            <File name="C:\sbasm3\go1cp.bat" />
-            <File name="C:\sbasm3\go2cp.bat" />
-            <File name="C:\sbasm3\go1hd.bat" />
-            <File name="C:\sbasm3\go2hd.bat" />
+            <File name="C:\My_code\NA\build_folder\go1.bat" />
+            <File name="C:\My_code\NA\build_folder\go2p.bat" />
+            <File name="C:\My_code\NA\build_folder\go1cp.bat" />
+            <File name="C:\My_code\NA\build_folder\go2cp.bat" />
+            <File name="C:\My_code\NA\build_folder\go1hd.bat" />
+            <File name="C:\My_code\NA\build_folder\go2hd.bat" />
         </Folder>
         <Folder name="Boot">
             <Folder name="Boot Loader Tools (RWTS)">

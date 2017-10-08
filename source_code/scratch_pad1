@@ -1,7 +1,7 @@
 BMI ;branch if high-bit is set
 BPL ;branch if high-bit is not set
 
-
+;test
 
 ;-----------Break if "Q" is pressed
 		jsr keyin
