@@ -555,6 +555,17 @@ For left to right, the only way I can think of to do it is convert the anchor to
 -ANIMATION
 @start
 
+-Disable animation bypass for map objects, or maybe for non-water tiles.
+		*Food for thought: I noticed that the guards in U3 blink slower when the player is moving than when standing still. they blink every 3 or 4 moves. Maybe there is a delay counter
+			in the game loop that just takes 3 or 4 iterations to flip. 
+
+			*if this doesn't work out, one option would be to limit the # of map objects that would be processed by ANIMATION update
+		if the player is holding down movement key. Like do a couple per game loop iteration and keep track of the last one done and pickup where
+		it left off. This could cause map object anumation to get out of sync but that's a feature unless it interfers with multi-tile animations.
+		i.e how would this work with MTT mobs.
+
+		
+
 -unsync animation frames of S_ENTITIES
 	*consider reserving high-bit of the flags byte on the mob MO record to trigger animation.frame++ in order to make it so all S_ENTITIES aren't in sync
 	*(don't actually increment animation.frame, but use the ++ value to drive the calculation of the shape table address for the "current" frame)
