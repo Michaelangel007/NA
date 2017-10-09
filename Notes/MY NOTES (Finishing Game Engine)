@@ -564,8 +564,12 @@ For left to right, the only way I can think of to do it is convert the anchor to
 		it left off. This could cause map object anumation to get out of sync but that's a feature unless it interfers with multi-tile animations.
 		i.e how would this work with MTT mobs.
 
-		
 
+		*Review this comment posted in Ultima Dragons facebook group
+			;U5 did this in the main thread, but it would only happen when a counter variable had reached 0. The counter was decremented by a timer interrupt. I suspect U1 was implemented in a similar way.		
+			this was part of the following post: https://www.facebook.com/groups/UltimaDragons/permalink/10156282133728797/
+			
+			
 -unsync animation frames of S_ENTITIES
 	*consider reserving high-bit of the flags byte on the mob MO record to trigger animation.frame++ in order to make it so all S_ENTITIES aren't in sync
 	*(don't actually increment animation.frame, but use the ++ value to drive the calculation of the shape table address for the "current" frame)
