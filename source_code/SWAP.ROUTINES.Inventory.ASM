@@ -546,7 +546,7 @@ TM_1.TREASURE_MGT.START
 	.PH INV_4.1a.DISPLAY_PLAYER_INVENTORY.PATCH_START ;this sub_module shares the same memory range as INV_4, INV_6, INV_7
 TM_1.TREASURE_MGT.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.treasure_mgt.ASM
+			;.IN 	c:\my_code\na\source_code\swap.routines.inv.treasure_mgt.ASM
 
 TM_1.TREASURE_MGT.PATCH_END
 	.EP ;end patch mode
