@@ -3,6 +3,7 @@ BPL ;branch if high-bit is not set
 
 ;test
 ;test2
+;test3
 
 ;-----------Break if "Q" is pressed
 		jsr keyin
