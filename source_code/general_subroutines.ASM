@@ -3056,7 +3056,7 @@ CONVERT.GMAP_XY.WZONE
 
 @END
 
-CONVERT.COLUMN_ROW.TO.SINDEX
+CONVERT.COLUMN_ROW.TO.SINDEX ;**OPT** Memory. Is this duplicate to CONVERT.COLUMN_ROW.TO.SCREEN_ARRAY_INDEX?
 @START
 ;PARAMETERS: PARM.GMAP.X, PARM.GMAP.Y
 ;RETURN: Y-REG (screen array index of tile location associated with GMAP X.Y)
@@ -3339,7 +3339,7 @@ CONVERT.COLUMN_ROW.TO.SCREEN_ARRAY_INDEX ;The screen array index is also /aka th
 	
 ;CONVERT SCREEN ARRAY INDEX TO COLUMN,ROW 
 ;(this is already done via a lookup table, no subroutine needed. See SCREEN TABLES in the variables file)
-
+;See SCREEN.INDEX.COLUMN and SCREEN.INDEX.ROW
 @END
 
 

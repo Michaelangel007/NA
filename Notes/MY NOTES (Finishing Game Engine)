@@ -478,6 +478,50 @@ Doing the top/bottom screen edge detect is easy. For top look for underflow on s
 For left to right, the only way I can think of to do it is convert the anchor to column, the compare to the anchor +offset column. For left it should always be less and for right it should always be greater. My concern is the speed overhead of converting to column, but if that's happening right now it's probably okay.
 
 
+
+----OUTLINE---
+
+
+
+*SCREEN.TILE.DATA.EXTENDED is a logical construct
+
+*LIGHT_PATTERN.OFFSET_TABLE is a hard coded lookup table containing the offset of each lighted tile from the ELS, starting
+with the upper left most tile of the light pattern. (!31 bytes)
+
+====Onscreen check===
+-Iterate SCREEN.TILE.DATA(TILE INDEX)
+	*If tile not ELS then next TILE INDEX
+	
+	-Tile is ELS
+		-Iterate light pattern (start in upper left)
+			*LIGHT SCREEN INDEX = ELS SCREEN INDEX + LIGHT_PATTERN.OFFSET_TABLE(Y)
+			
+			*If tile location above or below screen then next LIGHT SCREEN INDEX (use exiting routines to convert SCREEN.TILE.DATA index to column/row)
+							;!!!!WARNING: This doesn't work becuase the routine is just iterating through offsets and it will wrap around to the other side
+							;maybe do absolute value (ELS column/row - current column/row) and if > 2? then treat as offscreen because it's a wrap around
+							;and, before that, do an if > $BA then offscreen because that could happen with a top/bottom offscreen situation
+							
+			*SET SCREEN.TILE.DATA(LIGHT SCREEN INDEX) = $01
+		
+	
+ 
+====Offscreen check===	
+	*best I've come up with is identify the screen edge and the distance from the screen edge, then use that info to 
+	set a zpage pointer to the offset stencil. Have a stencil for each edge/distance scenario. The stop value for the stencil array
+	can be set based on the distance from screen edge, maybe via lookup table. 
+	
+	*Once the stencil is set, it should just be a matter of iterating the offset stencil as the light pattern...somehow figuring out
+	the starting how to fudge the ELS location to apply to the offset based on the row/column it's in
+	
+	;!!!!Warning. I don't think this works if the ELS is near the corner (i.e. off left edge, ELS in row 0), because that results in 
+	;an entirely different light pattern than the stencisl contemplated. Might be no way around having the offset stencils be for 
+	;an extended screen array, and then for each position determin if it's in the overlapping portion of the array and if yes, then convert
+	;to the screen array index to set the tile to light. 
+	
+	Note: I'm considering keeping on screen and offscreen separate to avoid speed hit of creating an extended screen array, writing to it, then copying
+	to the real screen array only the overlapping portion. 
+		
+		
 @END
 
 
