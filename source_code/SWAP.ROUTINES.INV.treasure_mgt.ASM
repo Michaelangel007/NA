@@ -36,7 +36,7 @@ TM_1.TREASURE_MGT
 ;ALSO load the open box code. 
 
 
-TM_1.COMBAT.ITEM_DROP
+TM_1.COMBAT.ITEM_DROP ;only mobs drop items, not specials. 
 @START
 
 .INIT.SCREEN
@@ -92,11 +92,6 @@ TM_1.COMBAT.ITEM_DROP
 	STA TM_1.GOLD_DROP.TALLY+$0
 	STA TM_1.GOLD_DROP.TALLY+$1
 
-	
-.DOES.MOB.DROP ;***just mobs, not sure I'm going to add specials as their appearance is harder to quantify in formulas for STA economy projections
-;CHR_SHEET.MOB.TREASURE_CODE	
-
-	;####insert code to determine if this mob drops treasure
 
 
 	LDX #$00 ;init mob sequential number, which will incremet by $1 at the top of the loop
@@ -508,7 +503,9 @@ TM_1.COMBAT.ITEM_DROP
 	CMP #$CE	;(N)o
 		;ACC = ASCII code of keypress
 	BEQ .EXIT_TEST ;if no, then skip player inventory add. Proceed to next mob record
-	CMP #$C1	;(A)ll
+	CMP #$9B 	;ESC (skip rest of item drops. Print gold and exit)
+	BEQ .LOOP.ITEM_DROP.DONE
+	CMP #$C1	;(A)ll	
 	BNE .GET.KEYPRESS ;no valid key was pressed, continue loop
 	
 .SET.PICKUP_ALL
