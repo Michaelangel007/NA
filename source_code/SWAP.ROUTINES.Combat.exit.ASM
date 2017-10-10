@@ -724,9 +724,14 @@ CHECK.SKILL.LEVELUP
 @START
 COMBAT.TREASURE_MGT.ENTRANCE
 @START
-
-					;jsr keyin
-					
+.KEYPRESS_ABORT_CHECK
+	LDA KB_BUFFER
+	CMP #$9B
+	BNE .KEYPRESS_ABORT_CHECK.DONE  ;ESC key was not pressed
+	;ESC key pressed: skip treasure drop routine
+	STA	KB_BUFFER_ACK               ;CLR LAST KEY
+	JMP .EXIT
+.KEYPRESS_ABORT_CHECK.DONE					
 					
 .INIT.SCREEN
 ;draw item drop window (right)
@@ -795,6 +800,8 @@ TREASURE.TEST		.AZ -/Testing/
 
 COMBAT.LAUNCH.TREASURE_MGT
 @START
+
+
 	
 ;LOAD FILE "SRTN.INVENTORY" (only loads part of the file)
 
