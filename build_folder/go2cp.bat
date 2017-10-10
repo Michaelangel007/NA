@@ -282,32 +282,39 @@ copy my.program.nib c:\applewin\games\my.program.nib
 copy my.program.nib c:\AppleWIN_1.26.2.2\games\
 copy my.program.nib c:\ADTPro-2.0.0\disks\my.program.nib
 copy my.program.nib c:\mame\my.program.nib
+copy my.program.nib c:\my_code\na\build_folder\my.program.nib
 REM copy my.program.nib c:\USERS\MARK\DROPBOX\TEMP2\my.program.nib
-
-
 
 copy my.main_player.nib c:\applewin\games\my.main_player.nib
 copy my.main_player.nib c:\AppleWIN_1.26.2.2\games\
 copy my.main_player.nib c:\ADTPro-2.0.0\disks\my.main_player.nib
 copy my.main_player.nib c:\mame\my.main_player.nib
+copy my.main_player.nib c:\my_code\na\build_folder\my.main_player.nib
+
 REM copy my.main_player.nib c:\USERS\MARK\DROPBOX\TEMP2\my.main_player.nib
 
 copy na.castle_disk.nib c:\applewin\games\na.castle_disk.nib
 copy na.castle_disk.nib c:\AppleWIN_1.26.2.2\games\
 copy na.castle_disk.nib c:\ADTPro-2.0.0\disks\na.castle_disk.nib
 copy na.castle_disk.nib c:\mame\na.castle_disk.nib
+copy na.castle_disk.nib c:\my_code\na\build_folder\na.castle_disk.nib
+
 REM copy na.castle_disk.nib c:\USERS\MARK\DROPBOX\TEMP2\na.castle_disk.nib
 
 copy na.town_disk.nib c:\applewin\games\na.town_disk.nib
 copy na.town_disk.nib c:\AppleWIN_1.26.2.2\games\
 copy na.town_disk.nib c:\ADTPro-2.0.0\disks\na.town_disk.nib
 copy na.town_disk.nib c:\mame\na.town_disk.nib
+copy na.town_disk.nib c:\my_code\na\build_folder\na.town_disk.nib
+
 REM na.town_disk.nib c:\USERS\MARK\DROPBOX\TEMP2\na.town_disk.nib
 
 copy na.undermap_disk.nib c:\applewin\games\na.undermap_disk.nib
 copy na.undermap_disk.nib c:\AppleWIN_1.26.2.2\games\
 copy na.undermap_disk.nib c:\ADTPro-2.0.0\disks\na.undermap_disk.nib
 copy na.undermap_disk.nib c:\mame\na.undermap_disk.nib
+copy na.undermap_disk.nib c:\my_code\na\build_folder\na.undermap_disk.nib
+
 REM copy na.undermap_disk.nib c:\USERS\MARK\DROPBOX\TEMP2\na.undermap_disk.nib
 
 copy c:\applewin\games\my.program.nib c:\my_code\backups\%hour%.%min%

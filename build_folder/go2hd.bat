@@ -293,6 +293,8 @@ copy APPLEHDD.PO c:\applewin\games\APPLEHDD.PO
 REM copy APPLEHDD.PO c:\applewin\games\APPLEHDD.HDV
 copy APPLEHDD.PO c:\AppleWIN_1.26.2.2\games\APPLEHDD.PO
 copy APPLEHDD.PO c:\ADTPro-2.0.0\disks\APPLEHDD.PO
+copy APPLEHDD.PO c:\my_code\na\build_folder\APPLEHDD.PO
+
 REM copy APPLEHDD.PO c:\USERS\MARK\DROPBOX\TEMP2\APPLEHDD.PO
 
 

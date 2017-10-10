@@ -296,12 +296,16 @@ copy my.program.dsk c:\applewin\games\my.program.dsk
 copy my.program.dsk c:\AppleWIN_1.26.2.2\games\
 copy my.program.dsk c:\ADTPro-2.0.0\disks\my.program.dsk
 copy my.program.dsk c:\mame\my.program.dsk
+copy my.program.dsk c:\my_code\na\build_folder\my.program.dsk
+
 REM copy my.program.dsk c:\USERS\MARK\DROPBOX\TEMP2\my.program.dsk
 
 copy my.main_player.PO c:\applewin\games\my.main_player.PO
 copy my.main_player.PO c:\AppleWIN_1.26.2.2\games\
 copy my.main_player.PO c:\ADTPro-2.0.0\disks\my.main_player.PO
 copy my.main_player.PO c:\mame\my.main_player.PO
+copy my.main_player.PO c:\my_code\na\build_folder\my.main_player.PO
+
 REM copy my.main_player.dsk c:\USERS\MARK\DROPBOX\TEMP2\my.main_player.dsk
 
 
@@ -309,12 +313,16 @@ copy na.castle_disk.PO c:\applewin\games\na.castle_disk.PO
 copy na.castle_disk.PO c:\AppleWIN_1.26.2.2\games\
 copy na.castle_disk.PO c:\ADTPro-2.0.0\disks\na.castle_disk.PO
 copy na.castle_disk.PO c:\mame\na.castle_disk.PO
+copy na.castle_disk.PO c:\my_code\na\build_folder\na.castle_disk.PO
+
 REM copy na.castle_disk.PO c:\USERS\MARK\DROPBOX\TEMP2\na.castle_disk.PO
 
 copy na.town_disk.PO c:\applewin\games\na.town_disk.PO
 copy na.town_disk.PO c:\AppleWIN_1.26.2.2\games\
 copy na.town_disk.PO c:\ADTPro-2.0.0\disks\na.town_disk.PO
 copy na.town_disk.PO c:\mame\na.town_disk.PO
+copy na.town_disk.PO c:\my_code\na\build_folder\na.town_disk.PO
+
 REM na.town_disk.PO c:\USERS\MARK\DROPBOX\TEMP2\na.town_disk.PO
 
 
@@ -322,6 +330,8 @@ copy na.undermap_disk.PO c:\applewin\games\na.undermap_disk.PO
 copy na.undermap_disk.PO c:\AppleWIN_1.26.2.2\games\
 copy na.undermap_disk.PO c:\ADTPro-2.0.0\disks\na.undermap_disk.PO
 copy na.undermap_disk.PO c:\mame\na.undermap_disk.PO
+copy na.undermap_disk.PO c:\my_code\na\build_folder\na.undermap_disk.PO
+
 REM copy na.undermap_disk.PO c:\USERS\MARK\DROPBOX\TEMP2\na.undermap_disk.PO
 
 copy c:\applewin\games\my.program.dsk c:\my_code\backups\%hour%.%min%
