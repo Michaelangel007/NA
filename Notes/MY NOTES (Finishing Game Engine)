@@ -25,6 +25,17 @@
 TOWNS / CASTLES / DUNGEONS
 @START
 
+-rate of time
+@start
+consider reducing the number of Nox A* iterations forced processed on each move. I think it's five. Consider 2 or even 1 to 
+speed up player movemnet. THen, increase the number of moves per 1 minute increment on the clock so Nox A* has enough time to
+calculate it's paths by the time the hour changes. 
+
+
+
+@end
+
+
 -Shops
 @start
 -Inns
