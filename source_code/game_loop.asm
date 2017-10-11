@@ -674,8 +674,8 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 		;LDA #$60	;new island: half-way between town and dungeon
 		;LDA #$76	;new island: by town 
 		;LDA #$67	;new island: by burning village
-		LDA #$53	;new island: by dungeon
-		;LDA #$18  ;$18 (on origial island)
+		;LDA #$53	;new island: by dungeon
+		LDA #$18  ;$18 (on origial island)
 		STA GMAP.X
 		STA PARM.GMAP.X
 ;		STA GMAP.X.LAST. see GAME.LAUNCH
@@ -685,8 +685,8 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 		;LDA #$6A	;new island: half-way between town and dungeon
 		;LDA #$72   ;new island: by town 
 		;LDA #$5A	;new island: by burning village
-		LDA #$6A	;new island: by dungeon
-		;LDA #$37   ;$37 (on origial island)
+		;LDA #$6A	;new island: by dungeon
+		LDA #$37   ;$37 (on origial island)
 		STA GMAP.Y
 		STA PARM.GMAP.Y
 ;		STA GMAP.Y.LAST. see GAME.LAUNCH
