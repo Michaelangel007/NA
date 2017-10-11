@@ -168,11 +168,19 @@ EVENT.CHECKS.BUILDING_ONLY
 	;**OPT** Memory. Speed. Right now there is only one code for location type, which is used to determine the tile_set to use and for other location-type specific features. There are a lot of the later. It might be a savings if the 
 					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
 					;but I suspect it would pay off. 
-	CMP #MAP.TYPE.BUILDING.GRE 	;is map type = building?
-	BCC TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW		;if no
-	CMP #MAP.TYPE.BUILDING.LT	;is map type = building?
-	BCS TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW		;if no
-	JMP EVENT.MANAGER.EXIT			;if yes
+	; CMP #MAP.TYPE.BUILDING.GRE 	;is map type = building?
+	; BCC TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW		;if no
+	; CMP #MAP.TYPE.BUILDING.LT	;is map type = building?
+	; BCS TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW		;if no
+	; JMP EVENT.MANAGER.EXIT			;if yes
+
+
+	CMP #MAP.TYPE.BUILDING.GRE 				;is map type = building?
+	BCC EVENT.CHECKS.BUILDING_ONLY.DONE		;if no
+	CMP #MAP.TYPE.BUILDING.LT				;is map type = building?
+	BCS EVENT.CHECKS.BUILDING_ONLY.DONE		;if no
+
+	;**FALLS THROUGH**
 	
 	
 TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW	;Keep (tenative)
@@ -182,10 +190,17 @@ TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW	;Keep (tenative)
 	LDA TIME.SUN.STATUS ;($00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT)
 	CMP #$02
 	BNE .IS.SUNRISE
-	
+
+		; lda #$aa
+		; ldx TIME.SUN.COUNTER
+		; ldy TIME.SUN.SUB_COUNTER
+		; jsr prep.brk
+		; brk
+		
 	LDA TIME.SUN.COUNTER	;$00-$04: counts down from $04 for sunset, counts up from $00 for sunrise. each value is a phase of the sunset/sunrise
 	CMP #$00				;if the counter is less than $02, it is almost fully night
 	BNE .EVENT_CHECK.COMPELTE		;if the counter is $02 or greater, don't trigger the night tiles here because once the counter reaches $01 the night tiles will be triggered via the event manager
+		
 	LDA TIME.SUN.SUB_COUNTER
 	CMP #$01
 	BNE .EVENT_CHECK.COMPELTE		;if the counter is $02 or greater, don't trigger the night tiles here because once the counter reaches $01 the night tiles will be triggered via the event manager
@@ -213,6 +228,9 @@ TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW	;Keep (tenative)
 .EVENT_CHECK.COMPELTE
 
 @END
+
+EVENT.CHECKS.BUILDING_ONLY.DONE
+
 
 NEXT.BUILDING.EVENT ;REPLACE WITH NAME OF NEXT EVENT******
 @END

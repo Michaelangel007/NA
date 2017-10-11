@@ -1872,6 +1872,55 @@ DRAW.TILE.TERRAIN_ENTRANCE
 
 	;ACC = Tile_ID
 
+
+.DAY_NIGHT.TILE.SWAP
+;VALIDATE ENTRANCE
+
+	PHA ;save Tile_ID
+	
+	;is a building map active
+	;**OPT** Memory. Speed. Right now there is only one code for location type, which is used to determine the tile_set to use and for other location-type specific features. There are a lot of the later. It might be a savings if the 
+					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
+					;but I suspect it would pay off. 
+	LDA PLAYER.MAP.LOCATION_TYPE
+	CMP #MAP.TYPE.BUILDING.GRE 	;is map type = building?
+	BCC .VALIDATE_ENTRANCE.DONE		;if no
+	CMP #MAP.TYPE.BUILDING.LT	;is map type = building?
+	BCS .VALIDATE_ENTRANCE.DONE			;if no
+	;if yes	
+
+	;is it night? (the map data always has the day tile)
+	LDA TIME.SUN.STATUS ;($00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT)
+	CMP #$02
+	BCC .VALIDATE_ENTRANCE.DONE
+
+	
+	;is Tile_ID is the day/night swap range	
+	PLA ;restore Tile_ID
+	CMP #TILE_ID.DAY_NIGHT.SWAP.EQ1
+	BEQ .IS.SWAP_TILE	
+	CMP #TILE_ID.DAY_NIGHT.SWAP.GRE1
+	BCC .NOT.SWAP_TILE	
+	CMP #TILE_ID.DAY_NIGHT.SWAP.LT1
+	BCS .NOT.SWAP_TILE	
+	
+	;**FALLS THROUGH**
+	
+.IS.SWAP_TILE	
+	CLC
+	ADC #$01 ;tile_ID = tile_ID +1
+	
+	;**FALLS THROUGH**
+	
+.NOT.SWAP_TILE	
+	PHA		;save Tile_ID to keep stack in sync. 
+	
+.VALIDATE_ENTRANCE.DONE	
+
+	PLA ;restore Tile_ID
+
+
+	
 	
 
 ; .CHECK.DARKNESS	
@@ -1928,8 +1977,8 @@ DRAW.TILE.TERRAIN_ENTRANCE
 	STA OP2
 	LDA AUX_MOVE.START+$1
 	STA OP2+$1
-	
-;=======INLINE CODE FOR ADC.16========	
+		
+;=======INLINE CODE FOR ADC.16========		;**OPT** Memory. the section above and below can be replaced with a simple 16-bit add
 ;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
 
 
@@ -1941,7 +1990,7 @@ DRAW.TILE.TERRAIN_ENTRANCE
     STA AUX_MOVE.START
 		 
     LDA OP1+$1
-    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
+    ADC OP2+$1
     STA AUX_MOVE.START+$1
 	
 ;======================================
@@ -1956,14 +2005,14 @@ DRAW.TILE.TERRAIN_ENTRANCE
 
 
 ; DO THE MATH 
-	CLD 
+	CLD 		;**OPT** Memory. CLD not needed here. Search for CLD in all sources files. I used to use it a lot more than needed. 
     CLC                          ;ALWAYS BEFORE ADD
     LDA OP1
     ADC OP2
     STA AUX_MOVE.END
 		 
     LDA OP1+$1
-    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
+    ADC OP2+$1	
     STA AUX_MOVE.END+$1
 	
 ;======================================

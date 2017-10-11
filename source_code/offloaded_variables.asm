@@ -213,7 +213,7 @@ TILE_ID.UNOCCUPIED.TILE.SWAP.LT1		.EQ $F0				;#CONSTANT
 @START
 TILE_ID.DAY_NIGHT.SWAP.GRE1		.EQ $55				;#CONSTANT
 TILE_ID.DAY_NIGHT.SWAP.LT1		.EQ $5A				;#CONSTANT
-TILE_ID.DAY_NIGHT.EQ			.EQ $4F				;#CONSTANT   ;**OPT** Memory. Speed. This one should be able to be eliminated after the tile_ID reorg project. Search for it in all source code files.
+TILE_ID.DAY_NIGHT.SWAP.EQ1			.EQ $4F				;#CONSTANT   ;**OPT** Memory. Speed. This one should be able to be eliminated after the tile_ID reorg project. Search for it in all source code files.
 
 
 ;Nox A* Grid tiles

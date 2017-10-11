@@ -165,7 +165,8 @@ DRAW.TILE.SINGLE ;	;=============DRAW A SINGLE TILE AT THE SPECIFIED SCREEN LOCA
 
 
 
-			
+;**OPT** Memory. See if there is a way to merge the shape table address/copy part of this routine with DRAW.TILE.TERRAIN_ENTRANCE, and
+;then probably put DRAW.TILE.TERRAIN_ENTRANCE just above DRAW.TILE			
 			
 ;VERIFY TILE IS ON THE VIEW SCREEN
 	STY SAVED.YREG.LOCAL ;save parm: screen index of tile location		
