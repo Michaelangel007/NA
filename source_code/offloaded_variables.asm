@@ -209,7 +209,14 @@ TILE_ID.UNOCCUPIED.TILE.SWAP.LT1		.EQ $F0				;#CONSTANT
 @END
 
 
-;BUILDING MAP: Nox A* Grid tiles
+;BUILDING MAPS
+@START
+TILE_ID.DAY_NIGHT.SWAP.GRE1		.EQ $55				;#CONSTANT
+TILE_ID.DAY_NIGHT.SWAP.LT1		.EQ $5A				;#CONSTANT
+TILE_ID.DAY_NIGHT.EQ			.EQ $4F				;#CONSTANT   ;**OPT** Memory. Speed. This one should be able to be eliminated after the tile_ID reorg project. Search for it in all source code files.
+
+
+;Nox A* Grid tiles
 @START
 ;street
 TILE_ID.ROAD.GRE1				.EQ $57				;#CONSTANT		TILE TYPE ID
@@ -236,6 +243,8 @@ TILE_ID.COT_OCCUPIED			.EQ $4D				;#CONSTANT		TILE TYPE ID
 TILE_ID.FLOOR_PATH.GRE1			.EQ $4E				;#CONSTANT		TILE TYPE ID
 TILE_ID.FLOOR_PATH.LT1			.EQ $50				;#CONSTANT		TILE TYPE ID
 ;--------------------------------------------
+@END
+
 @END
 
 ;CASTLE MAP

@@ -628,12 +628,6 @@ DRAW.ROW ;			;=============DRAWS ROW FROM TILE DATA, AT SPECIFIED LOCATION======
 
 
 
-;**OPT** Memory. Use 16 bit multiplication to calculate shape table address by tile type. Saves the 2 pages of memory used by TILE.SHAPES.HO/LO. Applies to DRAW.COLUMN, DRAW.ROW, DRAW.TILE.SINGLE, DRAW.TILE.FOREGROUND.SINGLE, ANIMATION.UPDATE
-
-;**OPT** Speed. The tile shape table gets copied into the hopper. Maybe there are two hoppers. Current and last. Draw.tile continues to use a zero page variable (shape) and if current tile == last tile, then point (shape) to tile.hopper.last There is an extra cost in draw.tile of the indirect lookup to (shape) instead of a indexed lookup directly to a single hopper, but I bet the gains offset this. Avoiding copying a tile shape table is avoiding a 32 iteration loop * X clock cycles. Almost every region will probably have long strings of tiles....grass, forest, water, mountains, often appear in clusters. Applies to DRAW.COLUMN, DRAW.ROW, DRAW.TILE.SINGLE, DRAW.TILE.FOREGROUND.SINGLE, ANIMATION.UPDATE. Gains likely especially large in animation update, as water tile drawing is lots of repeat tiles. 
-
-;**Opt** Speed. skip draw if animated tile ID or if MO present
-
 
 ;=====================SUBROUTINE DOCUMENTATION====================================
 ;This subroutine isn't designed for direct entrance. Management of some graphics screen variables
@@ -655,115 +649,8 @@ DRAW.ROW ;			;=============DRAWS ROW FROM TILE DATA, AT SPECIFIED LOCATION======
 .LOOP					
 
 ;LOAD TILE_TYPE OF THE NEXT TILE IN CURRENT ROW
-	LDA SCREEN.TILE.DATA,Y			
-
-; .CHECK.DARKNESS	
-; ;IS TILE HIDDEN (DARKNESS)?	
-	; LDX SCREEN.DARK.DATA,Y			
-	; CPX #$01
-	; BEQ .SKIPDRAW.STEP				;IF YES, DON'T DRAW TILE
-	; JMP .CALC.SHAPE.TABLE
-; .SKIPDRAW.STEP
-	; JMP .SKIPDRAW
-	
-.CALC.SHAPE.TABLE
-;CALCULATE SHAPE TABLE ADDRESS	
-	TAX								
-	LDA TILE.SHAPES.LO,X
-	STA AUX_MOVE.START				;SAVE BASE ADDRESS AS START ADDRESS FOR AUX MEMORY MOVE
-
-	CLC
-	ADC #SHAPE.SIZE
-	STA AUX_MOVE.END
-	
-	LDA TILE.SHAPES.HO,X
-	STA AUX_MOVE.START+$1
-	STA AUX_MOVE.END+$1
-
-	CPX #ANIMATION.TILE_RANGE.START	;IS CURRENT TILE AN ANIMATION TILE?
-	BCS	.ANIMATION.FRAME.OFFSET		;IF YES, CALCULATE AN OFFSET TO BASE ADDRESS VIA THE CURRENT ANIMATION FRAME
-	JMP .NOT_ANIMATED
-.ANIMATION.FRAME.OFFSET	
-;ANIMATION.FRAME_STATE holds the current animation frame number for all animation tiles
-;on the view screen. This variable can be used as an offset to the shape table base address
-;to identify the address for the current animation frame for the shape table already loaded
-;into SHAPE in the routine above.
-;
-;Each frame is $20 bytes (!32), so we can use ASL multiplication to calcualte the offset. 
-	
-	
-	LDA ANIMATION.FRAME_STATE		;LOAD CURRENT ANIMATION FRAME
-	
-	ASL ;X2						
-	ASL ;X4							
-	ASL ;X8							
-	ASL ;X16						
-	ASL ;X32
-
-;**OPT** if there were 4 or 8 animation frames, 8-bit addition could be used for the offset
-;because page boundaries would never be crossed by the offset. 
-
-	STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
-	LDA #$00
-	STA OP1+$1						
-				
-	LDA AUX_MOVE.START
-	STA OP2
-	LDA AUX_MOVE.START+$1
-	STA OP2+$1
-	
-;=======INLINE CODE FOR ADC.16========	
-;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
-
-
-; DO THE MATH
-	CLD 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.START
-		 
-    LDA OP1+$1
-    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    STA AUX_MOVE.START+$1
-	
-;======================================
-	
-	LDA AUX_MOVE.END
-	STA OP2
-	LDA AUX_MOVE.END+$1
-	STA OP2+$1
-	
-;=======INLINE CODE FOR ADC.16========	
-;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
-
-
-; DO THE MATH 
-	CLD 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.END
-		 
-    LDA OP1+$1
-    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    STA AUX_MOVE.END+$1
-	
-;======================================
-
-.NOT_ANIMATED
-
-	LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
-	STA AUX_MOVE.DEST
-	STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
-	LDA /SHAPE.HOPPER0
-	STA AUX_MOVE.DEST+$1
-	STA SHAPE+$1			
-
-	CLC								;EXECUTE AUX MEMORY MOVE
-	JSR AUX_MOVE
-	
-	JSR DRAW.TILE					;DRAW SHAPE
+		LDA SCREEN.TILE.DATA,Y		
+	JSR DRAW.TILE.TERRAIN_ENTRANCE
 	
 	
 ;ADJUST VARIABLES AND COUNTERS	
@@ -915,122 +802,10 @@ DRAW.COLUMN ; 		; ============DRAWS COLUMN FROM TILE DATA, AT SPECIFIED LOCATION
 		
 	LDY #$00						;START WITH 1ST ELEMENT IN SCREEN.TILE.HOPPER ARRAY.
 .LOOP					
-;LOAD TILE_TYPE OF THE NEXT TILE IN CURRENT ROW
-	LDA SCREEN.TILE.HOPPER,Y			
 
-; ;IS TILE DEEP WATER?
-; ;(note: this tally is used to determine whether to force animation to complete when entire screen is deep water tiles)
-	; CMP #TILE_ID.DEEP_WATER
-	; BNE .CHECK.DARKNESS
-	; INC ANIMATION.DEEP_WATER.TALLY
-	; ;**FALLS THROUGH**
-	
-; .CHECK.DARKNESS	
-; ;IS TILE HIDDEN (DARKNESS)?	
-	; LDX SCREEN.DARK.HOPPER,Y			
-	; CPX #$01
-	; BEQ .SKIPDRAW.STEP				;IF YES, DON'T DRAW TILE
-	; JMP .CALC.SHAPE.TABLE
-; .SKIPDRAW.STEP
-	; JMP .SKIPDRAW
-	
-.CALC.SHAPE.TABLE
-;CALCULATE SHAPE TABLE ADDRESS	
-	TAX								
-	LDA TILE.SHAPES.LO,X
-	STA AUX_MOVE.START				;SAVE BASE ADDRESS AS START ADDRESS FOR AUX MEMORY MOVE
-	CLC
-	ADC #SHAPE.SIZE
-	STA AUX_MOVE.END
-	
-	LDA TILE.SHAPES.HO,X
-	STA AUX_MOVE.START+$1
-	STA AUX_MOVE.END+$1
-
-	CPX #ANIMATION.TILE_RANGE.START	;IS CURRENT TILE AN ANIMATION TILE?
-	BCS	.ANIMATION.FRAME.OFFSET		;IF YES, CALCULATE AN OFFSET TO BASE ADDRESS VIA THE CURRENT ANIMATION FRAME
-	JMP .NOT_ANIMATED
-.ANIMATION.FRAME.OFFSET	
-;ANIMATION.FRAME_STATE holds the current animation frame number for all animation tiles
-;on the view screen. This variable can be used as an offset to the shape table base address
-;to identify the address for the current animation frame for the shape table already loaded
-;into SHAPE in the routine above.
-;
-;Each frame is $20 bytes (!32), so we can use ASL multiplication to calcualte the offset. 
-	
-	
-	LDA ANIMATION.FRAME_STATE		;LOAD CURRENT ANIMATION FRAME
-	
-	ASL ;X2						
-	ASL ;X4							
-	ASL ;X8							
-	ASL ;X16						
-	ASL ;X32
-
-;**OPT** if there were 4 or 8 animation frames, 8-bit addition could be used for the offset
-;because page boundaries would never be crossed by the offset. 
-
-	STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
-	LDA #$00
-	STA OP1+$1						
-				
-	LDA AUX_MOVE.START
-	STA OP2
-	LDA AUX_MOVE.START+$1
-	STA OP2+$1
-	
-;=======INLINE CODE FOR ADC.16========	
-;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
-
-
-; DO THE MATH
-	CLD 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.START
-		 
-    LDA OP1+$1
-    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    STA AUX_MOVE.START+$1
-	
-;======================================
-	
-	LDA AUX_MOVE.END
-	STA OP2
-	LDA AUX_MOVE.END+$1
-	STA OP2+$1
-	
-;=======INLINE CODE FOR ADC.16========	
-;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
-
-
-; DO THE MATH 
-	CLD 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.END
-		 
-    LDA OP1+$1
-    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    STA AUX_MOVE.END+$1
-	
-;======================================
-
-.NOT_ANIMATED
-
-	LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
-	STA AUX_MOVE.DEST
-	STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
-	LDA /SHAPE.HOPPER0
-	STA AUX_MOVE.DEST+$1
-	STA SHAPE+$1			
-
-	CLC								;EXECUTE AUX MEMORY MOVE
-	JSR AUX_MOVE
-	
-	JSR DRAW.TILE					;DRAW SHAPE
+;LOAD TILE_TYPE OF THE NEXT TILE IN CURRENT COLUMN
+		LDA SCREEN.TILE.HOPPER,Y		
+	JSR DRAW.TILE.TERRAIN_ENTRANCE
 	
 
 ;**OPT** SPEED/MEMORY. TILE.LINE IS IN ACC AT END OF DRAW.TILE. I MAY BE ABLE TO INCREMENT IT A LINE TO REACH THE START OF THE NEXT TILE INSTEAD OF LOADING TILE.START LINE
@@ -2082,7 +1857,132 @@ DRAW_ERASE.ACTIVE_PLAYER.SELECTOR ;current INV_4.ACTIVE_PLAYER
 @END
 
 
-	;**FALLS THROUGH**
+DRAW.TILE.TERRAIN_ENTRANCE
+@START
+;PARAMETERS: ACC = Tile_ID
+;ENTRANCE: DRAW.ROW, DRAW.COLUMN
+;note: this routine contains the common code to calculate and copy the shape table when drawing a terrain tile.
+
+;**OPT** Memory. Use 16 bit multiplication to calculate shape table address by tile type. Saves the 2 pages of memory used by TILE.SHAPES.HO/LO. Applies to DRAW.COLUMN, DRAW.ROW, DRAW.TILE.SINGLE, DRAW.TILE.FOREGROUND.SINGLE, ANIMATION.UPDATE
+
+;**OPT** Speed. The tile shape table gets copied into the hopper. Maybe there are two hoppers. Current and last. Draw.tile continues to use a zero page variable (shape) and if current tile == last tile, then point (shape) to tile.hopper.last There is an extra cost in draw.tile of the indirect lookup to (shape) instead of a indexed lookup directly to a single hopper, but I bet the gains offset this. Avoiding copying a tile shape table is avoiding a 32 iteration loop * X clock cycles. Almost every region will probably have long strings of tiles....grass, forest, water, mountains, often appear in clusters. Applies to DRAW.COLUMN, DRAW.ROW, DRAW.TILE.SINGLE, DRAW.TILE.FOREGROUND.SINGLE, ANIMATION.UPDATE. Gains likely especially large in animation update, as water tile drawing is lots of repeat tiles. 
+
+;**Opt** Speed. skip draw if animated tile ID or if MO present
+
+
+	;ACC = Tile_ID
+
+	
+
+; .CHECK.DARKNESS	
+; ;IS TILE HIDDEN (DARKNESS)?	
+	; LDX SCREEN.DARK.DATA,Y			
+	; CPX #$01
+	; BEQ .SKIPDRAW.STEP				;IF YES, DON'T DRAW TILE
+	; JMP .CALC.SHAPE.TABLE
+; .SKIPDRAW.STEP
+	; JMP .SKIPDRAW
+	
+.CALC.SHAPE.TABLE	;**OPT** Memory. The calculate and copy shape table code is probably the same as in DRAW.COLUMN. Maybe it could be setup as a common routine just above DRAW.TILE that falls through to it or does a JMP. 
+;CALCULATE SHAPE TABLE ADDRESS	
+	TAX								
+	LDA TILE.SHAPES.LO,X
+	STA AUX_MOVE.START				;SAVE BASE ADDRESS AS START ADDRESS FOR AUX MEMORY MOVE
+
+	CLC
+	ADC #SHAPE.SIZE
+	STA AUX_MOVE.END
+	
+	LDA TILE.SHAPES.HO,X
+	STA AUX_MOVE.START+$1
+	STA AUX_MOVE.END+$1
+
+	CPX #ANIMATION.TILE_RANGE.START	;IS CURRENT TILE AN ANIMATION TILE?
+	BCS	.ANIMATION.FRAME.OFFSET		;IF YES, CALCULATE AN OFFSET TO BASE ADDRESS VIA THE CURRENT ANIMATION FRAME
+	JMP .NOT_ANIMATED
+.ANIMATION.FRAME.OFFSET	
+;ANIMATION.FRAME_STATE holds the current animation frame number for all animation tiles
+;on the view screen. This variable can be used as an offset to the shape table base address
+;to identify the address for the current animation frame for the shape table already loaded
+;into SHAPE in the routine above.
+;
+;Each frame is $20 bytes (!32), so we can use ASL multiplication to calcualte the offset. 
+	
+	
+	LDA ANIMATION.FRAME_STATE		;LOAD CURRENT ANIMATION FRAME
+	
+	ASL ;X2						
+	ASL ;X4							
+	ASL ;X8							
+	ASL ;X16						
+	ASL ;X32
+
+;**OPT** if there were 4 or 8 animation frames, 8-bit addition could be used for the offset
+;because page boundaries would never be crossed by the offset. 
+
+	STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
+	LDA #$00
+	STA OP1+$1						
+				
+	LDA AUX_MOVE.START
+	STA OP2
+	LDA AUX_MOVE.START+$1
+	STA OP2+$1
+	
+;=======INLINE CODE FOR ADC.16========	
+;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+
+
+; DO THE MATH
+	CLD 
+    CLC                          ;ALWAYS BEFORE ADD
+    LDA OP1
+    ADC OP2
+    STA AUX_MOVE.START
+		 
+    LDA OP1+$1
+    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
+    STA AUX_MOVE.START+$1
+	
+;======================================
+	
+	LDA AUX_MOVE.END
+	STA OP2
+	LDA AUX_MOVE.END+$1
+	STA OP2+$1
+	
+;=======INLINE CODE FOR ADC.16========	
+;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+
+
+; DO THE MATH 
+	CLD 
+    CLC                          ;ALWAYS BEFORE ADD
+    LDA OP1
+    ADC OP2
+    STA AUX_MOVE.END
+		 
+    LDA OP1+$1
+    ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
+    STA AUX_MOVE.END+$1
+	
+;======================================
+
+.NOT_ANIMATED
+
+	LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
+	STA AUX_MOVE.DEST
+	STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
+	LDA /SHAPE.HOPPER0
+	STA AUX_MOVE.DEST+$1
+	STA SHAPE+$1			
+
+	CLC								;EXECUTE AUX MEMORY MOVE
+	JSR AUX_MOVE
+	
+	JMP DRAW.TILE
+@END
+
 	
 ;DRAW.TILE.SINGLE
 ;***see misc.main_memory.only.asm
