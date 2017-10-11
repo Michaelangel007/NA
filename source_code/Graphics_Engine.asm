@@ -1878,6 +1878,9 @@ DRAW.TILE.TERRAIN_ENTRANCE
 
 	PHA ;save Tile_ID
 	
+			
+	
+	
 	;is a building map active
 	;**OPT** Memory. Speed. Right now there is only one code for location type, which is used to determine the tile_set to use and for other location-type specific features. There are a lot of the later. It might be a savings if the 
 					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
@@ -1933,7 +1936,11 @@ DRAW.TILE.TERRAIN_ENTRANCE
 	; JMP .SKIPDRAW
 	
 .CALC.SHAPE.TABLE	;**OPT** Memory. The calculate and copy shape table code is probably the same as in DRAW.COLUMN. Maybe it could be setup as a common routine just above DRAW.TILE that falls through to it or does a JMP. 
-;CALCULATE SHAPE TABLE ADDRESS	
+;CALCULATE SHAPE TABLE ADDRESS
+
+			STX COW
+
+	
 	TAX								
 	LDA TILE.SHAPES.LO,X
 	STA AUX_MOVE.START				;SAVE BASE ADDRESS AS START ADDRESS FOR AUX MEMORY MOVE
@@ -2030,7 +2037,7 @@ DRAW.TILE.TERRAIN_ENTRANCE
 	JSR AUX_MOVE
 
 
-
+			LDX COW
 			
 	JMP DRAW.TILE
 @END

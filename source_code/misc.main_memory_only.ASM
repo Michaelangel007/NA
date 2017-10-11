@@ -214,9 +214,9 @@ DRAW.TILE.SINGLE ;	;=============DRAW A SINGLE TILE AT THE SPECIFIED SCREEN LOCA
 	LDA SCREEN.TILE.DATA,Y					
 .REENTRY
 	STY SAVED.YREG.LOCAL					;SAVING YREG TO A VARIABLE ENABLES US TO AVOID USING X-REG IN THIS ROUTINE, WHICH ENABLES THIS ROUTINE TO FALL THROUGH TO DRAW.TILE INSTEAD SAVING X-REG TO THE STACK AND USING JSR TO DRAW.TILE 
-
+		;**OPT** Above may not be needed
 	
-					; ;***testing
+					;***testing
 					PHA
 					LDA #$00						
 					STA SAVED_TILE_TYPE				;RESET TO $00 SO NEXT CALL TO THIS ROUTINE WILL USE DEFAULT TILE SOURCE (SCREEN.TILE.DATA) UNLESS SAVED.TILE_TYPE IS EXPRESSLY SET AGAIN. 
@@ -231,115 +231,115 @@ DRAW.TILE.SINGLE ;	;=============DRAW A SINGLE TILE AT THE SPECIFIED SCREEN LOCA
 					PLA
 					
 					
-					; ; LDA #$01
-					; ; STA TROUBLESHOOTING.HOOK
+					; LDA #$01
+					; STA TROUBLESHOOTING.HOOK
 					
 	
 	
-		; ;ACC = TILE_ID
-	; JMP DRAW.TILE.TERRAIN_ENTRANCE
+		;ACC = TILE_ID
+	JMP DRAW.TILE.TERRAIN_ENTRANCE
 
 	
 .CALC.SHAPE.TABLE	;**OPT** Memory. The calculate and copy shape table code is probably the same as in DRAW.COLUMN. Maybe it could be setup as a common routine just above DRAW.TILE that falls through to it or does a JMP. 
 ;CALCULATE SHAPE TABLE ADDRESS	
 
-			STX COW
-	TAX								
-	LDA TILE.SHAPES.LO,X
-	STA AUX_MOVE.START				;SAVE BASE ADDRESS AS START ADDRESS FOR AUX MEMORY MOVE
+			; STX COW
+	; TAX								
+	; LDA TILE.SHAPES.LO,X
+	; STA AUX_MOVE.START				;SAVE BASE ADDRESS AS START ADDRESS FOR AUX MEMORY MOVE
 
-	CLC
-	ADC #SHAPE.SIZE
-	STA AUX_MOVE.END
+	; CLC
+	; ADC #SHAPE.SIZE
+	; STA AUX_MOVE.END
 	
-	LDA TILE.SHAPES.HO,X
-	STA AUX_MOVE.START+$1
-	STA AUX_MOVE.END+$1
+	; LDA TILE.SHAPES.HO,X
+	; STA AUX_MOVE.START+$1
+	; STA AUX_MOVE.END+$1
 
-	CPX #ANIMATION.TILE_RANGE.START	;IS CURRENT TILE AN ANIMATION TILE?
-	BCS	.ANIMATION.FRAME.OFFSET		;IF YES, CALCULATE AN OFFSET TO BASE ADDRESS VIA THE CURRENT ANIMATION FRAME
-	JMP .NOT_ANIMATED
-.ANIMATION.FRAME.OFFSET	
-;ANIMATION.FRAME_STATE holds the current animation frame number for all animation tiles
-;on the view screen. This variable can be used as an offset to the shape table base address
-;to identify the address for the current animation frame for the shape table already loaded
-;into SHAPE in the routine above.
-;
-;Each frame is $20 bytes (!32), so we can use ASL multiplication to calcualte the offset. 
+	; CPX #ANIMATION.TILE_RANGE.START	;IS CURRENT TILE AN ANIMATION TILE?
+	; BCS	.ANIMATION.FRAME.OFFSET		;IF YES, CALCULATE AN OFFSET TO BASE ADDRESS VIA THE CURRENT ANIMATION FRAME
+	; JMP .NOT_ANIMATED
+; .ANIMATION.FRAME.OFFSET	
+; ;ANIMATION.FRAME_STATE holds the current animation frame number for all animation tiles
+; ;on the view screen. This variable can be used as an offset to the shape table base address
+; ;to identify the address for the current animation frame for the shape table already loaded
+; ;into SHAPE in the routine above.
+; ;
+; ;Each frame is $20 bytes (!32), so we can use ASL multiplication to calcualte the offset. 
 	
 	
-	LDA ANIMATION.FRAME_STATE		;LOAD CURRENT ANIMATION FRAME
+	; LDA ANIMATION.FRAME_STATE		;LOAD CURRENT ANIMATION FRAME
 	
-	ASL ;X2						
-	ASL ;X4							
-	ASL ;X8							
-	ASL ;X16						
-	ASL ;X32
+	; ASL ;X2						
+	; ASL ;X4							
+	; ASL ;X8							
+	; ASL ;X16						
+	; ASL ;X32
 
-;**OPT** if there were 4 or 8 animation frames, 8-bit addition could be used for the offset
-;because page boundaries would never be crossed by the offset. 
+; ;**OPT** if there were 4 or 8 animation frames, 8-bit addition could be used for the offset
+; ;because page boundaries would never be crossed by the offset. 
 
-	STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
-	LDA #$00
-	STA OP1+$1						
+	; STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
+	; LDA #$00
+	; STA OP1+$1						
 				
-	LDA AUX_MOVE.START
-	STA OP2
-	LDA AUX_MOVE.START+$1
-	STA OP2+$1
+	; LDA AUX_MOVE.START
+	; STA OP2
+	; LDA AUX_MOVE.START+$1
+	; STA OP2+$1
 		
-;=======INLINE CODE FOR ADC.16========		;**OPT** Memory. the section above and below can be replaced with a simple 16-bit add
-;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+; ;=======INLINE CODE FOR ADC.16========		;**OPT** Memory. the section above and below can be replaced with a simple 16-bit add
+; ;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
 
 
-; DO THE MATH
-	CLD 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.START
+; ; DO THE MATH
+	; CLD 
+    ; CLC                          ;ALWAYS BEFORE ADD
+    ; LDA OP1
+    ; ADC OP2
+    ; STA AUX_MOVE.START
 		 
-    LDA OP1+$1
-    ADC OP2+$1
-    STA AUX_MOVE.START+$1
+    ; LDA OP1+$1
+    ; ADC OP2+$1
+    ; STA AUX_MOVE.START+$1
 	
-;======================================
+; ;======================================
 	
-	LDA AUX_MOVE.END
-	STA OP2
-	LDA AUX_MOVE.END+$1
-	STA OP2+$1
+	; LDA AUX_MOVE.END
+	; STA OP2
+	; LDA AUX_MOVE.END+$1
+	; STA OP2+$1
 	
-;=======INLINE CODE FOR ADC.16========	
-;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+; ;=======INLINE CODE FOR ADC.16========	
+; ;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
 
 
-; DO THE MATH 
-	CLD 		;**OPT** Memory. CLD not needed here. Search for CLD in all sources files. I used to use it a lot more than needed. 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.END
+; ; DO THE MATH 
+	; CLD 		;**OPT** Memory. CLD not needed here. Search for CLD in all sources files. I used to use it a lot more than needed. 
+    ; CLC                          ;ALWAYS BEFORE ADD
+    ; LDA OP1
+    ; ADC OP2
+    ; STA AUX_MOVE.END
 		 
-    LDA OP1+$1
-    ADC OP2+$1	
-    STA AUX_MOVE.END+$1
+    ; LDA OP1+$1
+    ; ADC OP2+$1	
+    ; STA AUX_MOVE.END+$1
 	
-;======================================
+; ;======================================
 
-.NOT_ANIMATED
+; .NOT_ANIMATED
 
-	; LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
-	; STA AUX_MOVE.DEST
-	; STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
-	; LDA /SHAPE.HOPPER0
-	; STA AUX_MOVE.DEST+$1
-	; STA SHAPE+$1			
+	; ; LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
+	; ; STA AUX_MOVE.DEST
+	; ; STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
+	; ; LDA /SHAPE.HOPPER0
+	; ; STA AUX_MOVE.DEST+$1
+	; ; STA SHAPE+$1			
 
-	CLC								;EXECUTE AUX MEMORY MOVE
-	JSR AUX_MOVE
+	; CLC								;EXECUTE AUX MEMORY MOVE
+	; JSR AUX_MOVE
 	
-			LDX COW
+			; LDX COW
 
 	
 ; ;=========ORIGINAL SHAPE TABLE CODE========	
@@ -439,8 +439,8 @@ DRAW.TILE.SINGLE ;	;=============DRAW A SINGLE TILE AT THE SPECIFIED SCREEN LOCA
 	; CLC								;EXECUTE AUX MEMORY MOVE
 	; JSR AUX_MOVE
 
-							LDY SAVED.YREG.LOCAL		
-							JMP .TEST.EXIT
+							; LDY SAVED.YREG.LOCAL		
+							; JMP .TEST.EXIT
 		
 .ALTERNATE_ENTRANCE2
 	LDY SAVED.YREG.LOCAL		
