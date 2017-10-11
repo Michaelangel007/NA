@@ -779,7 +779,10 @@ ANIMATION.TILE.FRAME_CYCLE ; ========DRAWS NEXT ANIMATION FRAME FOR ONE TILE====
 
 
 	
-.CALCULATE.SHAPE.TABLE.ADDRESS	
+.CALCULATE.SHAPE.TABLE.ADDRESS	 ;****OPT** Memory. Consider consolidating with DRAW.TILE.TERRAIN_ENTRANCE (should work for map objects too). 
+								;Would take a speed hit but may not be that bad except when there are large amounts of water and player is moving but a bypass will remain in effect for that anyway most likely.
+								;And, consider that outside of that scenario animation has a delay...so any speed hit could be offset by reducing the delay. 
+								
 	;X-REG: animation frame number
 	TXA
 	ASL ;X2						

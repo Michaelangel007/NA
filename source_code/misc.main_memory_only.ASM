@@ -184,15 +184,6 @@ DRAW.TILE.SINGLE ;	;=============DRAW A SINGLE TILE AT THE SPECIFIED SCREEN LOCA
 .STANDARD.ENTRANCE	
 ;PREPARE SHAPE TABLE
 
-	;connect shape hopper
-	LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
-	STA AUX_MOVE.DEST
-	STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
-	LDA /SHAPE.HOPPER0
-	STA AUX_MOVE.DEST+$1
-	STA SHAPE+$1
-
-			
 	;load data into shape table?
 	;(this branch is used by callin routines which load data into the shape table hopper themselves)
 	LDA DRAW.TILE.SHAPE_TABLE.OVERRIDE ;($00 = load data into shape table from aux memory | $01 don't load data into shape table)
@@ -201,15 +192,46 @@ DRAW.TILE.SINGLE ;	;=============DRAW A SINGLE TILE AT THE SPECIFIED SCREEN LOCA
 	BNE .ALTERNATE_ENTRANCE2
 	;JMP COW.TEST
 ;.COW
+
+
+	;connect shape hopper
+	LDA #SHAPE.HOPPER0				;SAVE SHAPE.HOPPER0 AS THE DESTINATION ADDRESS FOR AUX MOVE
+	STA AUX_MOVE.DEST
+	STA SHAPE						;CONNECTS SHAPE.HOPPER0 TO SHAPE, USED BY DRAW.TILE
+	LDA /SHAPE.HOPPER0
+	STA AUX_MOVE.DEST+$1
+	STA SHAPE+$1
+			;**OPT** Memory. Above may not be needed
+			
+
 			
 .CALCULATE.SHAPE_TABLE.ADDRESS	
-	LDA SAVED_TILE_TYPE ;*OPT** Memory. Speed. Set this up as an ACC parameter, then save it to this variable as the 1st line of code in this routine. Then all the STA's to set this variable by calling routines can be removed. 				;IF A TILE_TYPE IS PRESENT IN THIS VARIABLE, USE IT.
+	LDA SAVED_TILE_TYPE 			;*OPT** Memory. Speed. Set this up as an ACC parameter, then save it to this variable as the 1st line of code in this routine. Then all the STA's to set this variable by calling routines can be removed. 				;IF A TILE_TYPE IS PRESENT IN THIS VARIABLE, USE IT.
 	BNE .REENTRY					;IF NOT, USE SCREEN.TILE.DATA AS THE SOURCE FOR TILE_TYPE
 	;load tile_type of the next tile in current row
 	LDA SCREEN.TILE.DATA,Y					
 .REENTRY
 	STY SAVED.YREG.LOCAL					;SAVING YREG TO A VARIABLE ENABLES US TO AVOID USING X-REG IN THIS ROUTINE, WHICH ENABLES THIS ROUTINE TO FALL THROUGH TO DRAW.TILE INSTEAD SAVING X-REG TO THE STACK AND USING JSR TO DRAW.TILE 
 
+	
+					; ;***testing
+					; PHA
+					; LDA SCREEN.INDEX.TILE_SBYTE,Y
+					; STA	SCREEN.DRAW.CURRENT_BYTE
+					
+					; LDA SCREEN.INDEX.TILE_LINE,Y
+					; STA TILE.LINE.START
+					; STA TILE.LINE
+					; PLA
+					
+					
+					; ; LDA #$01
+					; ; STA TROUBLESHOOTING.HOOK
+					
+	
+	
+		;ACC = TILE_ID
+	JMP DRAW.TILE.TERRAIN_ENTRANCE
 		
 	TAY								
 	LDA TILE.SHAPES.LO,Y
@@ -435,7 +457,29 @@ DRAW.TILE ;			;=============DRAW A SINGLE TILE AT THE LOCATION SPECIFIED======
 	TAY
 	PLA
 	TAX
-	
+
+
+
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP
+			
+			; INC HTAB
+			; JSR UPDATE.CHAR.POS
+			
+				; LDA #$B0
+			; JSR COUT
+			
+			; LDA #$00
+			; STA TROUBLESHOOTING.HOOK
+			
+; .TEMP
+			; LDA TEMP
+
+
+
+			
 	RTS
 
 ERROR
