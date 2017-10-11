@@ -2400,171 +2400,171 @@ OPEN.COMMAND ;open/unlock doors, operate portcullis levers
 PUSH.COMMAND ;push map objects to new location
 @START
 
-			; STA TEMP
-			; LDA TROUBLESHOOTING.HOOK
-			; CMP #$01
-			; BNE .TEMP3
-			; LDA TEXT
-			; LDA $C082				;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
-									; ;REQUIRED FOR BEFORE BRK BECAUSE APPLE MONITOR IS A ROM ROUTINE
-			; JSR CLEAR.TEXT.SCREEN
-			; BRK
-; .TEMP3
-			; LDA TEMP
+			; ; STA TEMP
+			; ; LDA TROUBLESHOOTING.HOOK
+			; ; CMP #$01
+			; ; BNE .TEMP3
+			; ; LDA TEXT
+			; ; LDA $C082				;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
+									; ; ;REQUIRED FOR BEFORE BRK BECAUSE APPLE MONITOR IS A ROM ROUTINE
+			; ; JSR CLEAR.TEXT.SCREEN
+			; ; BRK
+; ; .TEMP3
+			; ; LDA TEMP
 			
-;SET CURRENT COMMAND
-	LDA #$D0			;(P) PUSH
-	STA PLAYER.COMMAND.CURRENT
+; ;SET CURRENT COMMAND
+	; LDA #$D0			;(P) PUSH
+	; STA PLAYER.COMMAND.CURRENT
 	
-;SYNC BACKGROUND AND FOREGROUND GRAPHICS PAGES
-;(prep for when KEYIN.ANIMATION is called, as animation requires the pages to be in sync)
+; ;SYNC BACKGROUND AND FOREGROUND GRAPHICS PAGES
+; ;(prep for when KEYIN.ANIMATION is called, as animation requires the pages to be in sync)
 
-			;**OPT** Memory. Speed. I think this can be removed if I remove the key press abort skipping of copy.screen at the end of the common move routine, which I will probably have to do to get animation for just mobs working even in a key press abort scenario. 
-	;!!!!! BSR BANK1 !!!!
-	JSR COPY.SCREEN.ENTRANCE ;**DON'T REMOVE** (or the screen goes chaotic sometimes when collisions occur with double mover mobs. MO.DRAW must need the graphics pages in sync for some reason). UDPATE: I think this is needed because sometimes, due to key press abort, no copy.screen was done after the last move, so the pages are out of syncing going into MOVE.PASS, which is triggered by non-movement commands like (3)ZAP, Push, Board, etc.
+			; ;**OPT** Memory. Speed. I think this can be removed if I remove the key press abort skipping of copy.screen at the end of the common move routine, which I will probably have to do to get animation for just mobs working even in a key press abort scenario. 
+	; ;!!!!! BSR BANK1 !!!!
+	; JSR COPY.SCREEN.ENTRANCE ;**DON'T REMOVE** (or the screen goes chaotic sometimes when collisions occur with double mover mobs. MO.DRAW must need the graphics pages in sync for some reason). UDPATE: I think this is needed because sometimes, due to key press abort, no copy.screen was done after the last move, so the pages are out of syncing going into MOVE.PASS, which is triggered by non-movement commands like (3)ZAP, Push, Board, etc.
 
 
-;START 		
-	LDA PLAYER.TRANSPORT.ACTIVE	;load player transport status
-	CMP #$FF					;does player have active transport?
-	BNE .INVALID.COMMAND		;if yes, then push cannot be executed. 
+; ;START 		
+	; LDA PLAYER.TRANSPORT.ACTIVE	;load player transport status
+	; CMP #$FF					;does player have active transport?
+	; BNE .INVALID.COMMAND		;if yes, then push cannot be executed. 
 	
-	JSR PLAYER.INPUT.COMMAND_DIRECTION
-		;Y-REG = screen tile location of adjacent screen tile in direction selected
-		;ACC = screen tile location +2 screen tiles in direction selected
-		;ACC = $FF if directon key wasn't proceed (invalid command)
-	CMP #$FF	;was valid directon key entered by player?
-	BNE .CHECK.OBJECT.TYPE	;if yes, the continue to process this command
-	JMP .INVALID.COMMAND ;if no, then exit via invalid command routine
+	; JSR PLAYER.INPUT.COMMAND_DIRECTION
+		; ;Y-REG = screen tile location of adjacent screen tile in direction selected
+		; ;ACC = screen tile location +2 screen tiles in direction selected
+		; ;ACC = $FF if directon key wasn't proceed (invalid command)
+	; CMP #$FF	;was valid directon key entered by player?
+	; BNE .CHECK.OBJECT.TYPE	;if yes, the continue to process this command
+	; JMP .INVALID.COMMAND ;if no, then exit via invalid command routine
 		
-.CHECK.OBJECT.TYPE	
-	;ACC = PLAYER SCREEN LOCATION +2 IN DIRECTION SELECTED
-	STA PLAYER.MOVE.CANDIDATE_TILE_LOC
+; .CHECK.OBJECT.TYPE	
+	; ;ACC = PLAYER SCREEN LOCATION +2 IN DIRECTION SELECTED
+	; STA PLAYER.MOVE.CANDIDATE_TILE_LOC
 	
-	LDX SCREEN.MO_GENERAL.DATA,Y ;load general map object record index from screen array, location = offset 1 tile from player location in the direction of the push command. 	
-	CPX #$FF					;does adjacent tile contain a general map object?
-	BEQ .INVALID.COMMAND		;if not, then push command is not valid
+	; LDX SCREEN.MO_GENERAL.DATA,Y ;load general map object record index from screen array, location = offset 1 tile from player location in the direction of the push command. 	
+	; CPX #$FF					;does adjacent tile contain a general map object?
+	; BEQ .INVALID.COMMAND		;if not, then push command is not valid
 
-	;IS TRANSPORT OBJECT?
-	LDA MAP_OBJECTS.GENERAL+$2,X ;load tile type of map object
-	CMP #TILE_ID.HORSE_C						;BRANCH BASED ON THE TYPE OF TRASNPORT MO AT THE PLAYER LOCATION
-	BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
-	CMP #TILE_ID.FRIGATE1.1
-	BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
-	CMP #TILE_ID.CARAVEL
-	BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
-	CMP #TILE_ID.WYVERN
-	BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
-	CMP #TILE_ID.SKIFF
-	BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type	
-		;**OPT** Memory. Speed. This section could be shorter if transport objects could be identified by byte $3 (use $01-$03 for skiff values, with $01 being no skiffs, so boats are confuse with $00 as a default value), or if the TILE IDs for transport were in a range. 
+	; ;IS TRANSPORT OBJECT?
+	; LDA MAP_OBJECTS.GENERAL+$2,X ;load tile type of map object
+	; CMP #TILE_ID.HORSE_C						;BRANCH BASED ON THE TYPE OF TRASNPORT MO AT THE PLAYER LOCATION
+	; BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
+	; CMP #TILE_ID.FRIGATE1.1
+	; BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
+	; CMP #TILE_ID.CARAVEL
+	; BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
+	; CMP #TILE_ID.WYVERN
+	; BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type
+	; CMP #TILE_ID.SKIFF
+	; BEQ .INVALID.COMMAND		;if yes, then push command cannot be executed on that object type	
+		; ;**OPT** Memory. Speed. This section could be shorter if transport objects could be identified by byte $3 (use $01-$03 for skiff values, with $01 being no skiffs, so boats are confuse with $00 as a default value), or if the TILE IDs for transport were in a range. 
 
-	LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record			
-	CMP #MO.NOT_PUSHABLE.GRE		;is object pushable?
-	BCS .INVALID.COMMAND			;if no, then push command cannot be executed on that object type	
+	; LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record			
+	; CMP #MO.NOT_PUSHABLE.GRE		;is object pushable?
+	; BCS .INVALID.COMMAND			;if no, then push command cannot be executed on that object type	
 
-	;**FALLS THROUGH**
+	; ;**FALLS THROUGH**
 
-.CHECK.OBJECT.DESTINATION
-		;PARM: PLAYER.MOVE.CANDIDATE_TILE_LOC previously set 
+; .CHECK.OBJECT.DESTINATION
+		; ;PARM: PLAYER.MOVE.CANDIDATE_TILE_LOC previously set 
 		 
-	JSR PLAYER.COLLISSION.CHECK	;use player collision check routine on the destination tile of the map object, net of the push		
-	;return value in ACC ($00 = open, $01 = blocked)
-	TAY ;save collision return code
+	; JSR PLAYER.COLLISSION.CHECK	;use player collision check routine on the destination tile of the map object, net of the push		
+	; ;return value in ACC ($00 = open, $01 = blocked)
+	; TAY ;save collision return code
 
-;CLEAR COMMAND VARIABLES (they were only needed for PLAYER.COLLISION.CHECK)
-	LDA #$D0			;(P) PUSH
-	STA PLAYER.COMMAND.LAST
-	LDA #$00			;(P) PUSH
-	STA PLAYER.COMMAND.CURRENT
+; ;CLEAR COMMAND VARIABLES (they were only needed for PLAYER.COLLISION.CHECK)
+	; LDA #$D0			;(P) PUSH
+	; STA PLAYER.COMMAND.LAST
+	; LDA #$00			;(P) PUSH
+	; STA PLAYER.COMMAND.CURRENT
 	
-	CPY #$00 ;restore collision return code ($00 = open, $01 = blocked)
-	BEQ	.CHANGE.OBJECT.LOCATION	;move is permitted, proceed to move map object
-								;if move is note permitted, player and object swap locations
+	; CPY #$00 ;restore collision return code ($00 = open, $01 = blocked)
+	; BEQ	.CHANGE.OBJECT.LOCATION	;move is permitted, proceed to move map object
+								; ;if move is note permitted, player and object swap locations
 
-	;**FALLS THROUGH**
+	; ;**FALLS THROUGH**
 
-.SWAP.OBJECT.LOCATION
-;swap object and player location
-	LDA SAVED.ACC.GLOBAL1	;restore ASCII code of direction key pressed
-	CMP #$8B			;UP ARROW
-	BEQ .SWAP_NORTH
-	CMP #$8A			;DOWN ARROW
-	BEQ .SWAP_SOUTH
-	CMP #$95			;RIGHT ARROW
-	BEQ .SWAP_EAST
-	CMP #$88			;LEFT ARROW
-	BEQ	.SWAP_WEST 
-	;**SHOULD NEVER FALL THROUGH**
-	;(I don't think an error trap is needed as this section is exactly like the one above which does have an error trap in the form of report an invalid command to the player)
+; .SWAP.OBJECT.LOCATION
+; ;swap object and player location
+	; LDA SAVED.ACC.GLOBAL1	;restore ASCII code of direction key pressed
+	; CMP #$8B			;UP ARROW
+	; BEQ .SWAP_NORTH
+	; CMP #$8A			;DOWN ARROW
+	; BEQ .SWAP_SOUTH
+	; CMP #$95			;RIGHT ARROW
+	; BEQ .SWAP_EAST
+	; CMP #$88			;LEFT ARROW
+	; BEQ	.SWAP_WEST 
+	; ;**SHOULD NEVER FALL THROUGH**
+	; ;(I don't think an error trap is needed as this section is exactly like the one above which does have an error trap in the form of report an invalid command to the player)
 
-.SWAP_NORTH
-	INC MAP_OBJECTS.GENERAL+$1,X			;+1 TO Y POSITION
+; .SWAP_NORTH
+	; INC MAP_OBJECTS.GENERAL+$1,X			;+1 TO Y POSITION
 		
-	JMP NORTH ;execute player move in direction of push	
+	; JMP NORTH ;execute player move in direction of push	
 
 
-.INVALID.COMMAND
-;SET LAST COMMAND
-	LDA #$D0			;(P) PUSH
-	STA PLAYER.COMMAND.LAST
+; .INVALID.COMMAND
+; ;SET LAST COMMAND
+	; LDA #$D0			;(P) PUSH
+	; STA PLAYER.COMMAND.LAST
 
-;CLEAR CURRENT COMMAND ;**OPT** Memory. Speed. Need to clear current command until all command subroutines set the PLAYER.CURRENT.COMMAND variable. 
-	LDA #$00			;(P) PUSH
-	STA PLAYER.COMMAND.CURRENT
+; ;CLEAR CURRENT COMMAND ;**OPT** Memory. Speed. Need to clear current command until all command subroutines set the PLAYER.CURRENT.COMMAND variable. 
+	; LDA #$00			;(P) PUSH
+	; STA PLAYER.COMMAND.CURRENT
 	
-	JSR PLAY.SOUND.DUMB_ASS
-	JMP GAME.LAUNCH							;ALL NON-MOVEMENT COMMANDS MUST EXIT VIA JMP TO GAME.LAUNCH TO AVOID PROBLEMS WITH KEY PRESS ABORTS. SEE SUBROUTINE DOCUMENTATION FOR GAME.PRIMARY_LOOP FOR DETAILS.
+	; JSR PLAY.SOUND.DUMB_ASS
+	; JMP GAME.LAUNCH							;ALL NON-MOVEMENT COMMANDS MUST EXIT VIA JMP TO GAME.LAUNCH TO AVOID PROBLEMS WITH KEY PRESS ABORTS. SEE SUBROUTINE DOCUMENTATION FOR GAME.PRIMARY_LOOP FOR DETAILS.
 
 		
-.SWAP_SOUTH
-	DEC MAP_OBJECTS.GENERAL+$1,X			;-1 TO Y POSITION	
-	JMP SOUTH ;execute player move in direction of push	
+; .SWAP_SOUTH
+	; DEC MAP_OBJECTS.GENERAL+$1,X			;-1 TO Y POSITION	
+	; JMP SOUTH ;execute player move in direction of push	
 
-.SWAP_EAST
-	DEC MAP_OBJECTS.GENERAL,X				;-1 TO X POSITION
-	JMP EAST ;execute player move in direction of push	
+; .SWAP_EAST
+	; DEC MAP_OBJECTS.GENERAL,X				;-1 TO X POSITION
+	; JMP EAST ;execute player move in direction of push	
 
 
-.SWAP_WEST
-	INC MAP_OBJECTS.GENERAL,X				;+1 TO X POSITION
-	JMP WEST ;execute player move in direction of push	
+; .SWAP_WEST
+	; INC MAP_OBJECTS.GENERAL,X				;+1 TO X POSITION
+	; JMP WEST ;execute player move in direction of push	
 		
 	
-.CHANGE.OBJECT.LOCATION
-	LDA SAVED.ACC.GLOBAL1	;restore ASCII code of direction key pressed
-	CMP #$8B			;UP ARROW
-	BEQ .PUSH_NORTH
-	CMP #$8A			;DOWN ARROW
-	BEQ .PUSH_SOUTH
-	CMP #$95			;RIGHT ARROW
-	BEQ .PUSH_EAST
-	CMP #$88			;LEFT ARROW
-	BEQ	.PUSH_WEST 
-	;**SHOULD NEVER FALL THROUGH**
-	;(I don't think an error trap is needed as this section is exactly like the one above which does have an error trap in the form of report an invalid command to the player)
+; .CHANGE.OBJECT.LOCATION
+	; LDA SAVED.ACC.GLOBAL1	;restore ASCII code of direction key pressed
+	; CMP #$8B			;UP ARROW
+	; BEQ .PUSH_NORTH
+	; CMP #$8A			;DOWN ARROW
+	; BEQ .PUSH_SOUTH
+	; CMP #$95			;RIGHT ARROW
+	; BEQ .PUSH_EAST
+	; CMP #$88			;LEFT ARROW
+	; BEQ	.PUSH_WEST 
+	; ;**SHOULD NEVER FALL THROUGH**
+	; ;(I don't think an error trap is needed as this section is exactly like the one above which does have an error trap in the form of report an invalid command to the player)
 
-.PUSH_NORTH
-	DEC MAP_OBJECTS.GENERAL+$1,X			;-1 TO Y POSITION	
+; .PUSH_NORTH
+	; DEC MAP_OBJECTS.GENERAL+$1,X			;-1 TO Y POSITION	
 		
-	JMP NORTH ;execute player move in direction of push	
+	; JMP NORTH ;execute player move in direction of push	
 	
-.PUSH_SOUTH
-	INC MAP_OBJECTS.GENERAL+$1,X			;+1 TO Y POSITION
-	JMP SOUTH ;execute player move in direction of push	
+; .PUSH_SOUTH
+	; INC MAP_OBJECTS.GENERAL+$1,X			;+1 TO Y POSITION
+	; JMP SOUTH ;execute player move in direction of push	
 
-.PUSH_EAST
-	INC MAP_OBJECTS.GENERAL,X				;+1 TO X POSITION
-	JMP EAST ;execute player move in direction of push	
+; .PUSH_EAST
+	; INC MAP_OBJECTS.GENERAL,X				;+1 TO X POSITION
+	; JMP EAST ;execute player move in direction of push	
 
 
-.PUSH_WEST
-	DEC MAP_OBJECTS.GENERAL,X				;-1 TO X POSITION
-		; JSR PREP.BRK
-		; LDA MAP_OBJECTS.GENERAL,X
-		; LDY #$AB
-		; BRK
-	JMP WEST ;execute player move in direction of push	
+; .PUSH_WEST
+	; DEC MAP_OBJECTS.GENERAL,X				;-1 TO X POSITION
+		; ; JSR PREP.BRK
+		; ; LDA MAP_OBJECTS.GENERAL,X
+		; ; LDY #$AB
+		; ; BRK
+	; JMP WEST ;execute player move in direction of push	
 	
 @END
 	
