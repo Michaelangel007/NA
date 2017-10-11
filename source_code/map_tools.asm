@@ -261,7 +261,6 @@ LOAD.NEW.SHAPES ;and swap routines specific to map type
 @END
 
 
-
 .MAP_TYPE.CASTLE
 @START
 ;LOAD FILE "DATA.SHP.CASTLE_COURTYARD"

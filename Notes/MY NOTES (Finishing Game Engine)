@@ -582,8 +582,8 @@ with the upper left most tile of the light pattern. (!31 bytes)
 	
 	For example, to the TOD check before the main loop starts, and if the
 	TOD is such the swap isn't needed then save a JMP instuction to the memory addres where the first
-	line of the swap code is stored inside the loop. Before doig this, fully investigate the current
-	implimentation I recall there is stuff setup in event manager and possibly on wormhole entry
+	line of the swap code is stored inside the loop. Before doing this, fully investigate the current
+	implimentation. I recall there is stuff setup in event manager and possibly on wormhole entry
 	that decides whether to initate the copy. Whatever logic it's using has to be considered in
 	a scenerio where day tiles are displayed by default and then if night, do the swap. It seem like
 	it should be that simple. Hopefully the complexity of the existing setup will just be irrelivent

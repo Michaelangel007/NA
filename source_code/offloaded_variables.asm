@@ -961,6 +961,7 @@ DATA.SPR.WRITE.ADDRESS	 .EQ NPC.SCHEDULE
 @START
 ;(hold data which determines the tile makeup on the view screen)
 
+;**OPT** Memory. SCREEN.DARK.DATA and SCREEN.DARK.DATA_BEFORE may be able to be merged. Store the SCREEN.DARK.DATA_BEFORE status in SCREEN.DARK.DATA by setting the high-bit. 
 
 ;SCREEN.TILE.DATA 			.BS $BB						;HOLDS TILE_TYPE DATA FOR EACH TILE ON VIEW SCREEN
 SCREEN.TILE.DATA 			.EQ $0800	;$BB bytes.					;HOLDS TILE_TYPE DATA FOR EACH TILE ON VIEW SCREEN
