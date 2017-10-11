@@ -14,14 +14,15 @@
 ;
 ;*Sunrise/Sunset
 ;
-;*TILE_SWAP: Sunrise/Sunset
-;	The purpose of this event is to change the color of certain tiles (currently floor and street) by swapping the 
-;	shape tables associated with specific tile IDs. The swap is initiated by CHECK.SUN.STATUS when sunrise or sunset 
-;	first begins. No screen draw is done at first to force the new tile shapes onto the screen. As the sunrise/set 
-;	phases play out, only a few tiles with the new shape table are drawn as screen scrolling handles most of the map
-;	movement. This makes the introduction of the new tile shapes gradual. Then, in the last phase of the 
-;	sunrise/sunset, a full screen draw is done via TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW to complete the process.  
-;	TILE_SWAP.INIT.SUNRISE_SUNSET needs to be run at certains times as well, see it's docs for more details. 
+;=====OLD====
+; ;*TILE_SWAP: Sunrise/Sunset
+; ;	The purpose of this event is to change the color of certain tiles (currently floor and street) by swapping the 
+; ;	shape tables associated with specific tile IDs. The swap is initiated by CHECK.SUN.STATUS when sunrise or sunset 
+; ;	first begins. No screen draw is done at first to force the new tile shapes onto the screen. As the sunrise/set 
+; ;	phases play out, only a few tiles with the new shape table are drawn as screen scrolling handles most of the map
+; ;	movement. This makes the introduction of the new tile shapes gradual. Then, in the last phase of the 
+; ;	sunrise/sunset, a full screen draw is done via TILE_SWAP.SUNRISE_SUNSET.SCREEN_DRAW to complete the process.  
+; ;	TILE_SWAP.INIT.SUNRISE_SUNSET needs to be run at certains times as well, see it's docs for more details. 
 ;
 ;=================================================================================
 
@@ -67,8 +68,8 @@ CHECK.SUN.STATUS
 	STA TIME.SUN.COUNTER
 	STA TIME.SUN.SUB_COUNTER
 
-	;SET DAY TILES
-	JSR TILE_SWAP.SUN.SET_DAY ;use day tiles (red)
+	; ;SET DAY TILES
+	; JSR TILE_SWAP.SUN.SET_DAY ;use day tiles (red)
 
 	JMP .NEXT.EVENT
 	
@@ -89,8 +90,8 @@ CHECK.SUN.STATUS
 	LDA #$00
 	STA TIME.SUN.SUB_COUNTER
 
-	;SET NIGHT TILES	
-	JSR TILE_SWAP.SUN.SET_NIGHT ;use night tiles (blue)
+	; ;SET NIGHT TILES	
+	; JSR TILE_SWAP.SUN.SET_NIGHT ;use night tiles (blue)
 
 .NEXT.EVENT
 
@@ -402,144 +403,144 @@ TIME.DISPLAY ;=========DISPLAYS TIME ON VIDEO SCREEN======
 @END
 
 
-TILE_SWAP.INIT.SUNRISE_SUNSET
+;TILE_SWAP.INIT.SUNRISE_SUNSET
 @START
-;PARAMETERS: ACC ($00 = init buffers | >=$01 = don't init buffers)
-;ENTRANCE: DIRECT
-;RETURN: updated shape tables
+; ;PARAMETERS: ACC ($00 = init buffers | >=$01 = don't init buffers)
+; ;ENTRANCE: DIRECT
+; ;RETURN: updated shape tables
 
-;=====================SUBROUTINE DOCUMENTATION====================================
-;
-;This routine called upon building entrance, and by GAME.LAUNCH to evaluate the time
-;of day and set the day or night floor/street tiles accordingly.
-;
-;(NO LONGER USED)-About Initializing the Buffers
-;The first step in doing this is to init the shape table buffers for the day/night tiles.
-;However, this only needs to be done if the building shape table has just been loaded. 
-;
-;the buffers need to be init because the building shape table is setup with a red floor tile and
-;a blue street tile. These are copied to the red and blue buffers. 
-;
-;-After Buffers are Init, if applicable
-;The buffers are init in .LOAD.MISC.SHAPES (LOADER.P.ASM) during game boot, so this process
-;doen't need to be repeated. 
-;Based on time of day, the buffers are copied into the floor 
-;and street shape tables so that floor and street are the same
-;shape and same color.  
-;
-;If it is sunrise/day, swap in the daytime tiles.
-;If it is sunset/night, swap in the nightime tiles.  
-;
-;For more documentation on the overall implementation of this tile swap event, 
-;see the Event_Manager.ASM documentation at the top of this file.
-;
-;=================================================================================
+; ;=====================SUBROUTINE DOCUMENTATION====================================
+; ;
+; ;This routine called upon building entrance, and by GAME.LAUNCH to evaluate the time
+; ;of day and set the day or night floor/street tiles accordingly.
+; ;
+; ;(NO LONGER USED)-About Initializing the Buffers
+; ;The first step in doing this is to init the shape table buffers for the day/night tiles.
+; ;However, this only needs to be done if the building shape table has just been loaded. 
+; ;
+; ;the buffers need to be init because the building shape table is setup with a red floor tile and
+; ;a blue street tile. These are copied to the red and blue buffers. 
+; ;
+; ;-After Buffers are Init, if applicable
+; ;The buffers are init in .LOAD.MISC.SHAPES (LOADER.P.ASM) during game boot, so this process
+; ;doen't need to be repeated. 
+; ;Based on time of day, the buffers are copied into the floor 
+; ;and street shape tables so that floor and street are the same
+; ;shape and same color.  
+; ;
+; ;If it is sunrise/day, swap in the daytime tiles.
+; ;If it is sunset/night, swap in the nightime tiles.  
+; ;
+; ;For more documentation on the overall implementation of this tile swap event, 
+; ;see the Event_Manager.ASM documentation at the top of this file.
+; ;
+; ;=================================================================================
 
-;**UPDATE: buffer is now init in LOADER.P.ASM
-;an init each time building is entered is not needed.
+; ;**UPDATE: buffer is now init in LOADER.P.ASM
+; ;an init each time building is entered is not needed.
 
-	;ACC = parameter: ($00 = init buffers | >=$01 = don't init buffers)
-	; CMP #$01 ;is ACC parm set to init buffer?
-	; BCS .START ;if no, then skip init buffer
-	;**FALLS THROUGH**
+	; ;ACC = parameter: ($00 = init buffers | >=$01 = don't init buffers)
+	; ; CMP #$01 ;is ACC parm set to init buffer?
+	; ; BCS .START ;if no, then skip init buffer
+	; ;**FALLS THROUGH**
 
-.INIT.BUFFER	
-	;copy red & blue floor tiles to an aux memory buffer
-	;JSR TILE_SWAP.SUN.INIT.BUFFERS ;this routine is in BSR: bank1
+; .INIT.BUFFER	
+	; ;copy red & blue floor tiles to an aux memory buffer
+	; ;JSR TILE_SWAP.SUN.INIT.BUFFERS ;this routine is in BSR: bank1
 
-.START
+; .START
 
-;determine time of day
-	LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
-	CMP #$00 ;sunrise?
-	BEQ .SET.DAY.TILES
-	CMP #$01 ;day
-	BEQ .SET.DAY.TILES
-	CMP #$02 ;sunset?
-	BEQ .SET.NIGHT.TILES	
-	;ACC assumed = #$03, night
-
-.SET.NIGHT.TILES
-	JSR TILE_SWAP.SUN.SET_NIGHT ;use night tiles (blue)
-	JMP .TILE_SWAP.INIT.DONE
-	
-.SET.DAY.TILES
-
-;DEBUG: screen looks okay
-
-
-
-	; ;---------------------
-	
-			; ;
-			; STA TEMP
-			; LDA TROUBLESHOOTING.HOOK
-			; CMP #$01
-			; BNE .TEMP
-			; jsr keyin
-
-		; ;GET MAIN BSR MEMORY-STATUS UPON ENTRY
-			; LDA $C012		;ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
-			; STA BSR.STATE
-			; LDA $C011		;BANK1/BANK2 soft-switch flag (bit7 = 1: BANK2, bit7=0 BANK1)
-			; STA BANK.STATE
-			
-			
-			; lda #$aa
-			; ldx BSR.STATE
-			; ldy BANK.STATE
-			; ; ldx #TILE_SWAP.SUN.SET_DAY
-			; ; ldy /TILE_SWAP.SUN.SET_DAY
-			; JSR PREP.BRK
-			; BRK
-; .TEMP
-			; LDA TEMP
-	; ;---------------------	
-	
-
-	
-	JSR TILE_SWAP.SUN.SET_DAY ;use day tiles (red)
-	;**FALLS THROUGH**
-	
-	
-.TILE_SWAP.INIT.DONE
-
-	RTS
-	
-	
-;****OLD METHOD TIED TO SUN STATUS AND SUN STATUS COUNTER
-; .IS.NIGHT
+; ;determine time of day
 	; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
-	; CMP #$03
-	; BNE .IS.SUNSET
-	; JMP .SET.NIGHT.TILES	
-; .IS.SUNSET
-	; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
-	; CMP #$02
-	; BNE .IS.DAY	
-	; LDA TIME.SUN.COUNTER	;$00-$04: counts down from $04 for sunset, counts up from $00 for sunrise. each value is a phase of the sunset/sunrise
-	; CMP #$02				;if the counter is less than $02, it is almost fully night
-	; BCS .IS.DAY			;if the counter is $02 or greater, don't trigger the night tiles here because once the counter reaches $01 the night tiles will be triggered via the event manager
+	; CMP #$00 ;sunrise?
+	; BEQ .SET.DAY.TILES
+	; CMP #$01 ;day
+	; BEQ .SET.DAY.TILES
+	; CMP #$02 ;sunset?
+	; BEQ .SET.NIGHT.TILES	
+	; ;ACC assumed = #$03, night
+
 ; .SET.NIGHT.TILES
 	; JSR TILE_SWAP.SUN.SET_NIGHT ;use night tiles (blue)
 	; JMP .TILE_SWAP.INIT.DONE
 	
-; .IS.DAY
-	; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
-	; CMP #$01
-	; BNE .IMPUTE.SUNRISE
-	; JMP .SET.DAY.TILES	
-; .IMPUTE.SUNRISE ;from check aboe, we know TIME.SUN.STATUS !=$03, $02, or $01. The only value left in the valid range for this variable is $00, which is sunrise. 
-	; ; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
-	; ; CMP #$00
-	; ; BNE .IS.DAY	
-	; LDA TIME.SUN.COUNTER	;$00-$04: counts down from $04 for sunset, counts up from $00 for sunrise. each value is a phase of the sunset/sunrise
-	; CMP #$02				;if the counter is greater than $02, it is almost fully day
-	; BCS .SET.DAY.TILES		;if the counter is less than $02, don't trigger the day tiles here because once the counter reaches $03 the day tiles will be triggered via the event manager
-	; JMP .SET.NIGHT.TILES
 ; .SET.DAY.TILES
+
+; ;DEBUG: screen looks okay
+
+
+
+	; ; ;---------------------
+	
+			; ; ;
+			; ; STA TEMP
+			; ; LDA TROUBLESHOOTING.HOOK
+			; ; CMP #$01
+			; ; BNE .TEMP
+			; ; jsr keyin
+
+		; ; ;GET MAIN BSR MEMORY-STATUS UPON ENTRY
+			; ; LDA $C012		;ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
+			; ; STA BSR.STATE
+			; ; LDA $C011		;BANK1/BANK2 soft-switch flag (bit7 = 1: BANK2, bit7=0 BANK1)
+			; ; STA BANK.STATE
+			
+			
+			; ; lda #$aa
+			; ; ldx BSR.STATE
+			; ; ldy BANK.STATE
+			; ; ; ldx #TILE_SWAP.SUN.SET_DAY
+			; ; ; ldy /TILE_SWAP.SUN.SET_DAY
+			; ; JSR PREP.BRK
+			; ; BRK
+; ; .TEMP
+			; ; LDA TEMP
+	; ; ;---------------------	
+	
+
+	
 	; JSR TILE_SWAP.SUN.SET_DAY ;use day tiles (red)
 	; ;**FALLS THROUGH**
+	
+	
+; .TILE_SWAP.INIT.DONE
+
+	; RTS
+	
+	
+; ;****OLD METHOD TIED TO SUN STATUS AND SUN STATUS COUNTER
+; ; .IS.NIGHT
+	; ; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
+	; ; CMP #$03
+	; ; BNE .IS.SUNSET
+	; ; JMP .SET.NIGHT.TILES	
+; ; .IS.SUNSET
+	; ; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
+	; ; CMP #$02
+	; ; BNE .IS.DAY	
+	; ; LDA TIME.SUN.COUNTER	;$00-$04: counts down from $04 for sunset, counts up from $00 for sunrise. each value is a phase of the sunset/sunrise
+	; ; CMP #$02				;if the counter is less than $02, it is almost fully night
+	; ; BCS .IS.DAY			;if the counter is $02 or greater, don't trigger the night tiles here because once the counter reaches $01 the night tiles will be triggered via the event manager
+; ; .SET.NIGHT.TILES
+	; ; JSR TILE_SWAP.SUN.SET_NIGHT ;use night tiles (blue)
+	; ; JMP .TILE_SWAP.INIT.DONE
+	
+; ; .IS.DAY
+	; ; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
+	; ; CMP #$01
+	; ; BNE .IMPUTE.SUNRISE
+	; ; JMP .SET.DAY.TILES	
+; ; .IMPUTE.SUNRISE ;from check aboe, we know TIME.SUN.STATUS !=$03, $02, or $01. The only value left in the valid range for this variable is $00, which is sunrise. 
+	; ; ; LDA TIME.SUN.STATUS ;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
+	; ; ; CMP #$00
+	; ; ; BNE .IS.DAY	
+	; ; LDA TIME.SUN.COUNTER	;$00-$04: counts down from $04 for sunset, counts up from $00 for sunrise. each value is a phase of the sunset/sunrise
+	; ; CMP #$02				;if the counter is greater than $02, it is almost fully day
+	; ; BCS .SET.DAY.TILES		;if the counter is less than $02, don't trigger the day tiles here because once the counter reaches $03 the day tiles will be triggered via the event manager
+	; ; JMP .SET.NIGHT.TILES
+; ; .SET.DAY.TILES
+	; ; JSR TILE_SWAP.SUN.SET_DAY ;use day tiles (red)
+	; ; ;**FALLS THROUGH**
 
 @END
 	

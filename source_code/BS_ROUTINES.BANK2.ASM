@@ -51,63 +51,63 @@ TILE_SWAP.SUN ;setup in BSR because it copies between AUX memory locations
 	; RTS
 @END
 
-TILE_SWAP.SUN.SET_DAY
+;TILE_SWAP.SUN.SET_DAY
 @START
 
-;DEBUG: screen goes crazy, town displays with streets in solid white and game hands. The page should not
-;have fliped yet. The hook below doesn't triger
+; ;DEBUG: screen goes crazy, town displays with streets in solid white and game hands. The page should not
+; ;have fliped yet. The hook below doesn't triger
 
 	
-	STA $C003 ;read enable aux ($200 - $BFFF)
-	STA $C005 ;write enable aux ($200 - $BFFF)
+	; STA $C003 ;read enable aux ($200 - $BFFF)
+	; STA $C005 ;write enable aux ($200 - $BFFF)
 
-	LDX #$00
-.LOOP
-	LDA SHAPE_BUFFER.FLOOR.BRICK.ORANGE,X	
-	STA SHAPE.FLOOR.BRICK,X
-	STA SHAPE.PATH.FLOOR.BRICK,X
+	; LDX #$00
+; .LOOP
+	; LDA SHAPE_BUFFER.FLOOR.BRICK.ORANGE,X	
+	; STA SHAPE.FLOOR.BRICK,X
+	; STA SHAPE.PATH.FLOOR.BRICK,X
 
-	LDA SHAPE_BUFFER.STREET.BRICK.ORANGE,X	
-	STA SHAPE.STREET.BRICK,X
+	; LDA SHAPE_BUFFER.STREET.BRICK.ORANGE,X	
+	; STA SHAPE.STREET.BRICK,X
 
-	LDA SHAPE_BUFFER.STREET.GRAVEL.ORANGE,X	
-	STA SHAPE.STREET.GRAVEL,X
+	; LDA SHAPE_BUFFER.STREET.GRAVEL.ORANGE,X	
+	; STA SHAPE.STREET.GRAVEL,X
 
-	INX
-	CPX #TILE.SHAPE.SIZE
-	BNE .LOOP
+	; INX
+	; CPX #TILE.SHAPE.SIZE
+	; BNE .LOOP
 
-	STA $C002 ;read enable main ($200 - $BFFF)
-	STA $C004 ;write enable main ($200 - $BFFF)
+	; STA $C002 ;read enable main ($200 - $BFFF)
+	; STA $C004 ;write enable main ($200 - $BFFF)
 
-	RTS
+	; RTS
 @END
 	
-TILE_SWAP.SUN.SET_NIGHT
+;TILE_SWAP.SUN.SET_NIGHT
 @START
-	STA $C003 ;read enable aux ($200 - $BFFF)
-	STA $C005 ;write enable aux ($200 - $BFFF)
+	; STA $C003 ;read enable aux ($200 - $BFFF)
+	; STA $C005 ;write enable aux ($200 - $BFFF)
 
-	LDX #$00
-.LOOP
-	LDA SHAPE_BUFFER.FLOOR.BRICK.BLUE,X	
-	STA SHAPE.FLOOR.BRICK,X
-	STA SHAPE.PATH.FLOOR.BRICK,X
+	; LDX #$00
+; .LOOP
+	; LDA SHAPE_BUFFER.FLOOR.BRICK.BLUE,X	
+	; STA SHAPE.FLOOR.BRICK,X
+	; STA SHAPE.PATH.FLOOR.BRICK,X
 
-	LDA SHAPE_BUFFER.STREET.BRICK.BLUE,X	
-	STA SHAPE.STREET.BRICK,X
+	; LDA SHAPE_BUFFER.STREET.BRICK.BLUE,X	
+	; STA SHAPE.STREET.BRICK,X
 
-	LDA SHAPE_BUFFER.STREET.GRAVEL.BLUE,X	
-	STA SHAPE.STREET.GRAVEL,X
+	; LDA SHAPE_BUFFER.STREET.GRAVEL.BLUE,X	
+	; STA SHAPE.STREET.GRAVEL,X
 	
-	INX
-	CPX #TILE.SHAPE.SIZE
-	BNE .LOOP
+	; INX
+	; CPX #TILE.SHAPE.SIZE
+	; BNE .LOOP
 	
-	STA $C002 ;read enable main ($200 - $BFFF)
-	STA $C004 ;write enable main ($200 - $BFFF)
+	; STA $C002 ;read enable main ($200 - $BFFF)
+	; STA $C004 ;write enable main ($200 - $BFFF)
 
-	RTS
+	; RTS
 @END
 	
 

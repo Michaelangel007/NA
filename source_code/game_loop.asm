@@ -1047,8 +1047,10 @@ GAME.LAUNCH ;=====JMP HERE TO REDRAW SCREEN AT CURRENT GMAP POSITION
 	;**FALLS THROUGH**				;if yes
 	
 		;**BUILDING ONLY. Setup a special section if a lot of building only stuff gets added to this code section
-		;LDA #$01 ;parameter: don't init shape buffers, since a shape table was just loaded
-	JSR TILE_SWAP.INIT.SUNRISE_SUNSET ;facilitates the swapping of daytile and nighttime tiles.
+		
+		
+		; ;LDA #$01 ;parameter: don't init shape buffers, since a shape table was just loaded
+	; JSR TILE_SWAP.INIT.SUNRISE_SUNSET ;facilitates the swapping of daytile and nighttime tiles.
 
 .INIT.BUILDING.COMPLETE
 

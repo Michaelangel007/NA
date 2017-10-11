@@ -247,8 +247,8 @@ LOAD.NEW.SHAPES ;and swap routines specific to map type
 
 	
 .OTHER
-		;LDA #$00 ;parameter: init shape buffers, since a shape table was just loaded
-	JSR TILE_SWAP.INIT.SUNRISE_SUNSET ;facilitates the swapping of daytile and nighttime tiles.
+		; ;LDA #$00 ;parameter: init shape buffers, since a shape table was just loaded
+	; JSR TILE_SWAP.INIT.SUNRISE_SUNSET ;facilitates the swapping of daytile and nighttime tiles.
 
 
 ;DEBUG: screen not okay
@@ -297,9 +297,9 @@ LOAD.NEW.SHAPES ;and swap routines specific to map type
 	;don't call LOAD.SRTN.BUILDING, because that swaps out the zone tools will be needed to load the new map. 
 
 
-.OTHER3
-		;LDA #$00 ;parameter: init shape buffers, since a shape table was just loaded
-	JSR TILE_SWAP.INIT.SUNRISE_SUNSET ;facilitates the swapping of daytile and nighttime tiles.
+; .OTHER3
+		; ;LDA #$00 ;parameter: init shape buffers, since a shape table was just loaded
+	; JSR TILE_SWAP.INIT.SUNRISE_SUNSET ;facilitates the swapping of daytile and nighttime tiles.
 
 .SHAPE.LOAD.DONE3
 
