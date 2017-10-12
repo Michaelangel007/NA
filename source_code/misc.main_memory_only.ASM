@@ -491,53 +491,77 @@ DRAW.TILE.TERRAIN_ENTRANCE
 ;**OPT** if there were 4 or 8 animation frames, 8-bit addition could be used for the offset
 ;because page boundaries would never be crossed by the offset. 
 
-	STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
-	LDA #$00
-	STA OP1+$1						
-				
-	LDA AUX_MOVE.START
-	STA OP2
-	LDA AUX_MOVE.START+$1
-	STA OP2+$1
-		
-;=======INLINE CODE FOR ADC.16========		;**OPT** Memory. the section above and below can be replaced with a simple 16-bit add
+	PHA 	;save animation frame offset
+
 ;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+	CLC
+	ADC AUX_MOVE.START+$0
+	STA AUX_MOVE.START+$0
+	LDA AUX_MOVE.START+$1
+	ADC #$00
+	STA AUX_MOVE.START+$1
 
 
-; DO THE MATH
-	CLD 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.START
-		 
-    LDA OP1+$1
-    ADC OP2+$1
-    STA AUX_MOVE.START+$1
-	
-;======================================
-	
-	LDA AUX_MOVE.END
-	STA OP2
-	LDA AUX_MOVE.END+$1
-	STA OP2+$1
-	
-;=======INLINE CODE FOR ADC.16========	
 ;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+	PLA 	;restore animation frame offset
 
-
-; DO THE MATH 
-	CLD 		;**OPT** Memory. CLD not needed here. Search for CLD in all sources files. I used to use it a lot more than needed. 
-    CLC                          ;ALWAYS BEFORE ADD
-    LDA OP1
-    ADC OP2
-    STA AUX_MOVE.END
-		 
-    LDA OP1+$1
-    ADC OP2+$1	
-    STA AUX_MOVE.END+$1
+	CLC
+	ADC AUX_MOVE.END+$0
+	STA AUX_MOVE.END+$0
+	LDA AUX_MOVE.END+$1
+	ADC #$00
+	STA AUX_MOVE.END+$1
 	
-;======================================
+	
+; ;--------------
+
+	; STA OP1							;SAVE RESULT OF MULTIPLCATION (ASLs) ABOVE				
+	; LDA #$00
+	; STA OP1+$1						
+				
+	; LDA AUX_MOVE.START
+	; STA OP2
+	; LDA AUX_MOVE.START+$1
+	; STA OP2+$1
+		
+; ;=======INLINE CODE FOR ADC.16========		;**OPT** Memory. the section above and below can be replaced with a simple 16-bit add
+; ;AUX_MOVE.START(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+
+
+; ; DO THE MATH
+	; CLD 
+    ; CLC                          ;ALWAYS BEFORE ADD
+    ; LDA OP1
+    ; ADC OP2
+    ; STA AUX_MOVE.START
+		 
+    ; LDA OP1+$1
+    ; ADC OP2+$1
+    ; STA AUX_MOVE.START+$1
+	
+; ;======================================
+	
+	; LDA AUX_MOVE.END
+	; STA OP2
+	; LDA AUX_MOVE.END+$1
+	; STA OP2+$1
+	
+; ;=======INLINE CODE FOR ADC.16========	
+; ;AUX_MOVE.END(2)+ ACC(1) [ANIMATION FRAME OFFSET]
+
+
+; ; DO THE MATH 
+	; CLD 		;**OPT** Memory. CLD not needed here. Search for CLD in all sources files. I used to use it a lot more than needed. 
+    ; CLC                          ;ALWAYS BEFORE ADD
+    ; LDA OP1
+    ; ADC OP2
+    ; STA AUX_MOVE.END
+		 
+    ; LDA OP1+$1
+    ; ADC OP2+$1	
+    ; STA AUX_MOVE.END+$1
+	
+; ;======================================
 
 .NOT_ANIMATED
 
