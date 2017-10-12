@@ -509,6 +509,8 @@ GENERATE.DEBUG.LOG
 ;CONTROL VIA A JMP TO GAME.LOADER2
 
 
+;*****ENTRANCE******
+GAME.SESSION.ENTRANCE
 GAME.SETUP ;one time things that don't need to be done ever again, even for a full screen draw
 @START
 

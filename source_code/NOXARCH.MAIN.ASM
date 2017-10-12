@@ -2061,7 +2061,7 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 	;enable ROM, disable BSR	
 		LDA $C082 
 	JSR $FD1B ;wait for user to press a key (return not required)	
-		
+				
 		;re-enable bank-switched ram ($d000 bank 2)
 		LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK2 2nd)
 		LDA $C083
@@ -2070,7 +2070,7 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 		
 	JSR RANDOM.8.INIT			;LOAD SEED AND SETS DEFAULT RETURN RESULT RANDOM # RANGE. 		
 
-
+;works
 		
 ;RANDOM.8 TESTING
 @START
@@ -2439,6 +2439,8 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 
 @END
 
+				
+				
 
 ;TRANSFER CONTROL
 	
@@ -2464,7 +2466,7 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 			; brk
 
 		
-	JMP GAME.START.DRIVER  
+	JMP GAME.SESSION.ENTRANCE  
 
 
 
