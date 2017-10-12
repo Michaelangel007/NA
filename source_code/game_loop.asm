@@ -712,94 +712,6 @@ GAME.PRIMARY_LOOP.ALTERNATE.ENTRANCE		;SKIPS ALL INBETWEEN MOVE ACTIVITES SUCH A
 	
 	JSR NPC.PATHGENERATOR					;calculate the path to the next anchor of all Building NPCs with a schedule change in the next hour
 	JMP .BUILDING.CHECK.COMPLETE
-.NOT.IN.BUILDING	
-	;JSR MOB.GENERATION
-.BUILDING.CHECK.COMPLETE
-
-
-		
-;======CONDITIONAL LOGIC====	
-@START
-@MIDDLE
-	
-	;**OPT** Memory. Speed. Convert ACC value to upper or lowercase, then only do checks for one case
-	
-	LDA $C000
-    BPL GAME.PRIMARY_LOOP 
-    ; BMI .COW 
-	; JMP GAME.PRIMARY_LOOP 
-; .COW	
-    STA $C010               ;CLR LAST KEY
-
-	; PHA
-	; LDA RANDOM.NUMBER.SEED.COUNTER
-	; STA $4E
-	; CLC
-	; ADC #$63
-	; STA $4F
-	; PLA
-	
-	;**OPT** Memory. Convert ACC to UCASE and elimate the duplicate branches
-	
-	CMP #$8B			;UP ARROW
-	BEQ .NORTH_STEP
-	CMP #$8A			;DOWN ARROW
-	BEQ .SOUTH_STEP
-	CMP #$95			;RIGHT ARROW
-	BEQ .EAST_STEP
-	CMP #$88			;LEFT ARROW
-	BEQ	.WEST_STEP
-	CMP	#$C1			;(A) Attack
-	BEQ .COMMAND.ATTACK_STEP
-	CMP	#$E1			;(a) Attack
-	BEQ .COMMAND.ATTACK_STEP
-	CMP #$C2			;(B) BOARD
-	BEQ	.BOARD_STEP
-	CMP #$E2			;(b) BOARD
-	BEQ	.BOARD_STEP
-	; CMP #$C5			;(E) ENTER
-	; BEQ	.ENTER_STEP
-	; CMP #$E5			;(e) ENTER
-	; BEQ	.ENTER_STEP	
-	CMP #$C9			;(I) alternate key for up.
- 	BEQ .NORTH_STEP
-	CMP #$E9			;(i) alternate key for up
-	BEQ .NORTH_STEP	
-	CMP #$CA			;(J) JUMP
-	BEQ	.JUMP_STEP
-	CMP #$EA			;(j) JUMP
-	BEQ	.JUMP_STEP
-	CMP #$CF			;(O) OPEN
-	BEQ	.OPEN.COMMAND_STEP
-	CMP #$EF			;(o) OPEN / OPERATE
-	BEQ	.OPEN.COMMAND_STEP	
-	CMP #$D0			;(P) PUSH
-	BEQ	.PUSH.COMMAND_STEP
-	CMP #$F0			;(p) PUSH
-	BEQ	.PUSH.COMMAND_STEP
-	CMP #$D1			;(Q) QUIT
-	BEQ	.COMMAND.QUIT_STEP
-	CMP #$F1			;(q) QUIT
-	BEQ	.COMMAND.QUIT_STEP
-	CMP #$D4			;(T) Talk
-	BEQ .TALK.COMMAND_STEP
-	CMP #$F4			;(t) Talk
-	BEQ .TALK.COMMAND_STEP	
-	CMP #$D8			;(X) X-IT
-	BEQ	.XIT_STEP
-	CMP #$F8			;(x) X-IT
-	BEQ	.XIT_STEP
-	CMP #$D9			;(Y) YELL
-	BEQ	.YELL_STEP
-	CMP #$F9			;(Y) YELL
-	BEQ	.YELL_STEP	
-	CMP #$A0			;SPACE BAR
-	BEQ	.PASS_STEP
-	CMP #$89			;TAB (display character roster)
-	BEQ	.COMMAND.DISPLAY_CHARACTER_ROSTER_STEP
-	JMP .CHECK.PLAYTEST_KEYS
-	
-@MIDDLE
 	
 .NORTH_STEP
 	JMP NORTH
@@ -849,7 +761,76 @@ GAME.PRIMARY_LOOP.ALTERNATE.ENTRANCE		;SKIPS ALL INBETWEEN MOVE ACTIVITES SUCH A
 	
 .YELL_STEP
 	JMP YELL
+	
+	
+	
+.NOT.IN.BUILDING	
+	;JSR MOB.GENERATION
+.BUILDING.CHECK.COMPLETE
 
+
+		
+;======CONDITIONAL LOGIC====	
+@START
+@MIDDLE
+	
+	;**OPT** Memory. Speed. Convert ACC value to upper or lowercase, then only do checks for one case
+	
+	LDA $C000
+    BPL GAME.PRIMARY_LOOP 
+    ; BMI .COW 
+	; JMP GAME.PRIMARY_LOOP 
+; .COW	
+    STA $C010               ;CLR LAST KEY
+
+	; PHA
+	; LDA RANDOM.NUMBER.SEED.COUNTER
+	; STA $4E
+	; CLC
+	; ADC #$63
+	; STA $4F
+	; PLA
+	
+	;**OPT** Memory. Convert ACC to UCASE and elimate the duplicate branches
+
+		;ACC = ASCII 
+	JSR CONVERT.ASCII.UCASE
+		;ACC = UCASE(ASCII)
+		
+	CMP #$8B			;UP ARROW
+	BEQ .NORTH_STEP
+	CMP #$8A			;DOWN ARROW
+	BEQ .SOUTH_STEP
+	CMP #$95			;RIGHT ARROW
+	BEQ .EAST_STEP
+	CMP #$88			;LEFT ARROW
+	BEQ	.WEST_STEP
+	CMP	#$C1			;(A) Attack
+	BEQ .COMMAND.ATTACK_STEP
+	CMP #$C2			;(B) BOARD
+	BEQ	.BOARD_STEP
+	CMP #$C9			;(I) alternate key for up.
+ 	BEQ .NORTH_STEP
+	CMP #$CA			;(J) JUMP
+	BEQ	.JUMP_STEP
+	CMP #$CF			;(O) OPEN / OPERATE
+	BEQ	.OPEN.COMMAND_STEP	
+	CMP #$D0			;(P) PUSH
+	BEQ	.PUSH.COMMAND_STEP
+	CMP #$D1			;(Q) QUIT
+	BEQ	.COMMAND.QUIT_STEP
+	CMP #$D4			;(T) Talk
+	BEQ .TALK.COMMAND_STEP
+	CMP #$D8			;(X) X-IT
+	BEQ	.XIT_STEP
+	CMP #$D9			;(Y) YELL
+	BEQ	.YELL_STEP
+	CMP #$A0			;SPACE BAR
+	BEQ	.PASS_STEP
+	CMP #$89			;TAB (display character roster)
+	BEQ	.COMMAND.DISPLAY_CHARACTER_ROSTER_STEP
+	
+	
 .CHECK.PLAYTEST_KEYS
 	CMP #$B0			;0	(SET HOOK)
 	BEQ	.KEY0_STEP
@@ -901,7 +882,15 @@ GAME.PRIMARY_LOOP.ALTERNATE.ENTRANCE		;SKIPS ALL INBETWEEN MOVE ACTIVITES SUCH A
 	STA TW.BOTTOM_WINDOW.INIT_CODE	;($00 = none | $01 = Ignite Torch | $02 = Open door | $03 = Unlock Door | $04 = Operate lever | $05 = Invalid Command)
 	
 	JSR PASS
-	JMP GAME.PRIMARY_LOOP
+	JMP GAME.PRIMARY_LOOP	
+	
+	
+	;JMP .CHECK.PLAYTEST_KEYS
+	
+@MIDDLE
+	
+
+
 
 	
 .KEY0_STEP
