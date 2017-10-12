@@ -14,75 +14,75 @@
 ;IGR.16							;IS GREATER, 16-BIT
 ;SBC.16							;SUBTRACTION, 16-BIT
 
-ADC.16 ;==========ADDITION, 16-BIT (BCD SUPPORT)=========
+;ADC.16 ;==========ADDITION, 16-BIT (BCD SUPPORT)=========
 @START
-;PARAMETERS: OP1(2), OP2(2), [SED/CLD]*
-;RETURN: RESULT(2)
-;*SED: This routines was tested with decimal (BCD). To use
-;	in BCD mode, use SED just before the JSR to call this routine, 
-;	and CLD just after.
+; ;PARAMETERS: OP1(2), OP2(2), [SED/CLD]*
+; ;RETURN: RESULT(2)
+; ;*SED: This routines was tested with decimal (BCD). To use
+; ;	in BCD mode, use SED just before the JSR to call this routine, 
+; ;	and CLD just after.
 
-;WARNING: IF USING THIS FUNCTION WITH AN 8-BIT VALUE (BECAUSE THE LOOP MAY PRODUCE A 16-BIT VALUE), YOU
-;MUST SET OP1+$1 AND OP2+$2 TO $00 BEFORE CALLING ADC.16. USUALLY BEST TO DO THIS JUST BEFORE THE LOOP 
-;STARTS DURING INIT OF OTHER VARIABLES.
+; ;WARNING: IF USING THIS FUNCTION WITH AN 8-BIT VALUE (BECAUSE THE LOOP MAY PRODUCE A 16-BIT VALUE), YOU
+; ;MUST SET OP1+$1 AND OP2+$2 TO $00 BEFORE CALLING ADC.16. USUALLY BEST TO DO THIS JUST BEFORE THE LOOP 
+; ;STARTS DURING INIT OF OTHER VARIABLES.
 
-;==========================================================
-;SOURCE CODE CREDIT
-;"Using 6502 Assembly Language" by Randy Hyde
-;==========================================================
+; ;==========================================================
+; ;SOURCE CODE CREDIT
+; ;"Using 6502 Assembly Language" by Randy Hyde
+; ;==========================================================
 
 
-; ;**DRIVER TEMPLATE**
-	; LDA SMAP.CURRENT			;ADVANCE TO NEXT ROW ON THE SCREEN
-	; STA OP1
-	; LDA SMAP.CURRENT+$1
-	; STA OP1+$1
-	; LDA #OFFSET.DOWN
-	; STA OP2
+; ; ;**DRIVER TEMPLATE**
+	; ; LDA SMAP.CURRENT			;ADVANCE TO NEXT ROW ON THE SCREEN
+	; ; STA OP1
+	; ; LDA SMAP.CURRENT+$1
+	; ; STA OP1+$1
+	; ; LDA #OFFSET.DOWN
+	; ; STA OP2
+	; ; LDA #$00
+	; ; STA OP2+$1
+	; ;
+	; ; JSR ADC.16						;SMAP.CURRENT(2) + #OFFSET.DOWN(1)
+	; ;
+	; ; LDA RESULT
+	; ; STA SMAP.CURRENT
+	; ; LDA RESULT+$1
+	; ; STA SMAP.CURRENT+$1
+	
+	
+	
+; ; ;BCD MODE SWITCHING
+	; ; CMP #$00			;is BCD parameter (ACC) enabled?
+	; ; BEQ .START			;if no, start subroutine
+	; ; SED					;if yes, enable BCD
+	
+
+; .START	
+; ;INIT VARIABLES
 	; LDA #$00
-	; STA OP2+$1
-	;
-	; JSR ADC.16						;SMAP.CURRENT(2) + #OFFSET.DOWN(1)
-	;
-	; LDA RESULT
-	; STA SMAP.CURRENT
-	; LDA RESULT+$1
-	; STA SMAP.CURRENT+$1
-	
-	
-	
-; ;BCD MODE SWITCHING
-	; CMP #$00			;is BCD parameter (ACC) enabled?
-	; BEQ .START			;if no, start subroutine
-	; SED					;if yes, enable BCD
-	
+	; STA RESULT
+	; STA RESULT+$01
 
-.START	
-;INIT VARIABLES
-	LDA #$00
-	STA RESULT
-	STA RESULT+$01
-
-; DO THE MATH ($A0F + $01)
-	;CLD 
-    CLC                     ;always before add
-    LDA OP1
-    ADC OP2
-    STA RESULT
+; ; DO THE MATH ($A0F + $01)
+	; ;CLD 
+    ; CLC                     ;always before add
+    ; LDA OP1
+    ; ADC OP2
+    ; STA RESULT
 		 
-    LDA OP1+$1
-    ADC OP2+$1				;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    STA RESULT+$1
-    BCS .ERROR
+    ; LDA OP1+$1
+    ; ADC OP2+$1				;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
+    ; STA RESULT+$1
+    ; BCS .ERROR
 
-;	CLD						;Clear BCD mode, return to binary mode.
-    RTS
-.ERROR
-;ADC OVERFLOW ERROR
-;
-;DISABLE.BS_RAM
-	JSR PREP.BRK
-	BRK	
+; ;	CLD						;Clear BCD mode, return to binary mode.
+    ; RTS
+; .ERROR
+; ;ADC OVERFLOW ERROR
+; ;
+; ;DISABLE.BS_RAM
+	; JSR PREP.BRK
+	; BRK	
 
 @END
 

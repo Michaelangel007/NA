@@ -252,7 +252,7 @@ START
 
 ;======COLLISION CHECKS & DETERMINE LAND VS SEA MOB======
 @START
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP (2)
 	
 	CLC                          			;ALWAYS BEFORE ADD

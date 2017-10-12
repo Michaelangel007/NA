@@ -814,56 +814,6 @@ ANIMATION.TILE.FRAME_CYCLE ; ========DRAWS NEXT ANIMATION FRAME FOR ONE TILE====
 	ADC #$00
 	STA AUX_MOVE.END+$1
 
-	
-
-	; STA OP1							;LOAD SHAPE TABLE BASE OFFSET INTO OP1
-
-
-	; LDA #$00
-	; STA OP1+$1
-
-; ;=======INLINE CODE FOR ADC.16========	
-; ;TILE.SHAPES.HO/LO(2)+ ACC(1) [ANIMATION FRAME OFFSET]
-
-
-; ; DO THE MATH
-	; CLD ;**opt** memory. speed. this can be removed. Also, optimize the 16-bit add code. no need to use parameters of the ADC-16 subroutine. 
-    ; CLC                          ;ALWAYS BEFORE ADD
-    ; LDA OP1
-    ; ADC OP2
-    ; STA AUX_MOVE.START
-		 
-    ; LDA OP1+$1
-    ; ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    ; STA AUX_MOVE.START+$1
-	
-; ;======================================
-	
-	; LDA #SHAPE.SIZE				;# OF BYTES IN SHAPE TABLE
-	; STA OP1
-	; LDA #$00
-	; STA OP1+$1
-
-	; LDA AUX_MOVE.START
-	; STA OP2
-	; LDA AUX_MOVE.START+$1
-	; STA OP2+$1
-; ;=======INLINE CODE FOR ADC.16========	
-; ;SHAPE.SIZE(1)+ AUX_MOVE.START(2)
-
-
-; ; DO THE MATH
-	; CLD ;**opt** memory. speed. this can be removed. Also, optimize the 16-bit add code. no need to use parameters of the ADC-16 subroutine. 
-    ; CLC                          ;ALWAYS BEFORE ADD
-    ; LDA OP1
-    ; ADC OP2
-    ; STA AUX_MOVE.END
-		 
-    ; LDA OP1+$1
-    ; ADC OP2+$1					;carry flag not cleared via CLC intentionally, it's part of 16-bit adding. 
-    ; STA AUX_MOVE.END+$1
-	
-; ;======================================	
 
 	LDA #ANIMATION.SHAPE.HOPPER		;SAVE ANIMATION.SHAPE.HOPPER AS THE DESTINATION ADDRESS FOR AUX MOVE
 	STA AUX_MOVE.DEST

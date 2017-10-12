@@ -371,7 +371,7 @@ ZONE_TOOLS.TRANSITION.NORTH ; ========NORTH ENTRANCE WHEN LOAD THREADSHOLD TRIGG
 ;NOTE: RZONE.SOUTH.TABLE IS USED WITH THE TO/FROM REVERSED BECAUSE IT CONTAINS THE CORRECT VALUES FOR THE NORTH TRANSITION AS LONG AS THE X-REG COUNTER IS RUN BACKRWARDS. 
 ;
 ;=========COPY FROM========
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -385,7 +385,7 @@ ZONE_TOOLS.TRANSITION.NORTH ; ========NORTH ENTRANCE WHEN LOAD THREADSHOLD TRIGG
 ;======================================	
 
 ;=========COPY TO========
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -487,7 +487,7 @@ ZONE_TOOLS.TRANSITION.SOUTH ; ========SOUTH ENTRANCE WHEN LOAD THREADSHOLD TRIGG
 
 .LOOP_SCROLL	
 ;SET RZONE BASE ADDRESS
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -501,7 +501,7 @@ ZONE_TOOLS.TRANSITION.SOUTH ; ========SOUTH ENTRANCE WHEN LOAD THREADSHOLD TRIGG
 
 ;======================================	
 	
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -663,7 +663,7 @@ ZONE_TOOLS.TRANSITION.EAST ; ========EAST ENTRANCE WHEN LOAD THREADSHOLD TRIGGER
 ;SET RZONE BASE ADDRESS
 
 ;=========COPY FROM========
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -677,7 +677,7 @@ ZONE_TOOLS.TRANSITION.EAST ; ========EAST ENTRANCE WHEN LOAD THREADSHOLD TRIGGER
 ;======================================	
 
 ;=========COPY TO========
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -834,7 +834,7 @@ ZONE_TOOLS.TRANSITION.WEST ; ========WEST ENTRANCE WHEN LOAD THREADSHOLD TRIGGER
 ;SET RZONE BASE ADDRESS
 
 ;=========COPY FROM========
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -848,7 +848,7 @@ ZONE_TOOLS.TRANSITION.WEST ; ========WEST ENTRANCE WHEN LOAD THREADSHOLD TRIGGER
 ;======================================	
 
 ;=========COPY TO========
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          				;ALWAYS BEFORE ADD
@@ -1827,7 +1827,7 @@ ZONE_TOOLS.RCOPY ; ===COPY ZONE DATA TO REGIONAL MAP=====
 
 	
 ;INIT ROW INDEX TO THE SUM OF THE BASE ADDRESS OF THE RZONE ARRAY AND THE STARTING ELEMENT OF THE ARRAY FOR THE CURRENT ZONE	
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_START.LO/HO(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -1842,7 +1842,7 @@ ZONE_TOOLS.RCOPY ; ===COPY ZONE DATA TO REGIONAL MAP=====
 ;======================================	
 		
 
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) RZONE.LOOKUP.ARRAY_STOP.LO/HO(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -1891,7 +1891,7 @@ ZONE_TOOLS.RCOPY ; ===COPY ZONE DATA TO REGIONAL MAP=====
 	JMP .EQUALS
 .NE	;the 16-bit values are not equal
 		;INCREMENT ROW INDEX
-		;=======INLINE CODE FOR ADC.16========	
+		;======================================	
 		;RZONE.ARRAY.INDEX_ROW(2) #RZONE.ARRAY.OFFSET(1)
 		
 			CLC                          			;ALWAYS BEFORE ADD
@@ -1971,7 +1971,7 @@ ZONE_TOOLS.SCROLL_COLUMN.COPY  ;=====SCROLL ONE ZONE TO ANOTHER====
 ;INCREMENT INDEXES
 ;
 	;INCREMENT FROM INDEX
-	;=======INLINE CODE FOR ADC.16========	
+	;======================================	
 	;RZONE.ARRAY.INDEX_ROW(2) #RZONE.ARRAY.OFFSET(1)
 	
 		CLC                          			;ALWAYS BEFORE ADD
@@ -1985,7 +1985,7 @@ ZONE_TOOLS.SCROLL_COLUMN.COPY  ;=====SCROLL ONE ZONE TO ANOTHER====
 
 	;======================================	
 	;INCREMENT TO INDEX
-	;=======INLINE CODE FOR ADC.16========	
+	;======================================	
 	;RZONE.ARRAY.INDEX_ROW(2) #RZONE.ARRAY.OFFSET(1)
 	
 		CLC                          			;ALWAYS BEFORE ADD

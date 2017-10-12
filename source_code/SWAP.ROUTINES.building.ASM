@@ -2031,7 +2031,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 
 	;STX SAVED.XREG.LOCAL						;COLLISION_CHECK_ONSCREEN USE AN X INDEX, SO IT SAVES X-REG, RESULTING IN A RESTORE X-REG UP AHEAD. SO THIS CODE NEEDS TO SAVE X-REG TO SO THAT THE CORRECT VALUE IS LOADED IN THE RESTORE. 
 ;SAVE TILE # NORTH OF NPC
-;=======INLINE CODE FOR SBC.16========	
+;======================================	
 ;MAP_OBJECTS.MAP_LOCATION(2)- #OFFSET.UP(1)
 
 			
@@ -2047,7 +2047,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 ;======================================
 
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -2079,7 +2079,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
     STA RMAP.LOOKUP+$1					;BORROWING SCREEN.TILE.HOPPER TO STORE THE RMAP OF THE TILE #S ADJACENT TO THE NPC
 ;======================================
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -2099,7 +2099,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 ;
 ;				
 ;SAVE TILE # EAST OF NPC
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;NPC.PATHFINDER.NEIGHBOR.RMAP(2)+ $01 (ALWAYS THE OFFSET TO THE RIGHT)
 
 
@@ -2118,7 +2118,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 
 
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -2138,7 +2138,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 ;
 ;	
 ;SAVE TILE # SOUTH OF NPC
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;NPC.PATHFINDER.NEIGHBOR.RMAP(2)+ #OFFSET.DOWN(1)
 
 
@@ -2156,7 +2156,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 ;======================================
 
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD

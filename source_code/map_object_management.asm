@@ -1985,7 +1985,7 @@ MOB.IDENTIFY.MAP_LOCATION ;=============USED ONLY FOR MOBS WITH SS FLAG SET=====
 	SBC #MAP_OBJECTS.PLAYER_LOCATION
 	STA MAP_OBJECTS.X_ADJ
 	
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RMAP(2)+ MAP_OBJECTS.X_ADJ(1)
 
 
@@ -2055,7 +2055,7 @@ MOB.IDENTIFY.MAP_LOCATION ;=============USED ONLY FOR MOBS WITH SS FLAG SET=====
 	
 
 	
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;TEMP16(2)- MAP_OBJECTS.Y_ADJ(1)
 
 
@@ -3170,7 +3170,7 @@ COLLISION_CHECK_OFFSCREEN
 ;======================================
 
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -3202,7 +3202,7 @@ COLLISION_CHECK_OFFSCREEN
     STA RMAP.LOOKUP+$1					;BORROWING SCREEN.TILE.HOPPER TO STORE THE RMAP OF THE TILE #S ADJACENT TO THE MOB
 ;======================================
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -3222,7 +3222,7 @@ COLLISION_CHECK_OFFSCREEN
 ;
 ;				
 ;SAVE TILE # EAST OF MOB
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;MAP_OBJECTS.MAP_LOCATION(2)+ $01 (ALWAYS THE OFFSET TO THE RIGHT)
 
 
@@ -3241,7 +3241,7 @@ COLLISION_CHECK_OFFSCREEN
 
 
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -3261,7 +3261,7 @@ COLLISION_CHECK_OFFSCREEN
 ;
 ;	
 ;SAVE TILE # SOUTH OF MOB
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;MAP_OBJECTS.MAP_LOCATION(2)+ #OFFSET.DOWN(1)
 
 
@@ -3279,7 +3279,7 @@ COLLISION_CHECK_OFFSCREEN
 ;======================================
 
 ;LOOKUP TILE_TYPE
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) + RMAP.LOOKUP(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD

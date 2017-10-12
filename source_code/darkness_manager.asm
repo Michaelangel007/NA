@@ -3843,7 +3843,7 @@ TILE.LOOKUP.OFFSCREEN.COLUMN ; 	=====LOAD A ROW OF TILES NOT ON THE VIEW SCREEN=
 
 ;INIT RZONE.ARRAY BASE ADDRESS
 
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY(2) SMAP.CURRENT(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -3889,7 +3889,7 @@ TILE.LOOKUP.OFFSCREEN.COLUMN ; 	=====LOAD A ROW OF TILES NOT ON THE VIEW SCREEN=
 	CPX SCREEN.COLUMN.STOP	
 	BEQ .EXIT
 	
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY.INDEX_ROW(2) #RZONE.ARRAY.OFFSET(1)
 
 ;NEXT TILE	
@@ -3949,7 +3949,7 @@ TILE.LOOKUP.OFFSCREEN.ROW ; 	=====LOAD A ROW OF TILES NOT ON THE VIEW SCREEN ===
 
 ;INIT RZONE.ARRAY BASE ADDRESS
 
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) + SMAP.CURRENT(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD

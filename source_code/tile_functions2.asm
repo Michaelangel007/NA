@@ -68,23 +68,35 @@ TILE.LOOKUP.SCREEN ;	=====LOAD ENTIRE SCREEN OF TILES=================
 	JSR TILE.LOOKUP.ROW
 		
 ;INCREMENT COUNTERS
-	LDA SMAP.CURRENT					
-	STA OP1
+
+	;SMAP.CURRENT(2) + #OFFSET.DOWN(1)
+	LDA SMAP.CURRENT+$0
+	CLC
+	ADC #OFFSET.DOWN
+	STA SMAP.CURRENT+$0
 	LDA SMAP.CURRENT+$1
-	STA OP1+$1
-	
-	LDA #OFFSET.DOWN			
-	STA OP2
-	LDA #$00
-	STA OP2+$1
-	
-	;**OPT* Speed. Convert to in-line code
-	JSR ADC.16					;RMAP(2) - SCREEN.OFFSET.LO/HO (2)		;CALCULATE TILE_ID OF TILE IN UPPER LEFT CORNER OF SCREEN
-			
-	LDA RESULT					;SAVE TILE_ID OF UPPER LEFT SCREEN TILE
-	STA SMAP.CURRENT
-	LDA RESULT+$1
+	ADC #$00
 	STA SMAP.CURRENT+$1
+	
+	
+	
+	; LDA SMAP.CURRENT					
+	; STA OP1
+	; LDA SMAP.CURRENT+$1
+	; STA OP1+$1
+	
+	; LDA #OFFSET.DOWN			
+	; STA OP2
+	; LDA #$00
+	; STA OP2+$1
+	
+	; ;**OPT* Speed. Convert to in-line code
+	; JSR ADC.16					;RMAP(2) - SCREEN.OFFSET.LO/HO (2)		;CALCULATE TILE_ID OF TILE IN UPPER LEFT CORNER OF SCREEN
+			
+	; LDA RESULT					;SAVE TILE_ID OF UPPER LEFT SCREEN TILE
+	; STA SMAP.CURRENT
+	; LDA RESULT+$1
+	; STA SMAP.CURRENT+$1
 			
 	INY 						;INCREMENT ROW COUNTER
 	CPY #SCREEN.COLUMN.SIZE		;# OF TILES IN A COLUMN == # OF ROWS ON THE SCREEN		 
@@ -132,7 +144,7 @@ TILE.LOOKUP.ROW ; 		=====LOAD A ROW OF TILES=========================
 			
 ;INIT RZONE.ARRAY BASE ADDRESS
 
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) + SMAP.CURRENT(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -199,7 +211,7 @@ TILE.LOOKUP.COLUMN ; 	=====LOAD A ROW OF TILES=========================
 
 ;INIT RZONE.ARRAY BASE ADDRESS
 
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) SMAP.CURRENT(2)
 	
 	CLC                          			;ALWAYS BEFORE ADD
@@ -245,7 +257,7 @@ TILE.LOOKUP.COLUMN ; 	=====LOAD A ROW OF TILES=========================
 	CPX SCREEN.COLUMN.STOP	
 	BEQ .EXIT
 	
-;=======INLINE CODE FOR ADC.16========	
+;======================================		
 ;RZONE.ARRAY.INDEX_ROW(2) #RZONE.ARRAY.OFFSET(1)
 
 ;NEXT TILE	
@@ -299,7 +311,7 @@ TILE.LOOKUP.COLUMN ; 	=====LOAD A ROW OF TILES=========================
 
 ;INIT RZONE.ARRAY BASE ADDRESS
 
-;=======INLINE CODE FOR ADC.16========	
+;======================================	
 ;RZONE.ARRAY(2) + RMAP(2)
 	
 	; CLC                          			;ALWAYS BEFORE ADD
