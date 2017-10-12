@@ -1768,51 +1768,51 @@ RANDOM.8
 
 @END
 
-SBC.16	;==========SUBTRACTION, 16-BIT (BCD SUPPORT)=========
+;SBC.16	;==========SUBTRACTION, 16-BIT (BCD SUPPORT)=========
 @START
-;PARAMETERS: OP1(2), OP2(2), [SED/CLD]*
-;RETURN: RESULT(2)
-;*SED: This routines was tested with decimal (BCD). To use
-;	in BCD mode, use SED just before the JSR to call this routine, 
-;	and CLD just after.
+; ;PARAMETERS: OP1(2), OP2(2), [SED/CLD]*
+; ;RETURN: RESULT(2)
+; ;*SED: This routines was tested with decimal (BCD). To use
+; ;	in BCD mode, use SED just before the JSR to call this routine, 
+; ;	and CLD just after.
 
-;WARNING: IF USING THIS FUNCTION WITH AN 8-BIT VALUE (BECAUSE THE LOOP MAY PRODUCE A 16-BIT VALUE), YOU
-;MUST SET OP1+$1 AND OP2+$2 TO $00 BEFORE CALLING ADC.16. USUALLY BEST TO DO THIS JUST BEFORE THE LOOP 
-;STARTS DURING INIT OF OTHER VARIABLES.
+; ;WARNING: IF USING THIS FUNCTION WITH AN 8-BIT VALUE (BECAUSE THE LOOP MAY PRODUCE A 16-BIT VALUE), YOU
+; ;MUST SET OP1+$1 AND OP2+$2 TO $00 BEFORE CALLING ADC.16. USUALLY BEST TO DO THIS JUST BEFORE THE LOOP 
+; ;STARTS DURING INIT OF OTHER VARIABLES.
 
-;==========================================================
-;SOURCE CODE CREDIT
-;"Using 6502 Assembly Language" by Randy Hyde
-;==========================================================
+; ;==========================================================
+; ;SOURCE CODE CREDIT
+; ;"Using 6502 Assembly Language" by Randy Hyde
+; ;==========================================================
 
-;INIT VARIABLES
-	LDA #$00
-	STA RESULT
-	STA RESULT+$01
+; ;INIT VARIABLES
+	; LDA #$00
+	; STA RESULT
+	; STA RESULT+$01
 
 
-; DO THE MATH
-	CLD 
-    SEC                           ;ALWAYS BEFORE SUBTRACTION
-    LDA OP1
-    SBC OP2
-    STA RESULT
-    LDA OP1+$1
-    SBC OP2+$1
-    STA RESULT+$1
-    BCC .ERROR
-    RTS
-.ERROR
-	; LDA OP1
-	; STA $9600
-	; LDA OP1+$1
-	; STA $9601
-	; LDA OP2
-	; STA $9602
-	; LDA OP2+$1
-	; STA $9603
-	JSR PREP.BRK
-    BRK	
+; ; DO THE MATH
+	; CLD 
+    ; SEC                           ;ALWAYS BEFORE SUBTRACTION
+    ; LDA OP1
+    ; SBC OP2
+    ; STA RESULT
+    ; LDA OP1+$1
+    ; SBC OP2+$1
+    ; STA RESULT+$1
+    ; BCC .ERROR
+    ; RTS
+; .ERROR
+	; ; LDA OP1
+	; ; STA $9600
+	; ; LDA OP1+$1
+	; ; STA $9601
+	; ; LDA OP2
+	; ; STA $9602
+	; ; LDA OP2+$1
+	; ; STA $9603
+	; JSR PREP.BRK
+    ; BRK	
 @END
 
 PERCENT.GET ;full 16-bit support for low and high number parameters*

@@ -2066,7 +2066,7 @@ IDENTIFY.OPEN.PATHS ;(run collision controls on tile just loaded)
 				
 ;
 ;SAVE TILE # WEST OF NPC
-;=======INLINE CODE FOR SBC.16========	
+;======================================	
 ;NPC.PATHFINDER.NEIGHBOR.RMAP(2) - $01 (ALWAYS THE OFFSET TO THE LEFT)
 	
 	CLD 
