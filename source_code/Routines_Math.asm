@@ -1089,88 +1089,88 @@ RANDOM.8.INIT ;======INIT ROUTINE FOR 8-BIT RANDOM NUMBER GENERATOR
 	
 @END
 
-MLP.16.NO_BCD	;16-BIT MULTIPLICATION (**NO BCD SUPPORT**, but faster than MLP.16)
+;MLP.16.NO_BCD	;16-BIT MULTIPLICATION (**NO BCD SUPPORT**, but faster than MLP.16)
 @START
-;PARAMETERS: MULPLR(2), MULCND(2)
-;RETURN: RESULT(2)
+; ;PARAMETERS: MULPLR(2), MULCND(2)
+; ;RETURN: RESULT(2)
 
-;**DRIVER TEMPLATE**
-		; LDA #$D0
-		; STA MULPLR
-		; LDA #$40
-		; STA MULPLR+$1
-; 		;
-		; LDA #$02
-		; STA MULCND
-		; LDA #$00
-		; STA MULCND+$01
-	; JSR MLP.16.NO_BCD
-		; ;RETURN VALUE: result+$0 (product LO), result+$1 (product HO)
-		;
-		; LDA RESULT+$0
-		; LDA RESULT+$1
-		;	 
-	; BRK
+; ;**DRIVER TEMPLATE**
+		; ; LDA #$D0
+		; ; STA MULPLR
+		; ; LDA #$40
+		; ; STA MULPLR+$1
+; ; 		;
+		; ; LDA #$02
+		; ; STA MULCND
+		; ; LDA #$00
+		; ; STA MULCND+$01
+	; ; JSR MLP.16.NO_BCD
+		; ; ;RETURN VALUE: result+$0 (product LO), result+$1 (product HO)
+		; ;
+		; ; LDA RESULT+$0
+		; ; LDA RESULT+$1
+		; ;	 
+	; ; BRK
 		
 		
-;SAVE REGISTERS
-        TYA 
-        PHA 
- ;       PHA
+; ;SAVE REGISTERS
+        ; TYA 
+        ; PHA 
+ ; ;       PHA
 		
-;INIT VARIABLES
-        LDA #$0
-        STA PARTIAL
-        STA PARTIAL+$1
+; ;INIT VARIABLES
+        ; LDA #$0
+        ; STA PARTIAL
+        ; STA PARTIAL+$1
 		
-.USMUL1
-        LDY #$10
-.USMUL2
-        LDA MULPLR
-        LSR 
-        BCC .USMUL4
-        CLC 
-        LDA PARTIAL
-        ADC MULCND
-		STA PARTIAL
-        LDA PARTIAL+$1
-        ADC MULCND+$1
-        STA PARTIAL+$1
-.USMUL4
-        ROR PARTIAL+$1
-        ROR PARTIAL
-        ROR MULPLR+$1
-        ROR MULPLR
-;
-;see if done yet
-;
-        DEY 
-        BNE .USMUL2
+; .USMUL1
+        ; LDY #$10
+; .USMUL2
+        ; LDA MULPLR
+        ; LSR 
+        ; BCC .USMUL4
+        ; CLC 
+        ; LDA PARTIAL
+        ; ADC MULCND
+		; STA PARTIAL
+        ; LDA PARTIAL+$1
+        ; ADC MULCND+$1
+        ; STA PARTIAL+$1
+; .USMUL4
+        ; ROR PARTIAL+$1
+        ; ROR PARTIAL
+        ; ROR MULPLR+$1
+        ; ROR MULPLR
+; ;
+; ;see if done yet
+; ;
+        ; DEY 
+        ; BNE .USMUL2
 
-.WRAPUP
-;check for overflow (>655,536)
-        LDA PARTIAL
-        ORA PARTIAL+$1
-        BNE .ERROR
+; .WRAPUP
+; ;check for overflow (>655,536)
+        ; LDA PARTIAL
+        ; ORA PARTIAL+$1
+        ; BNE .ERROR
 
-;
-;STORE RESULT OF MULTIPLICATION
-        LDA MULPLR
-        STA RESULT
-		LDA MULPLR+$1
-        STA RESULT+$1
+; ;
+; ;STORE RESULT OF MULTIPLICATION
+        ; LDA MULPLR
+        ; STA RESULT
+		; LDA MULPLR+$1
+        ; STA RESULT+$1
 
-.EXIT	
-;RESTORE REGISTERS	
-        PLA 
-        TAY 
- ;       PLA 
-        RTS 
+; .EXIT	
+; ;RESTORE REGISTERS	
+        ; PLA 
+        ; TAY 
+ ; ;       PLA 
+        ; RTS 
 
 		
-.ERROR
-;overflow error has occured (result > 655,536)
-        BRK 
+; .ERROR
+; ;overflow error has occured (result > 655,536)
+        ; BRK 
 
 @END
 
@@ -1278,9 +1278,13 @@ MLP.16	;16-BIT(partial) MULTIPLICATION (HEX & BCD SUPPORT**, 16-BIT MULPLR, 8-BI
 ;HO byte will get shifted and that will mess up the calculation. 
 
 @END
-				
-MLP.32	;NO BCD (32-BIT MULR/MLCND 64-BIT PRODUCT)
+		
+MLP.16.NO_BCD		
+MLP.32	;(32-BIT MULR/MLCND 64-BIT PRODUCT) (**NO BCD SUPPORT**, but faster than MLP.16)
 @START
+;PARAMETERS: MULR(2), MULND(2)
+;RETURN (16-BIT MODE): RESULT(2)
+;RETURN (32/64-BIT MODE): PROD (7)
 
 ;SAVE REGISTERS
 	TXA
@@ -1310,9 +1314,18 @@ MLP.32	;NO BCD (32-BIT MULR/MLCND 64-BIT PRODUCT)
 
 @END
 
-;PARAMETERS: MULPLR(2), MULCND(2)
-;RETURN: RESULT(2)
 
+	
+	LDA MLP.16.NO_BCD.PARM.MODE ;($00 = 16-bit multiplier/multicand | >=$01 = 32-bit multiplier/multicand mode)	
+	BNE .START ;branch if 32-bit mode
+	;disabled 32-bit mode
+	;(this saves bytes by eliminating the need to init these variables on each call when only a 16-bit multiplier/multicand is needed)
+	STA MULR+$2
+	STA MULR+$3	
+	STA MULND+$2
+	STA MULND+$3	
+	
+.START
 
 
 		
@@ -1359,14 +1372,23 @@ ROTATE_R:
 	adc     MULXP2
 	sta     MULXP2
 	
-		; lda #$aa
-		; ldx #result
-		; ldy /result
-		; jsr prep.brk
-		; brk
+
 
 .EXIT
 
+;STORE RESULT OF MULTIPLICATION
+	LDA PROD+$0
+	STA RESULT+$0
+	LDA PROD+$1
+	STA RESULT+$1
+		
+	
+	
+;reset mode to 16-bit multiplier/multicand
+	LDA #$00
+	STA MLP.16.NO_BCD.PARM.MODE		;($00 = 16-bit multiplier/multicand mode | >=$01 = 32-bit multiplier/multicand mode)	
+
+	
 ;RESTORE REGISTERS
 	PLA
 	TAX

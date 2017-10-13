@@ -768,6 +768,9 @@ MULCND.COUNTER	.EQ TEMP1
 	;it may take some more jiggering, but that is the general idea. Alternatively, keep the MLP32 definitions and .EQ the other math variables to them.
 	;UPDATE: I increased the RESULT_STEP definition to $8 so that PROD could .EQ to it so all math routines would continue to use RESULT as the return value. 
 	;the reorg mentiond above could still be done and those $4 bytes could be relaimed. 
+
+MLP.16.NO_BCD.PARM.MODE	.EQ DIV.16.PARM.MODE ;($00 = 16-bit dividend mode | >=$01 = 32-bit multiplier/multicand mode)
+	
 PROD 	.EQ RESULT_STEP			;$8bytes
 MULR 	.EQ DIVIDEND32	  	;$4bytes 
 MULND 	.EQ DIVISOR			;$4bytes
