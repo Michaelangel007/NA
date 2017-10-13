@@ -1176,11 +1176,11 @@ GENERAL.ENTRANCE
 	LDA GENERAL_MO.RECORD+$2
 	STA SAVED_TILE_TYPE
 	
-		LDA #$07					;SET TRACE
-		STA CALLED_BY
+		; LDA #$07					;SET TRACE
+		; STA CALLED_BY
 	JSR DRAW.TILE.SINGLE
-		LDA #$07					;SET TRACE
-		STA CALLED_BY
+		; LDA #$07					;SET TRACE
+		; STA CALLED_BY				;(****not needed, just trace RTS address from the stack)
 	
 
 			
@@ -1288,11 +1288,11 @@ GENERAL.ENTRANCE
 	STA SAVED_TILE_TYPE	
 	
 				
-		LDA #$0F							;SET TRACE
-		STA CALLED_BY
+		; LDA #$0F							;SET TRACE
+		; STA CALLED_BY
 	JSR DRAW.TILE.SINGLE
-		LDA #$00							;RESET TRACE
-		STA CALLED_BY
+		; LDA #$00							;RESET TRACE
+		; STA CALLED_BY					;(****not needed, just trace RTS address from the stack)
 
 		
 .UPDATE.SCREEN_ARRAY1
@@ -5829,11 +5829,12 @@ MOB.MOVE.MAKE ;
 	LDA SCREEN.TILE.DATA,Y
 	STA SAVED_TILE_TYPE
 		;**OPT** Memory. Speed. I think the above two lines can be removed. SAVE_TILE_TYPE is only used when the tile type you want drawn is not stored in SCREEN.TILE.DATA, which in this case it is since we are "erasing".
-		LDA #$08							;SET TRACE
-		STA CALLED_BY
+
+		; LDA #$08							;SET TRACE
+		; STA CALLED_BY						;(****not needed, just trace RTS address from the stack)
 	JSR DRAW.TILE.SINGLE					;REPLACE MOB TILE WITH UNDERLYING MAP TILE
 		LDA #$00							;RESET TRACE
-		STA CALLED_BY
+		;STA CALLED_BY
 		STA SPRITE.ERASETILE.OVERRIDE
 		
 	LDA #$01
@@ -5906,11 +5907,11 @@ MOB.MOVE.MAKE ;
 	CMP #$01
 	BEQ .MOB.PREMOVE_LOCATION.NOTVISIBLE2	;IF YES, DON'T DRAW TILE
 
-		LDA #$09							;SET TRACE
-		STA CALLED_BY
+		; LDA #$09							;SET TRACE
+		; STA CALLED_BY			;(****not needed, just trace RTS address from the stack)
 	JSR DRAW.TILE.SINGLE					;REPLACE MOB TILE WITH UNDERLYING MAP TILE
-		LDA #$00							;SET TRACE
-		STA CALLED_BY
+		; LDA #$00							;SET TRACE
+		; STA CALLED_BY
 		
 .MOB.PREMOVE_LOCATION.NOTVISIBLE2	
 	LDA #$FF
@@ -6580,11 +6581,11 @@ MOB.DRAWTILE.ENTRANCE2
 	STA SAVED_TILE_TYPE
 			
 			
-		LDA #$0A							;SET TRACE
-		STA CALLED_BY
+		; LDA #$0A							;SET TRACE
+		; STA CALLED_BY					;(****not needed, just trace RTS address from the stack)
 	JSR DRAW.TILE.SINGLE
-		LDA #$00							;RESET TRACE
-		STA CALLED_BY
+		; LDA #$00							;RESET TRACE
+		; STA CALLED_BY
 		
 	LDA #TILE.DEPTH.STANDARD			;RESET TILE DEPTH TO FULL TILE. 		
 	STA TILE.DEPTH	
@@ -6597,11 +6598,11 @@ MOB.DRAWTILE.ENTRANCE2
 .DRAW.TILE.ENTRANCE2	
 	STA SAVED_TILE_TYPE
 			
-		LDA #$0B							;SET TRACE
-		STA CALLED_BY		
+		; LDA #$0B							;SET TRACE
+		; STA CALLED_BY					;(****not needed, just trace RTS address from the stack)	
 	JSR DRAW.TILE.SINGLE
 		LDA #$00							;SET TRACE
-		STA CALLED_BY
+		;STA CALLED_BY
 		STA SPRITE.DRAWTILE.OVERRIDE 			;clear override
 
 
@@ -6739,11 +6740,11 @@ MOB.DRAWTILE.MT ;
 	LDA MOB.MT.TILE_TYPES,X					;LOAD NEXT MT TILE_TYPE
 	STA SAVED_TILE_TYPE	
 
-		LDA #$0C							;SET TRACE
-		STA CALLED_BY
+		; LDA #$0C							;SET TRACE
+		; STA CALLED_BY						;(****not needed, just trace RTS address from the stack)
 	JSR DRAW.TILE.SINGLE
-		LDA #$00							;RESET TRACE
-		STA CALLED_BY
+		; LDA #$00							;RESET TRACE
+		; STA CALLED_BY
 
 .TILE.NOTVISIBLE
 	;this section applies to visile tiles as well as those not visible

@@ -98,17 +98,11 @@ MOVE.PASS
 	JSR MO.DRAW						;should be after player icon on screen from last move is replaced
 
 		
-		LDA #$02					;set trace
-		STA CALLED_BY
+		; LDA #$02					;set trace
+		; STA CALLED_BY (****not needed, just trace RTS address from the stack)
 	JSR DRAW.TILE.PLAYER
-		LDA #$00					;reset trace
-		STA CALLED_BY
-
-			; JSR FLIP.PAGE
-			; JSR KEYIN
-			; LDA #$AB
-			; JSR FULL.BRK
-			; BRK
+		; LDA #$00					;reset trace
+		; STA CALLED_BY 
 
 		
 	JSR FLIP.PAGE
@@ -351,8 +345,8 @@ MOVE.NORTH
 
 	JSR SCROLL.ROWS.ENTRANCE
 
-		LDA #$03					;SET TRACE
-		STA CALLED_BY	
+		; LDA #$03					;SET TRACE
+		; STA CALLED_BY	(****not needed, just trace RTS address from the stack)
 		LDX #$00
 	JSR DRAW.ROW.SINGLE
 			
@@ -371,10 +365,9 @@ MOVE.NORTH
 	JSR DRAW.TILE.SINGLE	
 	LDY #PLAYER.MT.ADJACENT_TILES.SOUTH1 ;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED. #SCREEN.ARRAY.ADJACENT_NORTH is the same as the other location for a MT player icon. Note we only remove two tiles for a multi tile icon (4 tiles) because two of the tiles in the shape will be redraw automatically with the shape is drawn in it's new location (i.e for a move south, the bottom two tiles of the shape become the upper two tiles of the shape, net of the player move) 
 	JSR DRAW.TILE.SINGLE	
-		LDA #$00						;RESET TRACE
-		STA CALLED_BY
-		;**OPT** Memory. Remove all instances of CALLED_BY. Instead replace with a note that to
-		;				 determine the calling routine pull the RTS address of the stack. 
+		; LDA #$00						;RESET TRACE
+		; STA CALLED_BY   (****not needed, just trace RTS address from the stack)
+ 
 @END
 
 
@@ -531,8 +524,8 @@ MOVE.SOUTH
 	JSR SCROLL.ROWS.ENTRANCE
 	
 	
-		LDA #$04					;SET TRACE
-		STA CALLED_BY		
+		; LDA #$04					;SET TRACE
+		; STA CALLED_BY			(****not needed, just trace RTS address from the stack)	
 		LDX #$0A
 	JSR DRAW.ROW.SINGLE	
 	
@@ -551,8 +544,8 @@ MOVE.SOUTH
 	
 	LDY #PLAYER.MT.ADJACENT_TILES.NORTH1 ;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED. #SCREEN.ARRAY.ADJACENT_NORTH is the same as the other location for a MT player icon. Note we only remove two tiles for a multi tile icon (4 tiles) because two of the tiles in the shape will be redraw automatically with the shape is drawn in it's new location (i.e for a move south, the bottom two tiles of the shape become the upper two tiles of the shape, net of the player move) 
 	JSR DRAW.TILE.SINGLE	
-		LDA #$00						;RESET TRACE
-		STA CALLED_BY				;**OPT**. Memory. If this is just for debugging it shouldn't be needed. Just use the stack to trace
+		; LDA #$00						;RESET TRACE
+		; STA CALLED_BY				;(****not needed, just trace RTS address from the stack)
 @END
 		
 .EXIT	
@@ -693,9 +686,9 @@ MOVE.EAST
 	JSR SCROLL.COLUMNS.ENTRANCE
 		
 
-		LDA #$05					;SET TRACE
-		STA CALLED_BY	
-		LDX #$11				;SPECIFY 1ST COLUMN FOR DRAW ROUTINE
+		; LDA #$05					;SET TRACE
+		; STA CALLED_BY				;(****not needed, just trace RTS address from the stack)
+		LDX #$11					;SPECIFY 1ST COLUMN FOR DRAW ROUTINE
 	JSR DRAW.COLUMN.SINGLE
 	
 	JSR DARKNESS.REVIEW		;UPDATE THE HIDDEN (DARKNESS) TILES ON THE SCREEN BASED ON THE TILE_TYPE VALUES IN SCREEN.TILE.DATA 
@@ -712,9 +705,9 @@ MOVE.EAST
 	
 		LDY #PLAYER.MT.ADJACENT_TILES.WEST1 ;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED. #SCREEN.ARRAY.ADJACENT_NORTH is the same as the other location for a MT player icon. Note we only remove two tiles for a multi tile icon (4 tiles) because two of the tiles in the shape will be redraw automatically with the shape is drawn in it's new location (i.e for a move south, the bottom two tiles of the shape become the upper two tiles of the shape, net of the player move) 
 	JSR DRAW.TILE.SINGLE	
-		LDA #$00						;RESET TRACE
-		STA CALLED_BY
-@END
+		; LDA #$00						;RESET TRACE
+		; STA CALLED_BY					;(****not needed, just trace RTS address from the stack)
+; @END
 
 .EXIT
 	JMP MOVE.COMMON.ROUTINE				;CODE THAT IS COMMON TO ALL MOVEVEMENT DIRECTIONS
@@ -885,8 +878,8 @@ MOVE.WEST
 		; LDA $C082				;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE)
 		; ;DISABLE.BS_RAM
 
-		LDA #$06			;SET TRACE
-		STA CALLED_BY		
+		; LDA #$06			;SET TRACE
+		; STA CALLED_BY		;(****not needed, just trace RTS address from the stack)	
 		LDX #$00				;SPECIFY 1ST COLUMN FOR DRAW ROUTINE
 	JSR DRAW.COLUMN.SINGLE
 	
@@ -905,8 +898,8 @@ MOVE.WEST
 	JSR DRAW.TILE.SINGLE	
 	LDY #PLAYER.MT.ADJACENT_TILES.EAST1 ;REMOVE PLAYER ICON FROM LAST MOVE, WHICH GOT SCROLLED. #SCREEN.ARRAY.ADJACENT_NORTH is the same as the other location for a MT player icon. Note we only remove two tiles for a multi tile icon (4 tiles) because two of the tiles in the shape will be redraw automatically with the shape is drawn in it's new location (i.e for a move south, the bottom two tiles of the shape become the upper two tiles of the shape, net of the player move) 
 	JSR DRAW.TILE.SINGLE	
-		LDA #$00						;RESET TRACE
-		STA CALLED_BY
+		; LDA #$00						;RESET TRACE
+		; STA CALLED_BY					;(****not needed, just trace RTS address from the stack)
 @END
 		
 .EXIT		
@@ -1100,11 +1093,11 @@ UPDATE.BUFFER
 	JSR LOAD.PLAYER.WALKING.ICON	;COPY NEW PLAYER ICON TO THE PLAYER ICON BUFFER USED BY DRAW.TILE
 
 MOVE.COMMON.DRAW.TILE		
-		LDA #$04					;set trace
-		STA CALLED_BY		
+		; LDA #$04					;set trace
+		; STA CALLED_BY				;(****not needed, just trace RTS address from the stack)		
 	JSR DRAW.TILE.PLAYER
-		LDA #$00					;reset trace
-		STA CALLED_BY	
+		; LDA #$00					;reset trace
+		; STA CALLED_BY				;(****not needed, just trace RTS address from the stack)	
 		
 	JSR FLIP.PAGE
 	
