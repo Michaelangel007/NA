@@ -553,9 +553,9 @@ GAME.RENTRY	;=======USED FOR GAME RENTRY VIA THE MONITOR AFTER A BRK VIA QUIT CO
 		LDA $C083
 
 
-			lda #$aa
-			jsr prep.brk
-			brk
+			; lda #$aa
+			; jsr prep.brk
+			; brk
 			
 
 	; LDA #$00			;SPECIFY BOTH PAGES FOR CLEAR SCREEN
