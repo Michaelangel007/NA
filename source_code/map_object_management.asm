@@ -213,7 +213,7 @@ BOARD.FRIGATE
 .ERROR2
 ;FRIGATE X-AXIS IN UNEXPECTED POSITION IN .CENTER_FRIGATE_ONSCREEN
 	TAY
-	LDA #$AE
+	;LDA #$AE
 	JSR FULL.BRK
 	
 
@@ -4617,7 +4617,8 @@ SPRITE.RANDOM.MOVE.ENTRANCE ;BUILDING NPCs
 ;NOT.IN.TRANSIT (NPC.MOVE.MANAGER) reports an unrecognized
 ;anchor movement flag in PATHFINDER.SPRITE.RECORD+$7.
 ;check the value in the "NPC Data" worksheet for the building the NPC is in.
-	LDA #$A3
+	
+	;LDA #$A3
 	JSR FULL.BRK
 
 .TETHERED_TO_ANCHOR.RADIUS1
@@ -4841,7 +4842,8 @@ NPC.PATH_SEEKING.MAGNET_ALGORITHM.START ;(alternate entrance)
 ;isn't blocked. Regardless, there is no scenario I can think
 ;of where the next path tile should be the tile NPC was
 ;standing on when it detected a block. 
-	LDA #$A4
+	
+	;LDA #$A4
 	JSR FULL.BRK
 	
 	
@@ -7214,7 +7216,8 @@ ERROR1
 ;value in MOB.MOVE.CURRENT,
 ;OR .APPLY.PLAYER_MOVE (GENERAL.ENTRANCE) deteced invalid value in PLAYER.MOVE
 ;OR .APPLY.PLAYER_MOVE (SPRITE.ENTRANCE) deteced invalid value in PLAYER.MOVE
-	LDA #$A1
+	
+	;LDA #$A1
 	JSR FULL.BRK
 	
 @END

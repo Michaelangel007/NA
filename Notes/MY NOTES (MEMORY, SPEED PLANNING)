@@ -20,17 +20,19 @@
 	
 *Options to free up more main memory
 	*Review the library routines. It seems they take up a fair amount of space and maybe there are some subroutines which aren't in use. 
-	*remove the trace codes from calls to FULL.BRK in error traps. Not needed now that I know how to use the stack pointer to trace RTS addresses back to the source. 
-		;Also, I did something simular with calls to draw tile single. Those can be removed too for the same reason. 
+	*(DONE) remove the trace codes from calls to FULL.BRK in error traps. Not needed now that I know how to use the stack pointer to trace RTS addresses back to the source. 
+		;(PENDING) Also, I did something simular with calls to draw tile single. Those can be removed too for the same reason. 
 	*Change all filenames on disk image to a two digit numerical code. I can still use descriptive labels in the source code and extensive comments in the batch files could be made to keep things clear. each line of the
 		;batch file has the full .BIN filename on it anyway so the only time I'd need to look at a matrix would be if viewing files on the disk image via ciderpress
 	*Combine the screen dark and before arrays. Track the before status with the high bit. It should take same memory to LDA the same array and do a BMI as it is to LDA a different array and to a BEQ/BNE
 	*use Sprite type to select tile type for MTT in animation manager
-	*Deprecate MLP.16.NO_BCD into MLP.32. To avoid having to init the 32-bit portion of the multiplyer and multicand, 
+	*(DONE) Deprecate MLP.16.NO_BCD into MLP.32. To avoid having to init the 32-bit portion of the multiplyer and multicand, 
 		;setup a 32-bit mode parm which resets to 16-bit parm value at the end of the routine. See DIV.16 for example
 	*Load the data for new location worm hole coordinates to a file (see ;---MAPS with WORMHOLES---), probably the start of the map file. reserve a certain # of bytes and so the start of the map data is predictable. This may require changing the format of the worm hole arrays.
 		it is probably best to wait to do this until after I've done a fair amount of game design so I have some idea of how many worm holes per map are typically needed
 	*redo map compression. Compress PC side using LZ4, aLib or ZX7, and use QB64 to build headers (either as a table at the front or a zone # and length byte embedded between the compressed data). Then in 6502, the existing decompressor code and header code can be eliminated in exchange for the code to use one of Peters decompressors. DOING THIS MEANS THE MAP CANNOT BE PERMENANTLY CHANGED IN-GAME
+	
+	
 	(DONE) *move GAME.START.DRIVER from GAME_LOOP to LOADER.P
 	(DONE) *Swap prodos driver out to aux memory after bootstrapping is done, have P.IO wrapper swap in when called. 
 	(DONE) *integrate CONVERT.ASCII.UCASE into game_loop.ASM and remove the lowercase keypress checks since they won't be needed anymore. 
