@@ -36,11 +36,15 @@ for character sheets might already handle everythign needed.
 		even if if I don't do the overhaul plan. 
 		
 	*Freeing up aux main memory will help find a new home for the weapon shape tables which in turn helps free up aux BSR for the combat module
-		*changing the day/night floor/street tile switch to a tile swamp instead of a shape table swap may help this. And it needs to be
+		*(DONE) changing the day/night floor/street tile switch to a tile swap instead of a shape table swap may help this. And it needs to be
 		 done anyway to support the extra day/night tiles Bill did in the castle and ruined castle
-		*The character set takes up $300 bytes in aux memory. Consider whether the entire character set is needed.
-			Review ascii table. There might be a bunch of unnecessary stuff in the lower or upper ends of the range. 
-
+ 
+	
+	*Reduce # of saved paths for pathfinder. 
+		;currently I've budgeted for 16 pages of memory. 
+		;I suspect the implication of reducing the # of saved paths is reducing the # of NPCs that can be in transit at the same time.
+			I bet we can reduce this by a lot (maybe by half) and be okay from a design standpoint. To verify find out the max size of a single saved path. I think it's 1 page. 
+		;See "Pathfinder: Saved NPC Paths" in memory map.
 	
 ===SCROLL TEXT===
 

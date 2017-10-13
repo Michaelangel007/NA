@@ -30,9 +30,7 @@ MEMORY MAP (Bank Switched, main)
 MEMORY MAP (Aux)
 	$0200-1CFF(est)*	Compressed World Map Zone data. After seeing the compression ratio, guess at a total allocation and fill in the ?????, maybe set an error trap if the compression routine goes over
 	$1D00-27FF			(not in use) AUX run subroutines (!11 ($B) pages)
-	$2800-28FF			Small stuff
-		$2800-$28BF		Red/Blue floor & street tile buffers (brick and gravel)	
-		$2900-$2EFF		AUX Swap space expansion?? ($600 bytes)
+	$2800-2EFF			**AVAILABLE**
 	$2F00-58FF			AUX Swap space ($2A00 bytes)
 	$5900-5BFF			Hi-RES Character set
 	$5C00-6BFF			Pathfinder: Saved NPC Paths

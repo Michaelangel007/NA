@@ -1755,7 +1755,7 @@ KEYIN.BCD ;============WAITS FOR A BCD (!0-9) KEYPRESS=======
 	; INC COW
 @END
 
-DEBUG.PRINT ;same as .DEBUG.PRINT_X but setup to be called as a subrotuine. **OPT** Memory. Remove when resolved.  
+;DEBUG.PRINT ;same as .DEBUG.PRINT_X but setup to be called as a subrotuine. **OPT** Memory. Remove when resolved.  
 @START
 		
 	;PHA ;SAVE ACC
