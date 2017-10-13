@@ -21,7 +21,7 @@
 *Options to free up more main memory
 	*Review the library routines. It seems they take up a fair amount of space and maybe there are some subroutines which aren't in use. 
 	*(DONE) remove the trace codes from calls to FULL.BRK in error traps. Not needed now that I know how to use the stack pointer to trace RTS addresses back to the source. 
-		;(PENDING) Also, I did something simular with calls to draw tile single. Those can be removed too for the same reason. 
+		;(DONE) Also, I did something simular with calls to draw tile single. Those can be removed too for the same reason. 
 	*Change all filenames on disk image to a two digit numerical code. I can still use descriptive labels in the source code and extensive comments in the batch files could be made to keep things clear. each line of the
 		;batch file has the full .BIN filename on it anyway so the only time I'd need to look at a matrix would be if viewing files on the disk image via ciderpress
 	*Combine the screen dark and before arrays. Track the before status with the high bit. It should take same memory to LDA the same array and do a BMI as it is to LDA a different array and to a BEQ/BNE

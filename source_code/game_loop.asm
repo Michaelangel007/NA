@@ -532,9 +532,31 @@ GAME.RENTRY	;=======USED FOR GAME RENTRY VIA THE MONITOR AFTER A BRK VIA QUIT CO
 ;=================================================================================
 
 
+.INIT.SCREEN	;**OPT** Memory. Move to LOADER.P/NOXARCH.MAIN once NOXARCH.MAIN is no longer loaded into $2000, causing it to clobber itself with the screen clear
 
-	LDA #$00			;SPECIFY BOTH PAGES FOR CLEAR SCREEN
-	JSR SCLEAR			;CLEAR SCREEN BEFORE TURNING ON GRAPHICS (AVOIDS UNSIGHTLY FLASH OF RANDOM DOTS) 
+;SCREEN CLEAR (BOTH PAGES)
+		LDA $C082 ;ENABLE ROM
+	
+	;call Applesoft screen clear in ROM: Hi-Res page1
+		LDA #$20
+		STA $E6 
+	JSR $F3F2 ;Uses the following zpage variables: $1A HGR.SHAPE, $1C HGR.BITS, $E6 HGR.PAGE
+	
+	
+	;call Applesoft screen clear in ROM: Hi-Res page2
+		LDA #$40
+		STA $E6 
+	JSR $F3F2 ;Uses the following zpage variables: $1A HGR.SHAPE, $1C HGR.BITS, $E6 HGR.PAGE	
+
+		;ENABLE BANK-SWITCHED RAM ($D000 Bank 1)
+		LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK2 2nd)
+		LDA $C083
+
+
+
+
+	; LDA #$00			;SPECIFY BOTH PAGES FOR CLEAR SCREEN
+	; JSR SCLEAR			;CLEAR SCREEN BEFORE TURNING ON GRAPHICS (AVOIDS UNSIGHTLY FLASH OF RANDOM DOTS) 
 
 ;	JMP SKIP.GRAPHICS		;don't turn graphics mode on, so register output is visible from monitor prompt on BRK (testing)	
 

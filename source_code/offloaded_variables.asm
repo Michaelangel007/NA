@@ -112,6 +112,84 @@ COMBAT.OUT_OF_ORDER.SHARED.MEMORY15_STEP	.EQ SHARED.VARIABLE_SPACE.BLOCK2+$0F ;$
 
 @END
 
+
+;=====SCREEN HOLE=======
+@START
+;(Michael Pohoreksi advises that using the screen holes to store data is "safe" as long as you don't accidentally clobber them
+;with a screen clear routine that isn't sceen hole friendly)
+
+SCREEN_HOLE.2078_207F	.EQ	$2078	;$8bytes	
+
+; Screen Holes sorted by memory address
+; $2078..$207F
+; $20F8..$20FF
+; $2178..$217F
+; $21F8..$21FF
+; $2278..$227F
+; $22F8..$22FF
+; $2378..$237F
+; $23F8..$23FF
+; $2478..$247F
+; $24F8..$24FF
+; $2578..$257F
+; $25F8..$25FF
+; $2678..$267F
+; $26F8..$26FF
+; $2778..$277F
+; $27F8..$27FF
+; $2878..$287F
+; $28F8..$28FF
+; $2978..$297F
+; $29F8..$29FF
+; $2A78..$2A7F
+; $2AF8..$2AFF
+; $2B78..$2B7F
+; $2BF8..$2BFF
+; $2C78..$2C7F
+; $2CF8..$2CFF
+; $2D78..$2D7F
+; $2DF8..$2DFF
+; $2E78..$2E7F
+; $2EF8..$2EFF
+; $2F78..$2F7F
+; $2FF8..$2FFF
+; $3078..$307F
+; $30F8..$30FF
+; $3178..$317F
+; $31F8..$31FF
+; $3278..$327F
+; $32F8..$32FF
+; $3378..$337F
+; $33F8..$33FF
+; $3478..$347F
+; $34F8..$34FF
+; $3578..$357F
+; $35F8..$35FF
+; $3678..$367F
+; $36F8..$36FF
+; $3778..$377F
+; $37F8..$37FF
+; $3878..$387F
+; $38F8..$38FF
+; $3978..$397F
+; $39F8..$39FF
+; $3A78..$3A7F
+; $3AF8..$3AFF
+; $3B78..$3B7F
+; $3BF8..$3BFF
+; $3C78..$3C7F
+; $3CF8..$3CFF
+; $3D78..$3D7F
+; $3DF8..$3DFF
+; $3E78..$3E7F
+; $3EF8..$3EFF
+; $3F78..$3F7F
+; $3FF8..$3FFF
+
+
+
+@END
+
 ;======SWAP SPACE=======
 @START
 
