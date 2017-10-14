@@ -19,6 +19,8 @@
 	*use Sprite type to select tile type for MTT in animation manager
 	
 *Options to free up more main memory
+	*Finish screen hole converstion. Some variables couldn't be converted to screen holes because the screen clear (setting the screen holes and the rest of the hi-res screen to $00) happnes after GAME.START.DRIVER. Screen clear can be run before GAME.SETUP.DRIVER
+		;once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). To find the variables that can be converted but weren't, search for "**OPT** Memory. Screenhole."
 	*Review the library routines. It seems they take up a fair amount of space and maybe there are some subroutines which aren't in use. 
 	*(DONE) remove the trace codes from calls to FULL.BRK in error traps. Not needed now that I know how to use the stack pointer to trace RTS addresses back to the source. 
 		;(DONE) Also, I did something simular with calls to draw tile single. Those can be removed too for the same reason. 

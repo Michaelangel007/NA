@@ -2507,7 +2507,7 @@ TILE.DEPTH.STANDARD				.EQ $10				;#CONSTANT		# OF LINES IN 1 TILE
 TILE.DEPTH.HALF					.EQ $08				;#CONSTANT		NUMBER OF LINES TO DRAW FOR A "HALF TILE". 
 
 ;don't borrow TILE.DEPTH's memory for another variables. I think it has a persistent value most of the time. Borrowing it has caused the graphics to go wonky. 
-TILE.DEPTH						.BS	$1				;$1byte. !!!Conversion to SCREEN HOLE doesn't work!!!!STORES THE NUMBER OF LINES IN THE CURRENT TILE. USUALLY SET TO THE CONSTANT #TILE.DEPTH.STANDARD
+TILE.DEPTH						.BS	$1				;$1byte. STORES THE NUMBER OF LINES IN THE CURRENT TILE. USUALLY SET TO THE CONSTANT #TILE.DEPTH.STANDARD. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 TILE.LINE.START					.EQ SCREEN_HOLE.2178_217F+$1	;$1byte. START LINE OF CURRENT TILE TO BE DRAWN (DRAW.TILE)
 TILE.LINE.STOP					.EQ SCREEN_HOLE.2178_217F+$2	;$1byte. STOP LINE OF CURRENT TILE TO BE DRAWN (DRAW.TILE)
 TILE.LINE.COPY					.EQ SCREEN_HOLE.2178_217F+$3	;$1byte. USED FOR COPYING TILES UP/DOWN IN SCROLL.SCREEN AND ITS' SUBROUTINES
@@ -3484,9 +3484,14 @@ FORWARD.TRANSPORT.BUFFER	.EQ SHARED.VARIABLE_SPACE.BLOCK3+$1C ;4byts. Stores the
 
 ;------PLAYER LOCATION-----
 
-PLAYER.MAP.LOCATION				.BS $1	;contains the location code of the player's current location. 
+ 
+
+PLAYER.MAP.LOCATION				.BS $1	;contains the location code of the player's current location. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+
 PLAYER.MAP.LOCATION_TYPE		.BS $1	;contains the location type (i.e. castle, dungeon etc) of the player's current location. 
+
 PLAYER.MAP.LOCATION.LAST		.BS $4	;Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
+;PLAYER.MAP.LOCATION.LAST		.BS $4	;Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
 PLAYER.MAP.CODE					.EQ PLAYER.MAP.LOCATION
 PLAYER.MAP.TYPE					.EQ PLAYER.MAP.LOCATION_TYPE
 
@@ -3498,7 +3503,8 @@ CURRENT.MAP_LOCATION.TLK_DATA		.BS $2 ;Tracks the memory address of the SPR data
 
 ;-------this group must stay in this order-----
 GMAP					.BS $2			;Tracks the position on the map in computer terms. Specifically, it is the tile ID number of the tile at the center of the screen where the player stands. 
-GMAP.X					.BS $1		;Tracks player's x/y position on world map (whereas RMAP tracks position on the regional map which is 9 zones within the world map). Used to identify enterable location, and map edge detection. Future use. compass tracking, longitude. 
+GMAP.X					.BS $1
+;GMAP.X					.EQ SCREEN_HOLE.2278_227F+$7	;$1byte. Tracks player's x/y position on world map (whereas RMAP tracks position on the regional map which is 9 zones within the world map). Used to identify enterable location, and map edge detection. Future use. compass tracking, longitude. 
 GMAP.Y					.BS $1		;""
 GMAP.X.LAST				.BS $1		;Stores the GMAP X-axis of player prior to the execution of a movement command. Used to deal with differences in Mob and NPC sprite map tracking. 
 GMAP.Y.LAST				.BS $1		;Stores the GMAP Y-axis of player prior to the execution of a movement command. Used to deal with differences in Mob and NPC sprite map tracking. 
