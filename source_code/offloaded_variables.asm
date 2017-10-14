@@ -120,13 +120,11 @@ COMBAT.OUT_OF_ORDER.SHARED.MEMORY15_STEP	.EQ SHARED.VARIABLE_SPACE.BLOCK2+$0F ;$
 
 SCREEN_HOLE.2078_207F	.EQ	$2078	;$8bytes	
 SCREEN_HOLE.20F8_20FF	.EQ	$20F8	;$8bytes	
-
 SCREEN_HOLE.2178_217F	.EQ	$21F8	;$8bytes	
-
-
 SCREEN_HOLE.21F8_21FF	.EQ	$21F8	;$8bytes	
-
 SCREEN_HOLE.2278_227F	.EQ	$2278	;$8bytes	
+
+SCREEN_HOLE.22F8_22FF	.EQ	$22F8	;$8bytes	
 
 ; Screen Holes sorted by memory address
 ; $2078..$207F --used--
@@ -134,7 +132,7 @@ SCREEN_HOLE.2278_227F	.EQ	$2278	;$8bytes
 ; $2178..$217F --used--
 ; $21F8..$21FF --used--
 ; $2278..$227F --used--
-; $22F8..$22FF
+; $22F8..$22FF --used--
 ; $2378..$237F
 ; $23F8..$23FF
 ; $2478..$247F
@@ -2629,12 +2627,20 @@ HRCG.MAIN.END			.EQ $0EFF	;#CONSTANT; Starting memory address in main memory whe
 HRCG.SHAPE.OFFSET		.EQ $E0		;Stores the offset used to calculate the exact starting address of the shape table for a specific character, using the ASCII value of the character
 HRCG.SHAPE.SIZE			.EQ $07		;#CONSTANT; the number of bytes in each character's shape table 
 
-HRCG.BUFFER				.BS $8		;Buffer where a single character copies from aux memory is stored. The HRCG controller at $300 looks in this buffer for the bit map graphics data for all characters it is asked to print. 
-HRCG.PAGES				.BS $1		;($01 = hi-res page 1, $02 = hi-res page 2, $03 = both pages)
-HRCG.PAGES.SAVED		.BS $1		;Used by wrapper routines to COUT (i.e. PRINT.STR) to set the value of HRCG.PAGES after each COUT call, which resets the value of HRCG.PAGES to $03 on exit. 
+HRCG.BUFFER				.EQ SCREEN_HOLE.22F8_22FF+$0	;$8bytes. Buffer where a single character copies from aux memory is stored. The HRCG controller at $300 looks in this buffer for the bit map graphics data for all characters it is asked to print. 
+					   	;===IN USE==			 +$1-$7
+
+
+
+;HRCG.PAGES				.BS $1		;($01 = hi-res page 1, $02 = hi-res page 2, $03 = both pages)
+HRCG.PAGES				.EQ SCREEN_HOLE.2278_227F+$1	;$1byte. ($01 = hi-res page 1, $02 = hi-res page 2, $03 = both pages)
+
+;HRCG.PAGES.SAVED		.BS $1		;Used by wrapper routines to COUT (i.e. PRINT.STR) to set the value of HRCG.PAGES after each COUT call, which resets the value of HRCG.PAGES to $03 on exit. 
+HRCG.PAGES.SAVED		.EQ SCREEN_HOLE.2278_227F+$2	;$1byte. Used by wrapper routines to COUT (i.e. PRINT.STR) to set the value of HRCG.PAGES after each COUT call, which resets the value of HRCG.PAGES to $03 on exit. 
 	;**OPT** Memory. The above vars can probably be .EQs to some shared variable space. Maybe shape hopper
 
-COUT_CHAR_TYPE.SAVED	.BS $1		;Used by wrapper routines to COUT (i.e. PRINT.STR) to set the value of COUT_CHAR_TYPE after each COUT call, which resets the value of COUT_CHAR_TYPE to $00 on exit. 
+;COUT_CHAR_TYPE.SAVED	.BS $1		;Used by wrapper routines to COUT (i.e. PRINT.STR) to set the value of COUT_CHAR_TYPE after each COUT call, which resets the value of COUT_CHAR_TYPE to $00 on exit. 
+COUT_CHAR_TYPE.SAVED	.EQ SCREEN_HOLE.2278_227F+$3	;$1byte. Used by wrapper routines to COUT (i.e. PRINT.STR) to set the value of COUT_CHAR_TYPE after each COUT call, which resets the value of COUT_CHAR_TYPE to $00 on exit. 
 
 
 	
