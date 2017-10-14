@@ -3005,7 +3005,9 @@ INV_8.NPC_RECORD								.EQ SHAPE.HOPPER0+$74 	;$1bytes. (the map object record 
 @END
 
 ;INV_0.STATS: screen0 (status summary)
-INV_0.SCREEN0.FIRST_RUN.FLAG		 			.BS $1 ;$1bytes. .BS to avoid init.   ($00 =  first run of screen0 not complete | $01 first run screen0 complete)
+INV_0.SCREEN0.FIRST_RUN.FLAG		 			.EQ SCREEN_HOLE.2278_227F+$4	;$1byte. .BS (which a screen hole effectively is) to avoid init.   ($00 =  first run of screen0 not complete | $01 first run screen0 complete)
+;INV_0.SCREEN0.FIRST_RUN.FLAG		 			.BS $1 ;$1bytes. .BS to avoid init.   ($00 =  first run of screen0 not complete | $01 first run screen0 complete)
+
 
 
 ;SHAPE.HOPPER0 variable space F8-$FF available (FOR NEW ROUTINES)
