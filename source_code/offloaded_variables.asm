@@ -130,6 +130,7 @@ SCREEN_HOLE.22F8_22FF	.EQ	$22F8	;$8bytes
 SCREEN_HOLE.2378_237F	.EQ	$2378	;$8bytes	
 
 SCREEN_HOLE.23F8_23FF	.EQ	$23F8	;$8bytes	
+SCREEN_HOLE.2478_247F	.EQ	$2478	;$8bytes	
 
 
 ; Screen Holes sorted by memory address:
@@ -144,7 +145,7 @@ SCREEN_HOLE.23F8_23FF	.EQ	$23F8	;$8bytes
 ; $22F8..$22FF --used--
 ; $2378..$237F --used--
 ; $23F8..$23FF --used--
-; $2478..$247F
+; $2478..$247F --used--
 ; $24F8..$24FF
 ; $2578..$257F
 ; $25F8..$25FF
@@ -3636,14 +3637,20 @@ MAP_OBJECTS.CREATE.TRANSPORT.SKIFFS			.EQ SCREEN.TILE.HOPPER+$D			;PARAMETER FOR
 
 
 ;MAP/SCREEN LOCATION
-MAP_OBJECTS.MAP_LOCATION	.BS $2		;STORES THE GMAP LOCATION A GIVEN MAP OBJECT
-MAP_OBJECTS.TILE_LOCATION	.BS $1		;STORES THE SCREEN TILE # OF A GIVEN MAP OBJECT
+;MAP_OBJECTS.MAP_LOCATION	.BS $2		;STORES THE GMAP LOCATION A GIVEN MAP OBJECT
+MAP_OBJECTS.MAP_LOCATION	.EQ SCREEN_HOLE.23F8_23FF+$5	;$1byte. STORES THE GMAP LOCATION A GIVEN MAP OBJECT
+							;==IN USE==				 ;$6
+
+;MAP_OBJECTS.TILE_LOCATION	.BS $1		;STORES THE SCREEN TILE # OF A GIVEN MAP OBJECT
+MAP_OBJECTS.TILE_LOCATION	.EQ SCREEN_HOLE.23F8_23FF+$7	;$1byte. STORES THE SCREEN TILE # OF A GIVEN MAP OBJECT
 MAP_OBJECTS.PLAYER_LOCATION .EQ $80		;#CONSTANT. THE X,Y LOCATION THAT REPRESENTS THE PLAYER AS IT RELATES TO MAP OBJECTS AND CALCULATING THEIR PROXIMITY TO THE PLAYER
 
 
 ;MAP/SCREEN OPERATIONS (GENERAL)
-MANAGE_OBJECTS.NPC_MOB.INDEX.FLAG	.BS $01		;since the MOB and NPC map object arrays are not the same size, this flag tracks whether the index points to a MOB record only or a MOB & NPC Record. $00 = Mob & NPC, $01 = Mob only,
-MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG	.BS $01		;tracks whether the sprite object loop is in mob or NPC mode. ;$00=mob record, $01=npc record, >=$02=next map object record
+;MANAGE_OBJECTS.NPC_MOB.INDEX.FLAG	.BS $01		;since the MOB and NPC map object arrays are not the same size, this flag tracks whether the index points to a MOB record only or a MOB & NPC Record. $00 = Mob & NPC, $01 = Mob only,
+MANAGE_OBJECTS.NPC_MOB.INDEX.FLAG	.EQ SCREEN_HOLE.2478_247F+$0	;$1byte. since the MOB and NPC map object arrays are not the same size, this flag tracks whether the index points to a MOB record only or a MOB & NPC Record. $00 = Mob & NPC, $01 = Mob only,
+;MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG	.BS $01		;tracks whether the sprite object loop is in mob or NPC mode. ;$00=mob record, $01=npc record, >=$02=next map object record
+MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG	.EQ SCREEN_HOLE.2478_247F+$1	;$1byte. tracks whether the sprite object loop is in mob or NPC mode. ;$00=mob record, $01=npc record, >=$02=next map object record
 
 GMAP.X.TO_CONVERT					.EQ TEMPX	;Used to hold the value for GMAP to player-relative.X/Y conversions because the value could be GMAP.X/Y or GMAP.X/Y.LAST
 GMAP.Y.TO_CONVERT					.EQ TEMPY	;""
