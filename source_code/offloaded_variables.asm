@@ -3674,10 +3674,10 @@ MOB.POSITION.X_LT		.EQ MOB.POSITION.X_LT_STEP	;based on the position of a mob (n
 MOB.POSITION.Y_GR		.EQ MOB.POSITION.Y_GR_STEP	;based on the position of a mob (net of current player move, before mob moves). if != $00 then mob's y position is greater than player.
 MOB.POSITION.Y_LT		.EQ MOB.POSITION.Y_LT_STEP ;based on the position of a mob (net of current player move, before mob moves). if != $00 then mob's y position is less than player. 
 
-MAP_OBJECTS.SS.X_FLAG.LOWER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES. 
-MAP_OBJECTS.SS.X_FLAG.UPPER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES.
-MAP_OBJECTS.SS.Y_FLAG.LOWER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES.
-MAP_OBJECTS.SS.Y_FLAG.UPPER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES.
+MAP_OBJECTS.SS.X_FLAG.LOWER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MAP_OBJECTS.SS.X_FLAG.UPPER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MAP_OBJECTS.SS.Y_FLAG.LOWER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MAP_OBJECTS.SS.Y_FLAG.UPPER			.BS $1		;STORES THE FLOATING VALUES REPRESENTING THE EDGE OF THE REGIONAL MAP IN MOB X/Y TERMS, WHICH ADJUSTS AS THE PLAYER MOVES. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
 
 
