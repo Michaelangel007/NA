@@ -525,7 +525,7 @@ INV_8.INIT.MERCHANT_PROFILE.SEARCH.LOOP
 .NEXT_RECORD	
 	;increment counter
 	INX ;merchant profile ID counter
-
+	BEQ .ERROR.MERCHANT.NOT.FOUND
 	
 	;seek to start of next merchant profile record
 	LDA INV_8.MERCHANT.PROFILE.RECORD_SIZE ;load 8-bit size (bytes) of current profile record
@@ -535,9 +535,34 @@ INV_8.INIT.MERCHANT_PROFILE.SEARCH.LOOP
 	LDA #$00 ;profile record size is 8-bit so set the HO seek size byte value to #$00. 
 	STA INV_8.MERCHANT_PROFILE.SEEK_BYTES+$1
 	JMP INV_8.INIT.MERCHANT_PROFILE.SEARCH.LOOP
-						
+
+.ERROR.MERCHANT.NOT.FOUND
+;INV_8.INIT.MERCHANT_PROFILE.SEARCH.LOOP reports that the map code and NPC record # of the merchant the player talked to is not found
+;in the merchant profile table. This error was triggered because X-REG flipped to $00, which is used as the merchant profile ID counter, 
+;which increments as each sequential profile record is checked for a match.
+	; LDA #$AA
+	; LDX #$AA
+	; LDY #$AA
+	JSR PREP.BRK
+	BRK
+	
+	
 .MERCHANT_PROFILE.FOUND
 @END
+
+			; LDA INV_8.MERCHANT.PROFILE.MAP_CODE	 ;load map code field of current merchant profile record
+			; sta $bf00
+			; LDA INV_8.MERCHANT.PROFILE.NPC_RECORD ;load NPC Record # field of current merchant profile record
+			; sta $bf01
+			; lda PLAYER.MAP.CODE ;does the map code of the player's current map match the map code field of the current merchant_ID table record?
+			; sta $bf02
+			; lda INV_8.NPC_RECORD
+			; sta $bf03
+			; lda #$aa
+			; jsr prep.brk
+			; brk
+			
+					
 
 .READ.MERCHANT_PROFILE
 @START				
