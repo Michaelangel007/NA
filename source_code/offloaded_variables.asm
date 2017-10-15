@@ -123,8 +123,10 @@ SCREEN_HOLE.20F8_20FF	.EQ	$20F8	;$8bytes
 SCREEN_HOLE.2178_217F	.EQ	$21F8	;$8bytes	
 SCREEN_HOLE.21F8_21FF	.EQ	$21F8	;$8bytes	
 SCREEN_HOLE.2278_227F	.EQ	$2278	;$8bytes	
-
 SCREEN_HOLE.22F8_22FF	.EQ	$22F8	;$8bytes	
+
+SCREEN_HOLE.2378_237F	.EQ	$2378	;$8bytes	
+
 
 ; Screen Holes sorted by memory address
 ; $2078..$207F --used--
@@ -133,7 +135,7 @@ SCREEN_HOLE.22F8_22FF	.EQ	$22F8	;$8bytes
 ; $21F8..$21FF --used--
 ; $2278..$227F --used--
 ; $22F8..$22FF --used--
-; $2378..$237F
+; $2378..$237F --used--
 ; $23F8..$23FF
 ; $2478..$247F
 ; $24F8..$24FF
@@ -3488,23 +3490,31 @@ FORWARD.TRANSPORT.BUFFER	.EQ SHARED.VARIABLE_SPACE.BLOCK3+$1C ;4byts. Stores the
 
 PLAYER.MAP.LOCATION				.BS $1	;contains the location code of the player's current location. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
-PLAYER.MAP.LOCATION_TYPE		.BS $1	;contains the location type (i.e. castle, dungeon etc) of the player's current location. 
+PLAYER.MAP.LOCATION_TYPE		.BS $1	;contains the location type (i.e. castle, dungeon etc) of the player's current location. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
-PLAYER.MAP.LOCATION.LAST		.BS $4	;Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
+PLAYER.MAP.LOCATION.LAST		.EQ SCREEN_HOLE.2378_237F+$0	;$4byte. Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
+								;==IN USE==				 +$1-3
+
 ;PLAYER.MAP.LOCATION.LAST		.BS $4	;Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
 PLAYER.MAP.CODE					.EQ PLAYER.MAP.LOCATION
 PLAYER.MAP.TYPE					.EQ PLAYER.MAP.LOCATION_TYPE
 
 
-CURRENT.MAP_LOCATION.SPR_DATA		.BS $2 ;Tracks the memory address of the SPR data file associated with the map location the player is currently in
-CURRENT.MAP_LOCATION.TLK_DATA		.BS $2 ;Tracks the memory address of the SPR data file associated with the map location the player is currently in
+
+
+
+CURRENT.MAP_LOCATION.SPR_DATA		.BS $2 ;Tracks the memory address of the SPR data file associated with the map location the player is currently in. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+CURRENT.MAP_LOCATION.TLK_DATA		.BS $2 ;Tracks the memory address of the SPR data file associated with the map location the player is currently in. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
 ;TILE ID number: a term used to describe the value stored in RMAP, from which other variables such as SMAP, and SMAP.CURRENT are dervied. The tile ID is a unique reference number to a specific tile on the map (from a human perspective). To the computer it is meaningful because the value of Tile ID is also equal to the quantity of tiles on the map in GMAP.TILE.DATA up to and including the tile assocaited with Tile ID. 
 
 ;-------this group must stay in this order-----
+;!!!Warning!! this section cannot be converted to screen holes because. I think the problems were cause because
+;of the reason the note above was added, "this group must stay in this order", which I suspect was because I used a loop to init 
+;this group of variables when the player transitions between the undermap and service or vice versa. 
+
 GMAP					.BS $2			;Tracks the position on the map in computer terms. Specifically, it is the tile ID number of the tile at the center of the screen where the player stands. 
 GMAP.X					.BS $1
-;GMAP.X					.EQ SCREEN_HOLE.2278_227F+$7	;$1byte. Tracks player's x/y position on world map (whereas RMAP tracks position on the regional map which is 9 zones within the world map). Used to identify enterable location, and map edge detection. Future use. compass tracking, longitude. 
 GMAP.Y					.BS $1		;""
 GMAP.X.LAST				.BS $1		;Stores the GMAP X-axis of player prior to the execution of a movement command. Used to deal with differences in Mob and NPC sprite map tracking. 
 GMAP.Y.LAST				.BS $1		;Stores the GMAP Y-axis of player prior to the execution of a movement command. Used to deal with differences in Mob and NPC sprite map tracking. 
@@ -3515,12 +3525,11 @@ PLAYER.WMAP.ZONE		.BS $1			;PLAYERS CURRENT WORLD ZONE LOCATION
 ;-----------------
 
 
-SMAP					.BS $2			;2byt
+SMAP					.EQ SCREEN_HOLE.2278_227F+$5	;$2byte.
+						;==IN USE==				 +$6
+
+;SMAP.CURRENT			.BS $2			;2byt
 SMAP.CURRENT			.BS $2			;2byt
-; RMAP					.EQ $AB40		;TRACKS PLAYERS POSITION IN THE REGIONAL MAP ARRAY
-; RMAP.X					.EQ $AB42		;Tracks player x/y axis on regional map. 
-; RMAP.Y					.EQ $AB43		;Tracks player x/y axis on regional map. 
-; PLAYER.WMAP.ZONE		.EQ $AB44		;PLAYERS CURRENT WORLD ZONE LOCATION
 
 
 ;MAP MOVEMENT OFFSETS
@@ -3534,10 +3543,14 @@ OFFSET.SCREEN.LL		.EQ $E8	;#CONSTANT (offset from RMAP for calculating RMAP of l
 OFFSET.SCREEN.UR		.EQ $10 ;#CONSTANT (offset from SMAP for calculating RMAP of upper right screen tile)
 
 ;MAP CONVERSION TOOLS
-TEMPX					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
+TEMPX					.EQ SCREEN_HOLE.2278_227F+$7	;$1byte. used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
+;TEMPX					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 TEMPY					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
+;TEMPY					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 TEMPY2					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
+;TEMPY2					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 
+;.EQ SCREEN_HOLE.2378_237F+$0	;$4byte.
 
 PARM.GMAP.X				.BS $1	;stores GMAP.X as a parameter for CONVERT.xxx routines (see map_tools.asm) **SHARED**
 PARM1.GMAP.X			.EQ PARM.GMAP.X	;""
