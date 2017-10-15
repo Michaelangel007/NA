@@ -117,6 +117,7 @@ COMBAT.OUT_OF_ORDER.SHARED.MEMORY15_STEP	.EQ SHARED.VARIABLE_SPACE.BLOCK2+$0F ;$
 @START
 ;(Michael Pohoreksi advises that using the screen holes to store data is "safe" as long as you don't accidentally clobber them
 ;with a screen clear routine that isn't sceen hole friendly)
+;
 
 SCREEN_HOLE.2078_207F	.EQ	$2078	;$8bytes	
 SCREEN_HOLE.20F8_20FF	.EQ	$20F8	;$8bytes	
@@ -124,12 +125,15 @@ SCREEN_HOLE.2178_217F	.EQ	$21F8	;$8bytes
 SCREEN_HOLE.21F8_21FF	.EQ	$21F8	;$8bytes	
 SCREEN_HOLE.2278_227F	.EQ	$2278	;$8bytes	
 SCREEN_HOLE.22F8_22FF	.EQ	$22F8	;$8bytes	
+
+	;$2378+$0 has caused problems. 
 SCREEN_HOLE.2378_237F	.EQ	$2378	;$8bytes	
 
-SCREEN_HOLE.23F8_23FF	.EQ	$23F8	;$8bytes	
 
-
-; Screen Holes sorted by memory address
+; Screen Holes sorted by memory address:
+;also see:
+;https://github.com/Michaelangel007/apple2_hgr_font_tutorial#non-linear-memory
+;
 ; $2078..$207F --used--
 ; $20F8..$20FF --used--
 ; $2178..$217F --used--
@@ -137,7 +141,7 @@ SCREEN_HOLE.23F8_23FF	.EQ	$23F8	;$8bytes
 ; $2278..$227F --used--
 ; $22F8..$22FF --used--
 ; $2378..$237F --used--
-; $23F8..$23FF --used--
+; $23F8..$23FF
 ; $2478..$247F
 ; $24F8..$24FF
 ; $2578..$257F
@@ -3493,10 +3497,12 @@ PLAYER.MAP.LOCATION				.BS $1	;contains the location code of the player's curren
 
 PLAYER.MAP.LOCATION_TYPE		.BS $1	;contains the location type (i.e. castle, dungeon etc) of the player's current location. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
-PLAYER.MAP.LOCATION.LAST		.EQ SCREEN_HOLE.2378_237F+$0	;$4byte. Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
-								;==IN USE==				 +$1-3
-
 ;PLAYER.MAP.LOCATION.LAST		.BS $4	;Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
+PLAYER.MAP.LOCATION.LAST		.EQ SCREEN_HOLE.2378_237F+$1	;$4byte. Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
+								;==IN USE==				 +$2-4
+
+
+
 PLAYER.MAP.CODE					.EQ PLAYER.MAP.LOCATION
 PLAYER.MAP.TYPE					.EQ PLAYER.MAP.LOCATION_TYPE
 
@@ -3528,9 +3534,12 @@ PLAYER.WMAP.ZONE		.BS $1			;PLAYERS CURRENT WORLD ZONE LOCATION
 
 SMAP					.EQ SCREEN_HOLE.2278_227F+$5	;$2byte.
 						;==IN USE==				 +$6
+;SMAP					.BS $2						
 
+						
 ;SMAP.CURRENT			.BS $2			;2byt
-SMAP.CURRENT			.BS $2			;2byt
+SMAP.CURRENT			.EQ SCREEN_HOLE.2378_237F+$5	;$2byte. 
+						;==IN USE==				 +$6
 
 
 ;MAP MOVEMENT OFFSETS
@@ -3546,40 +3555,39 @@ OFFSET.SCREEN.UR		.EQ $10 ;#CONSTANT (offset from SMAP for calculating RMAP of u
 ;MAP CONVERSION TOOLS
 TEMPX					.EQ SCREEN_HOLE.2278_227F+$7	;$1byte. used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 ;TEMPX					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
-TEMPY					.EQ SCREEN_HOLE.2378_237F+$4	;$1byte. used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
+
+TEMPY					.EQ SCREEN_HOLE.2378_237F+$7	;$1byte. used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 ;TEMPY					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
-TEMPY2					.EQ SCREEN_HOLE.2378_237F+$5	;$1byte. used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
+TEMPY2					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 ;TEMPY2					.BS $1	;used for math calculations in CONVERT.xxx routines (see map_tools.asm) **SHARED**
 
+;.EQ SCREEN_HOLE.2378_237F+$0	;$4byte.
 
-
-;PARM.GMAP.X				.BS $1	;stores GMAP.X as a parameter for CONVERT.xxx routines (see map_tools.asm) **SHARED**
-PARM.GMAP.X				.EQ SCREEN_HOLE.2378_237F+$6	;$1byte. stores GMAP.X as a parameter for CONVERT.xxx routines (see map_tools.asm) **SHARED**
+PARM.GMAP.X				.BS $1	;stores GMAP.X as a parameter for CONVERT.xxx routines (see map_tools.asm) **SHARED**
 PARM1.GMAP.X			.EQ PARM.GMAP.X	;""
 PARM2.GMAP.X			.EQ	TEMPX ;""
 PARM.COLUMN				.EQ PARM.GMAP.X	;$1byte
 PARM1.SHAPE.SBYTE		.EQ PARM1.GMAP.X
 PARM2.SHAPE.SBYTE		.EQ PARM2.GMAP.X
 
-;PARM.GMAP.Y				.BS $1	;stores GMAP.Y as a parameter for CONVERT.xxx routines (see map_tools.asm)
-PARM.GMAP.Y				.EQ SCREEN_HOLE.2378_237F+$7	;$1byte. stores GMAP.Y as a parameter for CONVERT.xxx routines (see map_tools.asm)
+PARM.GMAP.Y				.BS $1	;stores GMAP.Y as a parameter for CONVERT.xxx routines (see map_tools.asm)
 PARM1.GMAP.Y			.EQ PARM.GMAP.Y	;""
 PARM2.GMAP.Y			.EQ	TEMPY ;""
 PARM.ROW				.EQ PARM.GMAP.Y ;$1byte
 PARM1.SHAPE.LINE		.EQ PARM1.GMAP.Y
 PARM2.SHAPE.LINE		.EQ PARM2.GMAP.Y
 
+
+
 PARM.RMAP.X				.EQ PARM.GMAP.X	;stores RMAP.X as a parameter for CONVERT.xxx routines (see map_tools.asm)
 PARM.RMAP.Y				.EQ PARM.GMAP.Y	;stores RMAP.Y as a parameter for CONVERT.xxx routines (see map_tools.asm)
-;PARM.WZONE				.BS $1	;stores PLAYER.WMAP.ZONE as a parameter for CONVERT.xxx routines (see map_tools.asm)
-PARM.WZONE				.EQ SCREEN_HOLE.23F8_23FF+$0	;$1byte. stores PLAYER.WMAP.ZONE as a parameter for CONVERT.xxx routines (see map_tools.asm)
+PARM.WZONE				.BS $1	;stores PLAYER.WMAP.ZONE as a parameter for CONVERT.xxx routines (see map_tools.asm)
+;PARM.WZONE				.EQ ;$1byte. stores PLAYER.WMAP.ZONE as a parameter for CONVERT.xxx routines (see map_tools.asm)
 PARM.RELATIVE.X			.EQ PARM.GMAP.X
 PARM.RELATIVE.Y			.EQ PARM.GMAP.Y
 
-;RETURN.GMAP.X			.BS $1	;stores return value for CONVERT.GMAP_XY.RMAP_XY
-RETURN.GMAP.X			.EQ SCREEN_HOLE.23F8_23FF+$1	;$1byte. stores return value for CONVERT.GMAP_XY.RMAP_XY
-;RETURN.GMAP.Y			.BS $1	;stores return value for CONVERT.GMAP_XY.RMAP_XY
-RETURN.GMAP.Y			.EQ SCREEN_HOLE.23F8_23FF+$2	;$1byte. stores return value for CONVERT.GMAP_XY.RMAP_XY
+RETURN.GMAP.X			.BS $1	;stores return value for CONVERT.GMAP_XY.RMAP_XY
+RETURN.GMAP.Y			.BS $1	;stores return value for CONVERT.GMAP_XY.RMAP_XY
 RETURN.RMAP.X			.EQ RETURN.GMAP.X	;stores return value for CONVERT.xxx routines (see map_tools.asm)
 RETURN.RMAP.Y			.EQ RETURN.GMAP.Y	;stores return value for CONVERT.xxx routines (see map_tools.asm)
 RETURN.RELATIVE.X		.EQ PARM.GMAP.X		;""
@@ -3587,9 +3595,7 @@ RETURN.RELATIVE.Y		.EQ PARM.GMAP.Y		;""
 RETURN.SCREEN_ARRAY_INDEX .EQ RETURN.GMAP.X ;1 byte
 ;RETURN.DISTANCE			.EQ RETURN.GMAP.X 	;""
 
-;RETURN.RMAP				.BS $2	;stores return value for CONVERT.RMAP_XY.RMAP
-RETURN.RMAP				.EQ SCREEN_HOLE.23F8_23FF+$3	;$2byte. stores return value for CONVERT.RMAP_XY.RMAP
-						;==IN USE==				 +$4
+RETURN.RMAP				.BS $2	;stores return value for CONVERT.RMAP_XY.RMAP
 RETURN.WZONE			.EQ PARM.WZONE	;stores return value for CONVERT.GMAP_XY.WZONE	
 
 
