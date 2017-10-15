@@ -131,6 +131,7 @@ SCREEN_HOLE.2378_237F	.EQ	$2378	;$8bytes
 
 SCREEN_HOLE.23F8_23FF	.EQ	$23F8	;$8bytes	
 SCREEN_HOLE.2478_247F	.EQ	$2478	;$8bytes	
+SCREEN_HOLE.24F8_24FF	.EQ	$24F8	;$8bytes	
 
 
 ; Screen Holes sorted by memory address:
@@ -146,7 +147,7 @@ SCREEN_HOLE.2478_247F	.EQ	$2478	;$8bytes
 ; $2378..$237F --used--
 ; $23F8..$23FF --used--
 ; $2478..$247F --used--
-; $24F8..$24FF
+; $24F8..$24FF --used--
 ; $2578..$257F
 ; $25F8..$25FF
 ; $2678..$267F
@@ -3685,10 +3686,13 @@ MAP_OBJECTS.SS.X_FLAG.UPPER.START	.EQ $98		;#CONSTANT. Marks the mob x/y right e
 MAP_OBJECTS.SS.Y_FLAG.LOWER.START	.EQ $68		;#CONSTANT. Marks the mob x/y top edge of the regional map when player is at the starting zone position. Use for SS in-region check.
 MAP_OBJECTS.SS.Y_FLAG.UPPER.START	.EQ $99		;#CONSTANT. Marks the mob x/y bottom edge of the regional map when player is at the starting zone position. Use for SS in-region check.
 
-MOB.SCREEN_STATUS.START				.BS $1		;BEFORE THE EFFECT OF THE PLAYER MOVE IS APPLIED, IS THE CURRENT MOB RECORD ONSCREEN? $00=YES, $01=NO
-MOB.SCREEN_STATUS.NPM				.BS $1		;AFTER THE EFFECT OF THE PLAYER MOVE IS APPLIED, IS THE CURRENT MOB RECORD ONSCREEN? $00=YES, $01=NO
+;MOB.SCREEN_STATUS.START				.BS $1		;BEFORE THE EFFECT OF THE PLAYER MOVE IS APPLIED, IS THE CURRENT MOB RECORD ONSCREEN? $00=YES, $01=NO
+MOB.SCREEN_STATUS.START				.EQ SCREEN_HOLE.2478_247F+$2	;$1byte. BEFORE THE EFFECT OF THE PLAYER MOVE IS APPLIED, IS THE CURRENT MOB RECORD ONSCREEN? $00=YES, $01=NO
+;MOB.SCREEN_STATUS.NPM				.BS $1		;AFTER THE EFFECT OF THE PLAYER MOVE IS APPLIED, IS THE CURRENT MOB RECORD ONSCREEN? $00=YES, $01=NO
+MOB.SCREEN_STATUS.NPM				.EQ SCREEN_HOLE.2478_247F+$3	;$1byte. AFTER THE EFFECT OF THE PLAYER MOVE IS APPLIED, IS THE CURRENT MOB RECORD ONSCREEN? $00=YES, $01=NO
 
 MOB.SCREEN_STATUS.SS				.BS $1		;AFTER THE EFFECT OF THE PLAYER MOVE IS APPLIED, IF $01 THE CURRENT MOB RECORD BEING PROCESED FOR MOVEMENT HAS THE SS FLAG SET, AND THAT MOB IS CURRENTLY NOT LOCATED ON THE VIEW SCREEN
+;MOB.SCREEN_STATUS.SS				.EQ SCREEN_HOLE.2478_247F+$4	;$1byte. AFTER THE EFFECT OF THE PLAYER MOVE IS APPLIED, IF $01 THE CURRENT MOB RECORD BEING PROCESED FOR MOVEMENT HAS THE SS FLAG SET, AND THAT MOB IS CURRENTLY NOT LOCATED ON THE VIEW SCREEN
 
 
 ;MAP/SCREEN OPERATIONS (ONSCREEN CHECK)
@@ -3706,18 +3710,33 @@ MAP_OBJECTS.Y_ADJ			.EQ MAP_OBJECTS.Y_ADJ_STEP		;SAME CONCEPT AS X_ADJ, BUT NEED
 
 
 ;MISC
-SPRITE.DRAWTILE.OVERRIDE	.BS $1		;used to force a sprite tile to be drawn even if under certain conditional logic would other prevent it from being draw.
-SPRITE.ERASETILE.OVERRIDE	.BS $1		;used to force a sprite tile to be drawn even if under certain conditional logic would other prevent it from being erased.
+;SPRITE.DRAWTILE.OVERRIDE	.BS $1		;used to force a sprite tile to be drawn even if under certain conditional logic would other prevent it from being draw.
+SPRITE.DRAWTILE.OVERRIDE	.EQ SCREEN_HOLE.2478_247F+$5	;$1byte. used to force a sprite tile to be drawn even if under certain conditional logic would other prevent it from being draw.
+;SPRITE.ERASETILE.OVERRIDE	.BS $1		;used to force a sprite tile to be drawn even if under certain conditional logic would other prevent it from being erased.
+SPRITE.ERASETILE.OVERRIDE	.EQ SCREEN_HOLE.2478_247F+$6	;$1byte. used to force a sprite tile to be drawn even if under certain conditional logic would other prevent it from being erased.
+
+;.EQ SCREEN_HOLE.2478_247F+$7	;$1byte. 
 
 ;FLAGS
-MOB.FLAG0					.BS	$1
-MOB.FLAG1					.BS	$1
-MOB.FLAG2					.BS	$1
-MOB.FLAG3					.BS	$1
-MOB.FLAG4					.BS	$1
-MOB.FLAG5					.BS	$1
-MOB.FLAG6					.BS	$1
-MOB.FLAG7					.BS	$1
+;---------------------------(must have contigous memory)-----------
+;MOB.FLAG0					.BS	$1
+MOB.FLAG0					.EQ SCREEN_HOLE.24F8_24FF+$0	;$1byte.
+;MOB.FLAG1					.BS	$1
+MOB.FLAG1					.EQ SCREEN_HOLE.24F8_24FF+$1	;$1byte.
+;MOB.FLAG2					.BS	$1
+MOB.FLAG2					.EQ SCREEN_HOLE.24F8_24FF+$2	;$1byte.
+;MOB.FLAG3					.BS	$1
+MOB.FLAG3					.EQ SCREEN_HOLE.24F8_24FF+$3	;$1byte.
+;MOB.FLAG4					.BS	$1
+MOB.FLAG4					.EQ SCREEN_HOLE.24F8_24FF+$4	;$1byte.
+;MOB.FLAG5					.BS	$1
+MOB.FLAG5					.EQ SCREEN_HOLE.24F8_24FF+$5	;$1byte.
+;MOB.FLAG6					.BS	$1
+MOB.FLAG6					.EQ SCREEN_HOLE.24F8_24FF+$6	;$1byte.
+;MOB.FLAG7					.BS	$1
+MOB.FLAG7					.EQ SCREEN_HOLE.24F8_24FF+$7	;$1byte.
+;---------------------------(must have contigous memory)-----------
+
 SPRITE.FLAGS_BYTE3			.EQ	MOB.FLAG0	;USED WITH A LOOP FOR WRITING VALUES TO ALL FLAGS AT ONCE
 
 GENERAL.FLAG0				.EQ MOB.FLAG0
