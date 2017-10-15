@@ -126,7 +126,7 @@ SCREEN_HOLE.21F8_21FF	.EQ	$21F8	;$8bytes
 SCREEN_HOLE.2278_227F	.EQ	$2278	;$8bytes	
 SCREEN_HOLE.22F8_22FF	.EQ	$22F8	;$8bytes	
 
-	;$2378+$0 has caused problems. 
+
 SCREEN_HOLE.2378_237F	.EQ	$2378	;$8bytes	
 
 SCREEN_HOLE.23F8_23FF	.EQ	$23F8	;$8bytes	
@@ -3502,8 +3502,8 @@ PLAYER.MAP.LOCATION				.BS $1	;contains the location code of the player's curren
 PLAYER.MAP.LOCATION_TYPE		.BS $1	;contains the location type (i.e. castle, dungeon etc) of the player's current location. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
 ;PLAYER.MAP.LOCATION.LAST		.BS $4	;Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
-PLAYER.MAP.LOCATION.LAST		.EQ SCREEN_HOLE.2378_237F+$1	;$4byte. Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
-								;==IN USE==				 +$2-4
+PLAYER.MAP.LOCATION.LAST		.EQ SCREEN_HOLE.2378_237F+$0	;$4byte. Tracks position data on the last location the player was in (including surface map). See Map Objects.xls for a datagram on this array
+								;==IN USE==				 +$1-4
 
 
 

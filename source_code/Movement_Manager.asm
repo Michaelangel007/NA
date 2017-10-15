@@ -1847,20 +1847,21 @@ MAP.EXIT.CHECK
 	STA PARM.GMAP.Y	
 
 	JSR MAP.UPDATE.POSITION ;set RMAP.X/Y, RMAP(2), PLAYER.WZONE and SS Flags
-			
-	; LDA PLAYER.MAP.LOCATION.LAST+$4
+
+	;***these used to be +$4 thru +$8	
+	; LDA PLAYER.MAP.LOCATION.LAST+$5
 	; STA RMAP+$0
 
-	; LDA PLAYER.MAP.LOCATION.LAST+$5
+	; LDA PLAYER.MAP.LOCATION.LAST+$6
 	; STA RMAP+$1
 
-	; LDA PLAYER.MAP.LOCATION.LAST+$6
+	; LDA PLAYER.MAP.LOCATION.LAST+$7
 	; STA RMAP.X
 
-	; LDA PLAYER.MAP.LOCATION.LAST+$7
+	; LDA PLAYER.MAP.LOCATION.LAST+$8
 	; STA RMAP.Y
 
-	; LDA PLAYER.MAP.LOCATION.LAST+$8
+	; LDA PLAYER.MAP.LOCATION.LAST+$9
 	; STA PLAYER.WMAP.ZONE
 
 	;SET GMAP.X/Y.LAST TO GMAP
@@ -2262,26 +2263,28 @@ MAP.ENTER.CHECK
 	LDA GMAP.Y
 	STA PLAYER.MAP.LOCATION.LAST+$3
 	
+	;***these used to be +$4 thru +$8
 	; LDA RMAP+$0
-	; STA PLAYER.MAP.LOCATION.LAST+$4
-	
-	; LDA RMAP+$1
 	; STA PLAYER.MAP.LOCATION.LAST+$5
 	
-	; LDA RMAP.X
+	; LDA RMAP+$1
 	; STA PLAYER.MAP.LOCATION.LAST+$6
 	
-	; LDA RMAP.Y
+	; LDA RMAP.X
 	; STA PLAYER.MAP.LOCATION.LAST+$7
 	
-	; LDA PLAYER.WMAP.ZONE
+	; LDA RMAP.Y
 	; STA PLAYER.MAP.LOCATION.LAST+$8
+	
+	; LDA PLAYER.WMAP.ZONE
+	; STA PLAYER.MAP.LOCATION.LAST+$9
 
 	;** FALLS THROUGH. this code section is invoked for non-building to building entrance/exists, but we process the .BUILDING_TO_BUILDING section anyway because PLAYER.MAP.LOCATION.LAST+$9 is expected to contain the location type by .USE.DEFAULT.POSITION, for all scenarios. 
 	
 .BUILDING_TO_BUILDING	
 	LDA PLAYER.MAP.LOCATION_TYPE
-	STA PLAYER.MAP.LOCATION.LAST+$9
+	;STA PLAYER.MAP.LOCATION.LAST+$9
+	STA PLAYER.MAP.LOCATION.LAST+$4
 	
 .UPDATE.PLAYER.LOCATION	
 ;UPDATE PLAYER MAP VARIABLES WITH NEW MAP DATA
@@ -2438,9 +2441,8 @@ FIND.STARTING.POSITION
 	
 .DESTINATION.LOCATION_TYPE.BUILDING
 ;USED DEFAULT STARTING POSITION IN NEW MAP
-	LDA PLAYER.MAP.LOCATION.LAST+$9 ;load the map type of the source map (which player is exiting)
-	; CMP #MAP.TYPE.TOWN_VILLAGE	;is player entering a building type map from a building type map (i.e. an upper/lower floor of the same location?)
-	; BEQ .LOAD.NEW.LOCATION 	;if yes, start position is same as source position
+	LDA PLAYER.MAP.LOCATION.LAST+$4 ;load the map type of the source map (which player is exiting)
+;	LDA PLAYER.MAP.LOCATION.LAST+$9 ;load the map type of the source map (which player is exiting)
 	;is a building map active
 	;**OPT** Memory. Speed. Right now there is only one code for location type, which is used to determine the tile_set to use and for other location-type specific features. There are a lot of the later. It might be a savings if the 
 					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
