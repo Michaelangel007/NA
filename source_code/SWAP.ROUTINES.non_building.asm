@@ -26,8 +26,11 @@
 ;
 ;=================================================================================
 
-MOB.GENERATION ;=========MANAGES THE RANDOM GENERATION OF MOBS ON THE MAP======
+;MOB.GENERATION ;=========MANAGES THE RANDOM GENERATION OF MOBS ON THE MAP======
 @START
+
+
+	
 
 ;=====================*TOP LEVEL* SUBROUTINE DOCUMENTATION====================================
 ;
@@ -518,15 +521,23 @@ EXIT2
 	;**FALLS THROUGH
 
 EXIT_FINAL
-
+	lda #$aa
+	jsr prep.brk
+	brk
 	RTS
 
 EXIT.ABORT								;USED IF PLAYER PRESSES A KEY DURING THIS ROUTINE, KEEPS TURN SET TO MOB FOR GENERATION
 	INC MOB.GEN.QUEUE	
 
 	STA RND.HI	
+
+	lda #$aa
+	jsr prep.brk
+	brk
+
 	RTS
 @END
+
 @END
 
 

@@ -142,11 +142,15 @@ SCREEN_HOLE.2678_267F	.EQ	$2678	;$8bytes
 
 ;all used
 SCREEN_HOLE.26F8_26FF	.EQ	$26F8	;$8bytes	
-
+;all used
 SCREEN_HOLE.2778_277F	.EQ	$2778	;$8bytes
-
+;all used
 SCREEN_HOLE.27F8_27FF	.EQ	$27F8	;$8bytes
 
+SCREEN_HOLE.2878_287F	.EQ	$2878	;$8bytes
+
+
+;*left off. pathfinder is partially converted. There is a .BS $4 I want to convert in the pathfinder sectin, then do a test. 
 
 
 ; Screen Holes sorted by memory address:
@@ -168,8 +172,8 @@ SCREEN_HOLE.27F8_27FF	.EQ	$27F8	;$8bytes
 ; $2678..$267F --used--
 ; $26F8..$26FF --used--
 ; $2778..$277F --used--
-; $27F8..$27FF
-; $2878..$287F
+; $27F8..$27FF --used--
+; $2878..$287F --used--
 ; $28F8..$28FF
 ; $2978..$297F
 ; $29F8..$29FF
@@ -3861,25 +3865,25 @@ COLLISION_FLAG.MOB_CROC.EQ2		.EQ	$88		;#CONSTANT
 
 
 GAME.MOB_GEN.CONTROL		.BS	$1		;STORES $00 FOR MOB GEN = OFF, HOLDS $01 FOR MOB GEN = ON. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-;GAME.MOB_GEN.CONTROL		.EQ SCREEN_HOLE.2678_267F+$6	;$1byte. STORES $00 FOR MOB GEN = OFF, HOLDS $01 FOR MOB GEN = ON. 
+;;;GAME.MOB_GEN.CONTROL		.EQ SCREEN_HOLE.2678_267F+$6	;$1byte. STORES $00 FOR MOB GEN = OFF, HOLDS $01 FOR MOB GEN = ON. 
 GAME.TURN.CONTROL			.BS	$1		;STORES $00 FOR PLAYER TURN, HOLDS $01 FOR MOB/NPC TURN. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-;GAME.TURN.CONTROL			.EQ SCREEN_HOLE.2678_267F+$7	;$1byte. STORES $00 FOR PLAYER TURN, HOLDS $01 FOR MOB/NPC TURN
+;;;GAME.TURN.CONTROL		.EQ SCREEN_HOLE.2678_267F+$7	;$1byte. STORES $00 FOR PLAYER TURN, HOLDS $01 FOR MOB/NPC TURN
 
-MOB.GEN.QUEUE				.BS $1		;WHEN MOB GENERATION IS ABORTED DUE TO PLAYER KEYPRESS, #$01 IS ADDED TO THIS VARIABLE SO THAT GENERATION CAN CATCHUP WHEN THE PROCESSOR IS FREE. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-;MOB.GEN.QUEUE				.EQ SCREEN_HOLE.26F8_26FF+$5	;$1byte. WHEN MOB GENERATION IS ABORTED DUE TO PLAYER KEYPRESS, #$01 IS ADDED TO THIS VARIABLE SO THAT GENERATION CAN CATCHUP WHEN THE PROCESSOR IS FREE
+;;;MOB.GEN.QUEUE				.BS $1		;WHEN MOB GENERATION IS ABORTED DUE TO PLAYER KEYPRESS, #$01 IS ADDED TO THIS VARIABLE SO THAT GENERATION CAN CATCHUP WHEN THE PROCESSOR IS FREE. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MOB.GEN.QUEUE				.EQ SCREEN_HOLE.26F8_26FF+$5	;$1byte. WHEN MOB GENERATION IS ABORTED DUE TO PLAYER KEYPRESS, #$01 IS ADDED TO THIS VARIABLE SO THAT GENERATION CAN CATCHUP WHEN THE PROCESSOR IS FREE
 
-MOB.GEN.SEA_FLAG			.BS $1		;RANDOM GENERATOR SELECTED A SEA MOB TYPE IF THIS FLAG IS SET TO #$01. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-;MOB.GEN.SEA_FLAG			.EQ SCREEN_HOLE.26F8_26FF+$6	;$1byte. RANDOM GENERATOR SELECTED A SEA MOB TYPE IF THIS FLAG IS SET TO #$01
-MOB.GEN.PROBABILITY			.BS $1		;CHANCE THAT GAME WILL ATTEMPT TO GENERATE A MOB ON A GIVEN RUN OF MOB.GENERATION, PROVIDED THAT IT'S NOT PLAYERS TURN. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-;MOB.GEN.PROBABILITY			.EQ SCREEN_HOLE.26F8_26FF+$7	;CHANCE THAT GAME WILL ATTEMPT TO GENERATE A MOB ON A GIVEN RUN OF MOB.GENERATION, PROVIDED THAT IT'S NOT PLAYERS TURN
+;;;MOB.GEN.SEA_FLAG			.BS $1		;RANDOM GENERATOR SELECTED A SEA MOB TYPE IF THIS FLAG IS SET TO #$01. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MOB.GEN.SEA_FLAG			.EQ SCREEN_HOLE.26F8_26FF+$6	;$1byte. RANDOM GENERATOR SELECTED A SEA MOB TYPE IF THIS FLAG IS SET TO #$01
+;;;MOB.GEN.PROBABILITY			.BS $1		;CHANCE THAT GAME WILL ATTEMPT TO GENERATE A MOB ON A GIVEN RUN OF MOB.GENERATION, PROVIDED THAT IT'S NOT PLAYERS TURN. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MOB.GEN.PROBABILITY			.EQ SCREEN_HOLE.26F8_26FF+$7	;CHANCE THAT GAME WILL ATTEMPT TO GENERATE A MOB ON A GIVEN RUN OF MOB.GENERATION, PROVIDED THAT IT'S NOT PLAYERS TURN
 
 ;MOB.GEN.SS_QTY				.BS $1		;The current number of off screen SS in the current region. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-MOB.GEN.SS_QTY				.EQ SCREEN_HOLE.2778_277F+$0	;$1byte. The current number of off screen SS in the current region
+MOB.GEN.SS_QTY				.EQ SCREEN_HOLE.2778_277F+$1	;$1byte. The current number of off screen SS in the current region
 
 MOB.GEN.SS_LIMIT			.EQ $10		;#CONSTANT. THE MAXIMUM NUMBER OF SS PERMITTED TO BE ACTIVE IN THE CURRENT REGION (NO NEW ONES GENERATED BEYOND THIS LIMIT)
 
-MOB.GEN.ARRAY_FULL_COUNTER	.BS $1		;WHEN THE MAP OBJECTS/MOB ARRAY IS FULL, THIS COUNTER IS USED TO INCREMENT THE RECORD THAT WILL BE OVERWRITTEN, SO IT'S NOT ALWAYS THE SAME ONE. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
-;MOB.GEN.ARRAY_FULL_COUNTER	.EQ SCREEN_HOLE.2778_277F+$1	;$1byte. WHEN THE MAP OBJECTS/MOB ARRAY IS FULL, THIS COUNTER IS USED TO INCREMENT THE RECORD THAT WILL BE OVERWRITTEN, SO IT'S NOT ALWAYS THE SAME ONE.
+;;;MOB.GEN.ARRAY_FULL_COUNTER	.BS $1		;WHEN THE MAP OBJECTS/MOB ARRAY IS FULL, THIS COUNTER IS USED TO INCREMENT THE RECORD THAT WILL BE OVERWRITTEN, SO IT'S NOT ALWAYS THE SAME ONE. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+MOB.GEN.ARRAY_FULL_COUNTER	.EQ SCREEN_HOLE.2778_277F+$0	;$1byte. WHEN THE MAP OBJECTS/MOB ARRAY IS FULL, THIS COUNTER IS USED TO INCREMENT THE RECORD THAT WILL BE OVERWRITTEN, SO IT'S NOT ALWAYS THE SAME ONE.
 
 
 ;MOB.CANDIDATE.RMAP			.BS $2		;STORES THE RANDOM NUMBER GENERATED FOR A NEW MOB'S LOCATION, BEFORE THE LOCATION HAS BEEN CHECKED FOR COLLISION. 
@@ -3922,32 +3926,53 @@ MOB.GEN_FLAG.LT1				.EQ $33		;#CONSTANT
 ;========NPC MOVEMENT/SCHEDULES=====
 @START
 
-
+		
 ;===========NPC.PATHFINDER=========
 PATHFINDER.SPRITE.RECORD			.BS $0C		;Holds the information on the sprite for which pathfinder is generating a path. 
 
-;NPC.PATHFINDER.ABORT_FLAG			.BS $01 	;$00 = No abort, $01 = aborted path is pending completion
 NPC.PATHFINDER.ABORT_FLAG			.BS $01 	;$00 = No abort, $01 = aborted path is pending completion
+;;;NPC.PATHFINDER.ABORT_FLAG			.EQ SCREEN_HOLE.2678_267F+$6	;$1byte. $00 = No abort, $01 = aborted path is pending completion
 
 KEYPRESS.ABORT.ITERATIONS.DEFAULT	.EQ $03		;#CONSTANT. required iterations before auto-abort 
 ;set to $FF to disable auto abort. normally default value is $03
-;KEYPRESS.ABORT.ITERATIONS			.BS $01		;usually set to the default value (see above constant). Or set to $FF to disable auto abort.
 KEYPRESS.ABORT.ITERATIONS			.BS $01		;usually set to the default value (see above constant). Or set to $FF to disable auto abort.
+;;;KEYPRESS.ABORT.ITERATIONS			.EQ SCREEN_HOLE.2678_267F+$7	;$1byte. usually set to the default value (see above constant). Or set to $FF to disable auto abort.
 
 
-;NPC.PATHFINDER.DIRECTIONS_CHECKED	.BS $4		;tracks which directions, from the current tile, have been checked for open paths.
 NPC.PATHFINDER.DIRECTIONS_CHECKED	.BS $4		;tracks which directions, from the current tile, have been checked for open paths.
+;;;NPC.PATHFINDER.DIRECTIONS_CHECKED	.EQ SCREEN_HOLE.2878_287F+$0 	;$1byte. tracks which directions, from the current tile, have been checked for open paths.
+									;==IN USE==			  +$0-$3
 
 NPC.PATHFINDER.TILE_NUMBER.TALLY	.BS $1		;the next tile number available to be assigned by the pathfinder subroutine, for use in the NPC.PATHFINDER.SEARCH.PATHS array
-NPC.PATHFINDER.CURRENT.TILE			.BS $1		;the tile number, unique to the pathfinder subroutine, associated with the current tile used as the center of the search pattern. 
-NPC.PATHFINDER.CURRENT.TILE.X		.BS $1		;the RMAP.X and RMAP.Y axis of the current tile number are recorded in the NPC.PATHFINDER.SEARCH.PATHS array as the source x,y for all neigbor tiles. 
-NPC.PATHFINDER.CURRENT.TILE.Y		.BS $1		;""
-NPC.PATHFINDER.CURRENT.DISTANCE		.BS $1		;distance from the current tile to the destination. 
-NPC.PATHFINDER.CURRENT.RMAP			.BS $1		;the RMAP associated with the current tile used as the center of the search pattern. 
-NPC.PATHFINDER.NEIGHBOR.X			.BS $1		;X-axis of the most recetly acquired neighbor tile.
-NPC.PATHFINDER.NEIGHBOR.Y			.BS $1		;Y-axis of the most recetly acquired neighbor tile.
-NPC.PATHFINDER.NEIGHBOR.RMAP		.BS $2		;RMAP of the most recetly acquired neighbor tile.
+;;;NPC.PATHFINDER.TILE_NUMBER.TALLY	.EQ SCREEN_HOLE.26F8_26FF+$5	;$1byte. the next tile number available to be assigned by the pathfinder subroutine, for use in the NPC.PATHFINDER.SEARCH.PATHS array
 
+NPC.PATHFINDER.CURRENT.TILE			.BS $1		;the tile number, unique to the pathfinder subroutine, associated with the current tile used as the center of the search pattern. 
+;;;NPC.PATHFINDER.CURRENT.TILE			.EQ SCREEN_HOLE.26F8_26FF+$6	;$1byte. the tile number, unique to the pathfinder subroutine, associated with the current tile used as the center of the search pattern. 
+
+NPC.PATHFINDER.CURRENT.TILE.X		.BS $1		;the RMAP.X and RMAP.Y axis of the current tile number are recorded in the NPC.PATHFINDER.SEARCH.PATHS array as the source x,y for all neigbor tiles. 
+;;;NPC.PATHFINDER.CURRENT.TILE.X		.EQ SCREEN_HOLE.26F8_26FF+$7	;$1byte. the RMAP.X and RMAP.Y axis of the current tile number are recorded in the NPC.PATHFINDER.SEARCH.PATHS array as the source x,y for all neigbor tiles. 
+
+NPC.PATHFINDER.CURRENT.TILE.Y		.BS $1		;""
+;;;NPC.PATHFINDER.CURRENT.TILE.Y		.EQ SCREEN_HOLE.2778_277F+$0	;$1byte. ""
+
+	
+
+
+NPC.PATHFINDER.CURRENT.DISTANCE		.BS $1		;distance from the current tile to the destination. 
+;;;NPC.PATHFINDER.CURRENT.DISTANCE		.EQ SCREEN_HOLE.27F8_27FF+$2 ;$1byte. distance from the current tile to the destination. 
+
+NPC.PATHFINDER.CURRENT.RMAP			.BS $1		;the RMAP associated with the current tile used as the center of the search pattern. 
+;;;NPC.PATHFINDER.CURRENT.RMAP			.EQ SCREEN_HOLE.27F8_27FF+$3 ;$1byte. the RMAP associated with the current tile used as the center of the search pattern. 
+
+NPC.PATHFINDER.NEIGHBOR.X			.BS $1		;X-axis of the most recetly acquired neighbor tile.
+;;;NPC.PATHFINDER.NEIGHBOR.X			.EQ SCREEN_HOLE.27F8_27FF+$4 ;$1byte. X-axis of the most recetly acquired neighbor tile.
+
+NPC.PATHFINDER.NEIGHBOR.Y			.BS $1		;Y-axis of the most recetly acquired neighbor tile.
+;;;NPC.PATHFINDER.NEIGHBOR.Y			.EQ SCREEN_HOLE.27F8_27FF+$5 ;$1byte. Y-axis of the most recetly acquired neighbor tile.
+
+NPC.PATHFINDER.NEIGHBOR.RMAP		.BS $2		;RMAP of the most recetly acquired neighbor tile.
+;;;NPC.PATHFINDER.NEIGHBOR.RMAP		.EQ SCREEN_HOLE.27F8_27FF+$6 ;$1byte. RMAP of the most recetly acquired neighbor tile.
+									;==IN USE== 			 +$7
 
 
 NPC.PATHFINDER.PRIORITY.QUE			.EQ SWAP_SPACE.MAIN_MEMORY+$1300	;$100bytes stores the order in which the tile_numbers discovered are applied to the search pattern to discover new neigbor tiles.	
