@@ -146,11 +146,11 @@ SCREEN_HOLE.26F8_26FF	.EQ	$26F8	;$8bytes
 SCREEN_HOLE.2778_277F	.EQ	$2778	;$8bytes
 ;all used
 SCREEN_HOLE.27F8_27FF	.EQ	$27F8	;$8bytes
-
+;all used
 SCREEN_HOLE.2878_287F	.EQ	$2878	;$8bytes
 
-
-;*left off. pathfinder is partially converted. There is a .BS $4 I want to convert in the pathfinder sectin, then do a test. 
+SCREEN_HOLE.28F8_28FF	.EQ	$28F8	;$8bytes
+SCREEN_HOLE.2978_297F	.EQ	$2978	;$8bytes
 
 
 ; Screen Holes sorted by memory address:
@@ -174,8 +174,8 @@ SCREEN_HOLE.2878_287F	.EQ	$2878	;$8bytes
 ; $2778..$277F --used--
 ; $27F8..$27FF --used--
 ; $2878..$287F --used--
-; $28F8..$28FF
-; $2978..$297F
+; $28F8..$28FF --used--
+; $2978..$297F --used--
 ; $29F8..$29FF
 ; $2A78..$2A7F
 ; $2AF8..$2AFF
@@ -3977,12 +3977,18 @@ NPC.PATHFINDER.NEIGHBOR.RMAP		.EQ SCREEN_HOLE.27F8_27FF+$6 ;$1byte. RMAP of the 
 
 NPC.PATHFINDER.PRIORITY.QUE			.EQ SWAP_SPACE.MAIN_MEMORY+$1300	;$100bytes stores the order in which the tile_numbers discovered are applied to the search pattern to discover new neigbor tiles.	
 									;$A900
-									
+		
+ 
+		
 NPC.PATHFINDER.PRIORITY.QUE.SIZE			.EQ NPC.PATHFINDER.PRIORITY.QUE		;the first byte of the priority que holds the # of records in the array, which is incremented each time a record is added and decremented each time a record is deleted. 
-NPC.PATHFINDER.PRIORITY.QUE.RECORD_TALLY	.BS $1	;number of 2byte records in the priority que, including the 2 byte length header. For this reason, it is equal to the number of records in the que +1
-NPC.PATHFINDER.PRIORITY.QUE.RECORD_INDEX	.BS $1  ;derived from NPC.PATHFINDER.PRIORITY.QUE.RECORD_TALLY. Used to toggle between writing new records after last record in que or overwriting last record in que. 
-NPC.PATHFINDER.PRIORITY.QUE.PROCESSED.RECORDS	.BS $1	;the number of processed records which are included in NPC.PATHFINDER.PRIORITY.QUE.SIZE. 
-PATHFINDER.STREET.PREFERENCE					.BS $1  ;PARAMETER. The value to add to the distance of non-street tiles in order to help pathfinder generate a path that uses streets when available.  
+;NPC.PATHFINDER.PRIORITY.QUE.RECORD_TALLY	.BS $1	;number of 2byte records in the priority que, including the 2 byte length header. For this reason, it is equal to the number of records in the que +1
+NPC.PATHFINDER.PRIORITY.QUE.RECORD_TALLY	.EQ SCREEN_HOLE.2878_287F+$4 	;$1byte. number of 2byte records in the priority que, including the 2 byte length header. For this reason, it is equal to the number of records in the que +1
+;NPC.PATHFINDER.PRIORITY.QUE.RECORD_INDEX	.BS $1  ;derived from NPC.PATHFINDER.PRIORITY.QUE.RECORD_TALLY. Used to toggle between writing new records after last record in que or overwriting last record in que. 
+NPC.PATHFINDER.PRIORITY.QUE.RECORD_INDEX	.EQ SCREEN_HOLE.2878_287F+$5 	;$1byte. derived from NPC.PATHFINDER.PRIORITY.QUE.RECORD_TALLY. Used to toggle between writing new records after last record in que or overwriting last record in que. 
+;NPC.PATHFINDER.PRIORITY.QUE.PROCESSED.RECORDS	.BS $1	;the number of processed records which are included in NPC.PATHFINDER.PRIORITY.QUE.SIZE. 
+NPC.PATHFINDER.PRIORITY.QUE.PROCESSED.RECORDS	.EQ SCREEN_HOLE.2878_287F+$6 	;$1byte. the number of processed records which are included in NPC.PATHFINDER.PRIORITY.QUE.SIZE. 
+;PATHFINDER.STREET.PREFERENCE					.BS $1  ;PARAMETER. The value to add to the distance of non-street tiles in order to help pathfinder generate a path that uses streets when available.  
+PATHFINDER.STREET.PREFERENCE					.EQ SCREEN_HOLE.2878_287F+$7	;$1byte. PARAMETER. The value to add to the distance of non-street tiles in order to help pathfinder generate a path that uses streets when available.  
 
 
 ;----------------------------------
@@ -3992,38 +3998,52 @@ NPC.PATHFINDER.SEARCH.PATHS			.EQ SWAP_SPACE.MAIN_MEMORY+$1400	;16-BIT ($19Ebyte
 
 	;----------------------------------
 									
-SEARCH.PATHS.NEIGHBORS_ADDED.COUNTER	.BS $1		;stores the number of neighbors added each iteration so that it is detectable when no neighbors are added.
+;SEARCH.PATHS.NEIGHBORS_ADDED.COUNTER	.BS $1		;stores the number of neighbors added each iteration so that it is detectable when no neighbors are added.
+SEARCH.PATHS.NEIGHBORS_ADDED.COUNTER	.EQ SCREEN_HOLE.28F8_28FF+$0	;$1byte. stores the number of neighbors added each iteration so that it is detectable when no neighbors are added.
 SEARCH.PATHS.RECORD.SIZE			.EQ $08		;#CONSTANT. the number of bytes in each record stored in NPC.PATHFINDER.SEARCH.PATHS
-SEARCH.PATHS.LO_INDEX				.BS $1 		;used to track the lo byte index when iterating NPC.PATHFINDER.SEARCH.PATHS
+;SEARCH.PATHS.LO_INDEX				.BS $1 		;used to track the lo byte index when iterating NPC.PATHFINDER.SEARCH.PATHS
+SEARCH.PATHS.LO_INDEX				.EQ SCREEN_HOLE.28F8_28FF+$1	;$1byte. used to track the lo byte index when iterating NPC.PATHFINDER.SEARCH.PATHS
 SEARCH.PATHS.HIMEM					.EQ SWAP_SPACE.MAIN_MEMORY+$1EFF	;the upper limit of the memory reserved for the NPC.PATHFINDER.SEARCH.PATHS array 
 									;$B4FF
 NPC.PATHFINDER.SEARCH.PATHS.POINTER		.EQ $EC		;2byt. Used by .open.paths to load data into NPC.PATHFINDER.SEARCH.PATHS, when an open path is found for a given tile.
 NPC.PATHFINDER.SEARCH.PATHS.POINTER2	.EQ $FC		;2byt. Used by .LOAD.NEXT.TILE to lookup data from NPC.PATHFINDER.SEARCH.PATHS, to load the next path tile.
-SEARCH.PATHS.POINTER.SAVED				.BS $01		;This pointer needs to be persistent through an entire instance of pathfinder. This variable saves the value of the pointer when a keypress abort occurs so it can be reloaded upon re-entry.
+;SEARCH.PATHS.POINTER.SAVED				.BS $01		;This pointer needs to be persistent through an entire instance of pathfinder. This variable saves the value of the pointer when a keypress abort occurs so it can be reloaded upon re-entry.
+SEARCH.PATHS.POINTER.SAVED				.EQ SCREEN_HOLE.28F8_28FF+$2	;$1byte. This pointer needs to be persistent through an entire instance of pathfinder. This variable saves the value of the pointer when a keypress abort occurs so it can be reloaded upon re-entry.
 
 NPC.PATHFINDER.FINAL.PATH			.EQ SWAP_SPACE.MAIN_MEMORY+$2300	;stores the final path, which is derviced from the data in NPC.PATHFINDER.SEARCH.PATHS after the algorith completes.  
 									;$B900
 FINAL.PATH.HIMEM					.EQ SWAP_SPACE.MAIN_MEMORY+$23FF	;the upper limit of the memory reserved for the NPC.PATHFINDER.FINAL.PATH array 
 									;$B9FF
-FINAL.PATH.RECORD.COUNTER			.BS $1		;counts records written to NPC.PATHFINDER.FINAL.PATH so that the last record's index can be calculated. The last record will be the next move the NPC makes to reach destination. 
+;FINAL.PATH.RECORD.COUNTER			.BS $1		;counts records written to NPC.PATHFINDER.FINAL.PATH so that the last record's index can be calculated. The last record will be the next move the NPC makes to reach destination. 
+FINAL.PATH.RECORD.COUNTER			.EQ SCREEN_HOLE.28F8_28FF+$3	;$1byte. counts records written to NPC.PATHFINDER.FINAL.PATH so that the last record's index can be calculated. The last record will be the next move the NPC makes to reach destination. 
 FINAL.PATH.INDEX					.EQ FINAL.PATH.RECORD.COUNTER ;used in NPC.MOVE_MANGER to point to the next move in an NPC's existing path
 
-NPC.PATHFINDER.DESTINATION.TILE.X	.BS $1		;the RMAP.X and RMAP.Y axis of the tile which NPC wants to move to. 
-NPC.PATHFINDER.DESTINATION.TILE.Y	.BS $1		;""
-PATH_TILE.SHORTEST.DISTANCE			.BS $1		;the path tile # that has the lowest distance to destination. Used by the algorithm to prioritize the search. 
-PATHFINDER.SHORTEST.DISTANCE.COUNTER .BS $1		;used to track when a neighbor is found which is closer to the destination than the previous closest tile found. If at least one such neighbor is found in a given iteration, no sort is performed.
-NPC.PATHFINDER.NEXT.SOURCE_TILE		.BS $1		;when assembling the final path, this is the next source path tile #, working backwards from destination to NPC's current position.
+;NPC.PATHFINDER.DESTINATION.TILE.X	.BS $1		;the RMAP.X and RMAP.Y axis of the tile which NPC wants to move to. 
+NPC.PATHFINDER.DESTINATION.TILE.X	.EQ SCREEN_HOLE.28F8_28FF+$4	;$1byte. the RMAP.X and RMAP.Y axis of the tile which NPC wants to move to. 
+;NPC.PATHFINDER.DESTINATION.TILE.Y	.BS $1		;""
+NPC.PATHFINDER.DESTINATION.TILE.Y	.EQ SCREEN_HOLE.28F8_28FF+$5	;$1byte. ""
+;PATH_TILE.SHORTEST.DISTANCE			.BS $1		;the path tile # that has the lowest distance to destination. Used by the algorithm to prioritize the search. 
+PATH_TILE.SHORTEST.DISTANCE			.EQ SCREEN_HOLE.28F8_28FF+$6	;$1byte. the path tile # that has the lowest distance to destination. Used by the algorithm to prioritize the search. 
+;PATHFINDER.SHORTEST.DISTANCE.COUNTER .BS $1		;used to track when a neighbor is found which is closer to the destination than the previous closest tile found. If at least one such neighbor is found in a given iteration, no sort is performed.
+PATHFINDER.SHORTEST.DISTANCE.COUNTER .EQ SCREEN_HOLE.28F8_28FF+$7	;$1byte. used to track when a neighbor is found which is closer to the destination than the previous closest tile found. If at least one such neighbor is found in a given iteration, no sort is performed.
+;NPC.PATHFINDER.NEXT.SOURCE_TILE		.BS $1		;when assembling the final path, this is the next source path tile #, working backwards from destination to NPC's current position.
+NPC.PATHFINDER.NEXT.SOURCE_TILE		.EQ SCREEN_HOLE.2978_297F+$0	;$1byte. when assembling the final path, this is the next source path tile #, working backwards from destination to NPC's current position.
 
 
-PATHFINDER.SWAP.DISTANCE			.BS $1		;used for temp data storage when moving records around in the priority que. 
-PATHFINDER.SWAP.TILE_NUMBER			.BS $1		;""
+;PATHFINDER.SWAP.DISTANCE			.BS $1		;used for temp data storage when moving records around in the priority que. 
+PATHFINDER.SWAP.DISTANCE			.EQ SCREEN_HOLE.2978_297F+$1	;$1byte. used for temp data storage when moving records around in the priority que. 
+;PATHFINDER.SWAP.TILE_NUMBER		.BS $1		;""
+PATHFINDER.SWAP.TILE_NUMBER			.EQ SCREEN_HOLE.2978_297F+$2	;$1byte. ""
 
 
-ACQUIRE.LOOP.COUNTER				.BS $1 		;counter for the loop which uses a T shaped search pattern to acquire new neighbors
-ITERATION.COUNTER					.BS $1
+;ACQUIRE.LOOP.COUNTER				.BS $1 		;counter for the loop which uses a T shaped search pattern to acquire new neighbors
+ACQUIRE.LOOP.COUNTER				.EQ SCREEN_HOLE.2978_297F+$3	;$1byte. counter for the loop which uses a T shaped search pattern to acquire new neighbors
+;ITERATION.COUNTER					.BS $1
+ITERATION.COUNTER					.EQ SCREEN_HOLE.2978_297F+$4	;$1byte. 
 ;ABORT.COUNTER						.BS $1		;Tracks the number of iterations 
-NPC.MOVE.COUNTER					.BS $1 ;***TEMP
-DIRECTION.TEST.COUNTER				.BS $1		;incremented each time a direction, for a given tile, is tested for open paths. When this counter == $04 then all directions have been tested.
+;NPC.MOVE.COUNTER					.BS $1 ;***TEMP
+;DIRECTION.TEST.COUNTER				.BS $1		;incremented each time a direction, for a given tile, is tested for open paths. When this counter == $04 then all directions have been tested.
+DIRECTION.TEST.COUNTER				.EQ SCREEN_HOLE.2978_297F+$5	;$1byte. incremented each time a direction, for a given tile, is tested for open paths. When this counter == $04 then all directions have been tested.
 
 
 
@@ -4120,7 +4140,8 @@ TRANSIT.NEXT_MOVE.INDEX				.EQ SHARED.VARIABLE_SPACE.BLOCK1+$80	;$1byt. the inde
 TRANSIT.NEXT_MOVE.X					.EQ SHARED.VARIABLE_SPACE.BLOCK1+$81	;$1byt. the X-axis of the next move for an NPC in transit to another anchor location
 TRANSIT.NEXT_MOVE.Y					.EQ SHARED.VARIABLE_SPACE.BLOCK1+$82	;$1byt. the X-axis of the next move for an NPC in transit to another anchor location
 
-DESTINATION_REACHED_WHILE_SEEKING	.BS $1	;If an NPC is seeking due to a blocked path, and the seek tile is the destination tile of the path, this flag is used to indicate that. $01 = on, $00 = off. 
+;DESTINATION_REACHED_WHILE_SEEKING	.BS $1	;If an NPC is seeking due to a blocked path, and the seek tile is the destination tile of the path, this flag is used to indicate that. $01 = on, $00 = off. 
+DESTINATION_REACHED_WHILE_SEEKING	.EQ SCREEN_HOLE.2978_297F+$6	;$1byte. If an NPC is seeking due to a blocked path, and the seek tile is the destination tile of the path, this flag is used to indicate that. $01 = on, $00 = off. 
 
 
 PLAYER.BLOCKED.NPC.COUNTER			.EQ SHARED.VARIABLE_SPACE.BLOCK1+$83	;$1byt. A tally of the number of times the player was in the path of an NPC. Resets after threshold is reached. Used in PLAYER.HARASSMENT.CHECK
@@ -4172,7 +4193,8 @@ NPC.SCHEDULE.WORKSPACE.SIZE			.EQ $FF
 ;NPC.INIT.ITERATION_COUNTER	.EQ SAVED.ACC.LOCAL ;used by NPC.INIT.NPC_RECORDS to detect if the iteration is after the first in order to detect X-REG = flipped to $00 as the exit value. This requires an interation counter because the X-REG increment is at the top of the loop.
 
 ;===========ADHOC PATHFINDER======
-NPC.PATHFINDER.ADOC.FLAG			.BS $01	;1byte. $FF = on, $00 = off. Used to let NPC.PATHFINDER subroutine know that it is being used for an adhoc generated path rather than for NPC scheduled paths
+;NPC.PATHFINDER.ADOC.FLAG			.BS $01	;1byte. $FF = on, $00 = off. Used to let NPC.PATHFINDER subroutine know that it is being used for an adhoc generated path rather than for NPC scheduled paths
+NPC.PATHFINDER.ADOC.FLAG			.EQ SCREEN_HOLE.2978_297F+$7	;$1byte. $FF = on, $00 = off. Used to let NPC.PATHFINDER subroutine know that it is being used for an adhoc generated path rather than for NPC scheduled paths
 
 	
 @END
