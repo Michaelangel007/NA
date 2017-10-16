@@ -9,12 +9,18 @@
 				calcualte the difference and take that *11 to see the net memory increase or decrease. 
 		*Quinn mentioned that games about have a section of art on the right side of screen and score board on the bottom to keep the animation in the "8-bit math zone" I wonder if this was part of how U5 achieved the tile map move speed that it did. U5 and pretty much all other tile games has character roster on right side of screen. Less on bottom though.
 
-	*Mob generation. For some reason mob generation is slowing down player movement by about 1 second per 20 tile movement. It's visually noticable. 
+	*Mob generation. (see updates first) For some reason mob generation is slowing down player movement by about 1 second per 20 tile movement. It's visually noticable. 
 			I thought it was bypassed on keypress detect but maybe a couple iterations are forced. Or maybe the keypress abort isn't close enough to the
 			top of the loop. Or maybe I need the keypress detect in the main game loop. This is a lot of speed to give up without understanding exactly what is going on.
-			note: strangely this only occured when I had all the mob generation variables converted to screen holes, but I had done this before all of them could be converted
+			;
+			update: strangely this only occured when I had all the mob generation variables converted to screen holes, but I had done this before all of them could be converted
 			because some were init in GAME.START.DRIVER before the screen clear. But that makes no sense because normally mob gen is disabled in the game loop. So why would enabling it, with 
 			variables converted to screen holes with bad init values somehow cause such a speed gain?
+			;
+			update: It looks like the difference I was observing was the difference between having the blank mob array enabled vs. disabled. i.e the more SS mobs, even if they aren't on screen, the slower movement will be. 
+					it just happend that the first time I had done a speed test in awhile was when I had the blank mob array enabled, which happened to be when I was doing the var/screen hole optimizations to the mob generation section. 
+					I'm keepint this item on the list for now just as a reminder about this dynamic. 
+			;
 	*Screen scrolling, only get 1 address via lookup tables. Calculate the other page address via +/- $2000 offset
 		*Note: we don't know which page is in PAGE.BACKGROUND/FOREGROUND so a branch is needed to determine whether the offset is +$2000 or -$2000
 	*Impliment idea for horizontally adjacent shapes to repeat use of shape table buffer
