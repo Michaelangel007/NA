@@ -322,7 +322,13 @@ SPELL_FILE.AFTER_CAST
 ;.PRINT_HIT	
 	; ;make sure hit prints on line after defender name	
 	; JSR PRINT.TEXT.WINDOW.CR ;print carriage return to combat scroll window
-	JSR COMBAT.PRINT.HIT
+	
+	;JSR COMBAT.PRINT.HIT
+	
+	;print "hit" text block
+		LDA #$00 ;($00 = hit text block, $01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
+	JSR COMBAT.PRINT.HIT.OTHER
+	
 	JSR DISPLAY.MOB.HP_STATUS_BAR	
 	JMP .DISPLAY.COMBAT.MATH
 

@@ -2291,8 +2291,13 @@ COMBAT.ATTACK.RANGE_MELEE
 ;each text block, which is used to set the TWF.STRING pointer.
 	
 .PRINT.HIT
-	JSR COMBAT.PRINT.HIT
+	;JSR COMBAT.PRINT.HIT
 
+	;print "hit" text block
+		LDA #$00 ;($00 = hit text block, $01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
+	JSR COMBAT.PRINT.HIT.OTHER
+	
+	;print other text if applicable to the hit outcome
 	LDA COMBAT.STATS.CRTL_HIT_FLAG ;($00 = critical hit succeeded, $01 = critical hit not attempted, $03 = critical hit blocked by defender)
 	CMP #$03
 	BNE .PRINT.HIT.DONE
@@ -2304,7 +2309,7 @@ COMBAT.ATTACK.RANGE_MELEE
 		; STA TWF.STRING+$1
 	; JSR PRINT.TEXT.WINDOW
 
-				LDA #$03 ;($01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
+		LDA #$03 ;($00 = hit text block, $01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
 	JSR COMBAT.PRINT.HIT.OTHER
 	
 	
@@ -2325,7 +2330,7 @@ COMBAT.ATTACK.RANGE_MELEE
 		; STA TWF.STRING+$1
 	; JSR PRINT.TEXT.WINDOW
 
-			LDA #$01 ;($01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
+		LDA #$01 ;($00 = hit text block, $01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
 	JSR COMBAT.PRINT.HIT.OTHER
 	
 	JMP .DISPLAY.STATUS_BAR.DONE
@@ -2338,7 +2343,7 @@ COMBAT.ATTACK.RANGE_MELEE
 		; STA TWF.STRING+$1	
 	; JSR PRINT.TEXT.WINDOW
 
-			LDA #$02 ;($01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
+		LDA #$02 ;($00 = hit text block, $01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
 	JSR COMBAT.PRINT.HIT.OTHER
 	
 	LDA COMBAT.STATS.HIT_MISS_KILL.FLAG ;($00 = hit | $01 = miss | $02 = kill)
@@ -7491,7 +7496,9 @@ COMBAT.PRINT.HIT.OTHER ;prints a variety of text blocks depending on the value o
 	
 
 .OTHER.HIT.TEXT_BLOCK.LOOKUP_TABLE
-	.BS $2
+	;.BS $2
+	.DA #COMBAT.TEXT_BLOCK.HIT
+	.DA /COMBAT.TEXT_BLOCK.HIT
 	
 	.DA #COMBAT.TEXT_BLOCK.KILLED
 	.DA /COMBAT.TEXT_BLOCK.KILLED
@@ -7508,21 +7515,21 @@ COMBAT.PRINT.HIT.OTHER ;prints a variety of text blocks depending on the value o
 
 
 
-COMBAT.PRINT.HIT
+;COMBAT.PRINT.HIT
 @START
-;PARAMETERS: CHR_SHEET.RECORD.READ (8)
-;ENTRANCE: direct
-;RETURN: printed text
+; ;PARAMETERS: CHR_SHEET.RECORD.READ (8)
+; ;ENTRANCE: direct
+; ;RETURN: printed text
 
 
-		LDA #COMBAT.TEXT_BLOCK.HIT					
-		STA TWF.STRING+$0
+		; LDA #COMBAT.TEXT_BLOCK.HIT					
+		; STA TWF.STRING+$0
 		
-		LDA /COMBAT.TEXT_BLOCK.HIT
-		STA TWF.STRING+$1	
-	JSR PRINT.TEXT.WINDOW
+		; LDA /COMBAT.TEXT_BLOCK.HIT
+		; STA TWF.STRING+$1	
+	; JSR PRINT.TEXT.WINDOW
 	
-	RTS
+	; RTS
 	
 @END
 
