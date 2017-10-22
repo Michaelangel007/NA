@@ -162,7 +162,7 @@ SCREEN_HOLE.2B78_2B7F	.EQ	$2B78	;$8bytes
 ;****USE THESE NEXT***
 
 ; (USED) SCREEN_HOLE.29F8_29FF +7 available
-; SCREEN_HOLE.2A78_2A7F. available, 5, 7
+; (USED) SCREEN_HOLE.2A78_2A7F. available, 5, 7
 
 ;none used
 SCREEN_HOLE.2BF8_2BFF	.EQ	$2BF8	;$8bytes
@@ -4957,25 +4957,35 @@ TM_1.TREASURE_IMAGE.ANIMATED_TILE.QTY		.EQ $04	;#CONSTANT. The number of animate
 ;============TIME & EVENTS=============
 @START
 TIME.SUN.STATUS				.BS $1		;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
-TIME.SUN.COUNTER			.BS $1		;$00-$04, COUNTS DOWN FROM $04 FOR SUNSET, COUNTS UP FROM $00 FOR SUNRISE. EACH VALUE IS A PHASE OF THE SUNSET/SUNRISE
-TIME.SUN.SUB_COUNTER		.BS $1		;COUNTS THE MOVES BETWEEN INCREMENTS TO TIME.SUN.COUNTER
+
+;TIME.SUN.COUNTER			.BS $1		;$00-$04, COUNTS DOWN FROM $04 FOR SUNSET, COUNTS UP FROM $00 FOR SUNRISE. EACH VALUE IS A PHASE OF THE SUNSET/SUNRISE. 
+TIME.SUN.COUNTER			.EQ	SCREEN_HOLE.2A78_2A7F+$5	;$1byte. $00-$04, COUNTS DOWN FROM $04 FOR SUNSET, COUNTS UP FROM $00 FOR SUNRISE. EACH VALUE IS A PHASE OF THE SUNSET/SUNRISE
+
+;TIME.SUN.SUB_COUNTER		.BS $1		;COUNTS THE MOVES BETWEEN INCREMENTS TO TIME.SUN.COUNTER
+TIME.SUN.SUB_COUNTER		.EQ	SCREEN_HOLE.2A78_2A7F+$7	;$1byte. COUNTS THE MOVES BETWEEN INCREMENTS TO TIME.SUN.COUNTER
+
 TIME.SUN.SUB_COUNTER.STOP	.EQ $02		;#CONSTANT. MOVES BETWEEN INCREMENTS OF TIME.SUN.COUNTER (PHASES OF SUNSET AND SUNRISE)
 
-TIME.CURRENT.HOUR			.BS $1		;!BCD!. 24-hour clock. The current game time, hours. 
-TIME.CURRENT.MINUTE			.BS $1		;!BCD!. 24-hour clock. The current game time, minutes. 
-TIME.MOVES.PER_MINUTE		.EQ	$02		;#CONSTANT. The number of moves that must occur for the game clock to advance 1 minute
-TIME.MOVES.COUNTER			.BS $1		;Tracks the number of moves that have occured since the game clock was incremented by 1 minute.
+;skip
+TIME.CURRENT.HOUR			.BS $1		;!BCD!. 24-hour clock. The current game time, hours. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+TIME.CURRENT.MINUTE			.BS $1		;!BCD!. 24-hour clock. The current game time, minutes. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
-TIME.DISPLAY.HOUR			.BS $1		;!BCD!. 12-hour clock. The current game time, hours. 
-TIME.DISPLAY.MINUTE			.BS $1		;!BCD!. 12-hour clock. The current game time, minutes. 
-TIME.DISPLAY.AM_PM			.BS $1		;$HEX$. $00=AM, $01=PM
+TIME.MOVES.PER_MINUTE		.EQ	$02		;#CONSTANT. The number of moves that must occur for the game clock to advance 1 minute
+;TIME.MOVES.COUNTER			.BS $1		;Tracks the number of moves that have occured since the game clock was incremented by 1 minute.
+TIME.MOVES.COUNTER			.EQ	SCREEN_HOLE.2BF8_2BFF+$0	;$1byte. Tracks the number of moves that have occured since the game clock was incremented by 1 minute.
+
+;skip
+TIME.DISPLAY.HOUR			.BS $1		;!BCD!. 12-hour clock. The current game time, hours. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+TIME.DISPLAY.MINUTE			.BS $1		;!BCD!. 12-hour clock. The current game time, minutes. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+TIME.DISPLAY.AM_PM			.BS $1		;$HEX$. $00=AM, $01=PM. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 
 EVENT.SUNRISE.HOUR 			.EQ $05			;#CONSTANT. The time that sunrise occurs.
 EVENT.SUNRISE.MINUTE		.EQ	$30			;#CONSTANT. ""
 EVENT.SUNSET.HOUR 			.EQ $20			;#CONSTANT. The time that sunset occurs.
 EVENT.SUNSET.MINUTE			.EQ	$30			;#CONSTANT. ""
 
-;game state flags
+;game state flags				;**OPT** Memory. Screenhole. Maybe the event flag array could use screen holes once it's no longer being used for the debug log. It would mean in the code accessing the event flags via a direct lable like EVENT_FLAG00,EVENT_FLAG01 etc. as each label can be .EQ to a different address. What we couldn't do is make relative references like EVENT.FLAGS+$0, EVENT.FLAGS+$1 etc.
+												 ;however, I think this is a problem with the way NPC.TALK expects to use the flags. 
 EVENT.FLAGS					.BS $100	;$100byt. Stores boolean flags ($01 = on, $00 off) that trigger certain events, allow/dissallow certain things, or otherwise dynamically affect gameplay 
 
 
