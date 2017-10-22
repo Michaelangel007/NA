@@ -2224,7 +2224,7 @@ TREASURE_PILE.Row5.15	.HS	80.80.80.80.80.80.80.80.80.80.80.80.80.80.80.80.A8.81
 
 ;*See C:\My_code\NA\Map_Shapes\Shapes\misc\Treasure_Pile\Treasure_Pile.XLS
 
-SHAPE_TABLE.TREASURE_PILE.ANIMATION
+SHAPE_TABLE.TREASURE_PILE.ANIMATION 	;**OPT** Speed. If it turns out there is AUX memory available (after game engine fine tuning is done, consider moving the treasure image shape data to AUX to reduce disk load time)
 @START
 
 TREASURE_PILE.SBYTE_TABLE					.HS 15.15.1D.25

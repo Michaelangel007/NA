@@ -4070,7 +4070,6 @@ DIRECTION.TEST.COUNTER				.EQ SCREEN_HOLE.2978_297F+$5	;$1byte. incremented each
 NPC.PATHFINDER.CLOSED_SET			.EQ SWAP_SPACE.MAIN_MEMORY+$1F00	;$03C1 bytes. tracks tiles which have been examined by pathfinder already
 									;$B500
 NPC.PATHFINDER.CLOSED_SET.POINTER	.EQ $EA		;2byt
-CLOSED_SET.OFFSET					.BS $20		;number of bytes per row in the closet set array 
 NEIGHBOR.ADJUSTED.X					.EQ MAP_OBJECTS.X_ADJ ;stores the x-axis of a prospective neighbor, adjusted to align with the closed_set array memory map. 
 NEIGHBOR.ADJUSTED.Y					.EQ MAP_OBJECTS.Y_ADJ ;"" (y-axis)
 CURRENT.TILE.ADJUSTED.X				.EQ NEIGHBOR.ADJUSTED.X
