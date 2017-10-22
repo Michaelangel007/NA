@@ -2214,8 +2214,8 @@ COMBAT.ATTACK.RANGE_MELEE
 			
 	JSR COMBAT.ATTACK.RANGE.DISPLAY
 		
-	JMP .DRAW_PROJECTILE.TYPE.END
-		;**OPT** memory. technically this JMP isn't needed since the section below is empty (i.e. melee) and probably always will be.
+	;JMP .DRAW_PROJECTILE.TYPE.END
+		
 		
 .DRAW_PROJECTILE.WEAPON.TYPE.MELEE	
 	;currently no shape draw needs to be done for a melee attack because they 
@@ -4564,15 +4564,21 @@ COMBAT.SHAPE.MOVE
 	; CMP #SHAPE.MOVE.SCREEN_ANIMATION.THREASHOLD
 	; BCC .ANIMATION.COMPLETE	
 	
-		;ENABLE BANK-SWITCHED RAM ($D000 Bank 1)
-		LDA $C08B
-		LDA $C08B
+
 		LDA #$01
-		STA ANIMATION.DELAY.OVERRIDE
-	JSR ANIMATION.UPDATE
-		;RE-ENABLE BANK-SWITCHED RAM ($D000 Bank 2)
-		LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK2 2nd)
-		LDA $C083 ;**OPT** Memory. ANIMATION.UPDATE is called a lot. put it in a subroutine. That way the BSR swithing only takes up memory once. 
+		STA ANIMATION.DELAY.OVERRIDE	
+	JSR ANIMATION.UPDATE.ENTRANCE
+	
+	
+		; ;ENABLE BANK-SWITCHED RAM ($D000 Bank 1)
+		; LDA $C08B
+		; LDA $C08B
+		; LDA #$01
+		; STA ANIMATION.DELAY.OVERRIDE
+	; JSR ANIMATION.UPDATE
+		; ;RE-ENABLE BANK-SWITCHED RAM ($D000 Bank 2)
+		; LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK2 2nd)
+		; LDA $C083 ;**OPT** Memory. ANIMATION.UPDATE is called a lot. put it in a subroutine. That way the BSR swithing only takes up memory once. 
 
 
 			; ldx #$00
