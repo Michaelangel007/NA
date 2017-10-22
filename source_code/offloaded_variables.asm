@@ -162,7 +162,7 @@ SCREEN_HOLE.2B78_2B7F	.EQ	$2B78	;$8bytes
 ;****USE THESE NEXT***
 
 ; (USED) SCREEN_HOLE.29F8_29FF +7 available
-; SCREEN_HOLE.2A78_2A7F +2 available, 4-5, 7
+; SCREEN_HOLE.2A78_2A7F. available, 5, 7
 
 ;none used
 SCREEN_HOLE.2BF8_2BFF	.EQ	$2BF8	;$8bytes
@@ -4715,7 +4715,9 @@ TWS.TALK_INPUT_WINDOW.CURSOR_START.HTAB	.EQ $19	;#CONSTANT. The HTAB of the curs
 TWS.TALK_INPUT_WINDOW.CURSOR_START.VTAB	.EQ $13	;#CONSTANT. The VTAB of the cursor after the window is reset, before any input is received. 
 
 		
-TW.RIGHT_WINDOW.CLEAN_UP.FLAG	.BS	$01	;($00 = off | $01 = on). controls whether DRAW.SCREEN will erase the right edge and first two bytes of the top/bottom lines of the text window border. 
+;TW.RIGHT_WINDOW.CLEAN_UP.FLAG	.BS	$01	;($00 = off | $01 = on). controls whether DRAW.SCREEN will erase the right edge and first two bytes of the top/bottom lines of the text window border. 
+TW.RIGHT_WINDOW.CLEAN_UP.FLAG	.EQ	SCREEN_HOLE.2A78_2A7F+$2	;$1byte. ($00 = off | $01 = on). controls whether DRAW.SCREEN will erase the right edge and first two bytes of the top/bottom lines of the text window border. 
+
 TW.RIGHT_WINDOW.STATUS.FLAG		.EQ TW.RIGHT_WINDOW.CLEAN_UP.FLAG  ;$00 = not active, $01 = active
 
 SCREEN_BYTE.COUNTER		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$80 ;$1byt
@@ -4741,7 +4743,8 @@ TWS.BOTTOM_WINDOW.PRINT.HTAB	.EQ $B		;#CONSTANT. use this position when printing
 TWS.BOTTOM_WINDOW.PRINT.VTAB	.EQ $17		;#CONSTANT. use this position when printing text to the text window.  
 TWS.BOTTOM_WINDOW.SIZE			.EQ $F		;#CONSTANT. # of characters. 
 	
-TW.BOTTOM_WINDOW.INIT_CODE		.BS $1	;set this variable to trigger INIT.TW_BOTTOM to print a specific text block when GAME.LAUNCH is called to force a full screen draw.  
+;TW.BOTTOM_WINDOW.INIT_CODE		.BS $1	;set this variable to trigger INIT.TW_BOTTOM to print a specific text block when GAME.LAUNCH is called to force a full screen draw.  
+TW.BOTTOM_WINDOW.INIT_CODE		.EQ	SCREEN_HOLE.2A78_2A7F+$4	;$1byte. set this variable to trigger INIT.TW_BOTTOM to print a specific text block when GAME.LAUNCH is called to force a full screen draw.  
 				;						;($00 = none | $01 = Ignite Torch | $02 = Open door | $03 = Unlock Door | $04 = Operate lever | $05 = Invalid Command)
 	
 ;TEXT WINDOW: RIGHT-SMALL (GENERAL SCREEN)
