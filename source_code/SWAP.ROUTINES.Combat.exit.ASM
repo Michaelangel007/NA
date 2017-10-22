@@ -37,6 +37,164 @@ COMBAT.EXIT
 	PHA
 	TYA
 	PHA
+
+COMBAT.SESSION_CLEANUP
+@START
+	
+.SYNC.MAP_OBJECTS.WITH.CHAR_SHEET
+@START
+;(copies health status field on the PC map object array to character sheet so that if a character died
+;in battle (for example) that result is proprated into gameplay after the combat module is exited)
+
+	LDX #$01 ;init loop counter and player #
+.LOOP.INIT.MAP_OBJECTS.PC
+			
+	;read PC character sheet data
+		TXA
+		;ACC = player sequential # (high-bit not set = read mode)
+	JSR COMBAT.READ_WRITE.CHR_SHEET.PC
+		;RETURN VALUE = CHR_SHEET.RECORD.READ
+	
+	;copy health status code from character sheet to map object array
+
+	;calculate map object array index
+	DEX ;subtract 1 from player # (which starts with 1) to align with map object array index (which starts with 0)
+	TXA
+	ASL ;X2
+	ASL ;X4
+	TAY ;index calculated, transfer to Y-REG
+	INX ;add 1 to player # to offset subtract (via DEX) above
+	
+	LDA COMBAT.MAP_OBJECTS.PC+$3,Y
+	STA CHR_SHEET.PC.HEALTH_STATUS	
+	
+	;exit test
+	CPX PARTY.TOTAL.PC
+	BEQ .LOOP.INIT.MAP_OBJECTS.PC.DONE
+	INX	
+	JMP .LOOP.INIT.MAP_OBJECTS.PC
+.LOOP.INIT.MAP_OBJECTS.PC.DONE
+
+
+@END
+			
+			
+.SAVE.PLAYER.CHR_SHEET
+@START
+;set command type (READ | WRITE | SEEK)
+; cmd_seek.current_drive 	.EQ $90
+; cmd_read.current_drive  	.EQ $91
+; cmd_write.current_drive 	.EQ $92
+;			
+; cmd_read.drive1			.EQ $1
+; cmd_read.drive2		  	.EQ $81
+; cmd_write.drive1			.EQ $2
+; cmd_write.drive2			.EQ $82
+
+	lda #cmd_write.drive2
+	sta parm.reqcmd
+
+;set write data size (# of 512 byte blocks to write from memory)
+	lda #DATA.PLY.CHR_SHEET.FILE_SIZE ;always #$00
+	sta parm.sizelo
+
+	lda /DATA.PLY.CHR_SHEET.FILE_SIZE ;number of pages to write (must be in multiples of 2. i.e. 2, 4, 6, 8 $0A, etc)
+	sta parm.sizehi
+	
+;set source memory address for write
+	lda #CHR_SHEET.PC.AUX_MEMORY.START
+	sta parm.ldrlo
+	lda /CHR_SHEET.PC.AUX_MEMORY.START
+	sta parm.ldrhi
+	
+;set filename to write to	
+	lda #DATA.PLY.CHR_SHEET ;load LO address
+	sta parm.namlo	
+	lda /DATA.PLY.CHR_SHEET ;load HO address
+	sta parm.namhi	
+		
+		LDA #$01	;PARM: $00=main, $01=aux
+	JSR PRODOS.IO
+
+
+@END
+
+	
+.RESTORE.GAME_VARIABLES ;**OPT** Memory. This can't be combined with the save position variables routine in location.maps.enter (movement.mgr.ASM) because the player varaibles saved when entering a building need to be restored on exit, and combat could happen in a building. but, if there are other instances where save/restore game location variables comes up then maybe those routines and this one could be combined and accessed via JSR. 
+@START
+
+
+	LDX #$00
+.RESTORE.LOOP
+;this loop does the equivilent of the following: 
+	; LDA COMBAT.GMAP.X.SAVED
+	; STA GMAP.X
+	;
+	; LDA COMBAT.GMAP.Y.SAVED
+	; STA GMAP.Y
+	;		
+	; LDA COMBAT.GMAP.X.LAST.SAVED
+	; STA GMAP.X.LAST
+	;
+	; LDA COMBAT.GMAP.Y.LAST.SAVED
+	; STA GMAP.Y.LAST
+	;
+	; LDA COMBAT.RMAP.X.SAVED
+	; STA RMAP.X
+	;
+	; LDA COMBAT.RMAP.Y.SAVED
+	; STA RMAP.Y
+	;
+	; LDA COMBAT.RMAP.SAVED+$0
+	; STA RMAP+$0
+	; LDA COMBAT.RMAP.SAVED+$1
+	; STA RMAP+$1
+	;
+	; LDA COMBAT.WZONE.SAVED
+	; STA PLAYER.WMAP.ZONE
+	
+	LDA COMBAT.GMAP.X.SAVED,X
+	STA GMAP.X,X
+	INX
+	CPX #$9
+	BNE .RESTORE.LOOP
+
+
+;RESTORE MISC GAME STATE & MAP VARIABLES
+	LDA COMBAT.TIME.SUN.STATUS.SAVED
+	STA TIME.SUN.STATUS
+	
+	JSR MAP.CALCULATE.SS_FLAGS
+
+				
+	;restore player's location type before entering combat
+	LDA COMBAT.PLAYER.MAP.LOCATION_TYPE.SAVED
+	STA PLAYER.MAP.LOCATION_TYPE
+
+@END
+
+;**OPT** Memory. This section can probably be moved to COMBAT.EXIT
+		
+;RESET SCREEN
+		; LDA #$03 ;clear both pages
+	; JSR CLEAR.TEXT_WINDOW.RIGHT
+	
+	;restore verticle blue text window border where horizontal scroll window top border line integrated
+		LDY #$18
+		LDX #TWB.COMBAT.SCROLL_WINDOW.TOP_LINE
+		LDA #$84		
+	JSR DRAW.BYTE
+
+		LDY #$27
+		LDX #TWB.COMBAT.SCROLL_WINDOW.TOP_LINE
+		LDA #$A0		
+	JSR DRAW.BYTE		
+	
+
+
+
+@END
+
 	
 
 	; LDA #$AA
