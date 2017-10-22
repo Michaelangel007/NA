@@ -305,6 +305,26 @@ Good idea about food + resting = healing. If I do that then maybe I don't need c
 
 @END
 
+-Making Camp
+@START
+Maybe this is a large HGR image like the treasure pile, but instead of just being the upper right corner it's the entire tile
+map in size or at least the size of the combat tile map (just as a reference point, this image isn't related to combat). Like making camp displays
+the character roster (to watch HP go up) which then leaves a combat size section of the screen for the image.
+
+Animation would be cool, like smoke from a camp fire and somebody drinking from a mug
+
+A song playing would be cool too. 
+
+Ideally Michael would write an HGR image diff program so that Bill could make the image in 816 paint, converting something in if needed
+from photoshop (photoshop -> outlaw, -> screen grab -> buckshot -> 816 paint)
+
+Need to wait until I see how much space is left on player disk so this is probbaly one of the last items to do.
+
+In the pre-storyline dev stage, maybe just connect a short routine to the (M)ake camp key which handles the health regen but
+doesn't do anything special. 
+
+@END
+
 
 -Ship Cannons / Wyvern
 @start

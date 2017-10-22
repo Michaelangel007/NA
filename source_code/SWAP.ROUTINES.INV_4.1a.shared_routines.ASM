@@ -1055,12 +1055,12 @@ INV_4.1a.SYNC_PAGES ;Sync player or merchant inventory window, depending on the 
 .INIT.SCREEN					;setup screen byte, line, depth	
 
 	LDA #$20
-	STA LINE.START	;set starting line for the copy from part of the scroll operation
+	STA LINE.START	
 	
 	LDA #$B8
-	STA LINE.STOP				;set the stop line, which is the last line of the last row of text characters to scroll +$08. 
+	STA LINE.STOP				
 
-		LDX LINE.START	;hi-res line number	to copy FROM	
+		LDX LINE.START			;hi-res line number	
 .LINELOOP	
 	LDY DRAW.START_BYTE			;reset screen byte index to the left edge of text window	
 	

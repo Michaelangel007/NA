@@ -4922,6 +4922,8 @@ TM_1.GOLD_DROP.TALLY						.EQ SHARED.VARIABLE_SPACE.BLOCK2+$04 ;2 bytes
 TM_1.GOLD_DROP.PERCENT.ADJ					.EQ SHARED.VARIABLE_SPACE.BLOCK2+$06
 
 
+;Treasure image animation
+TM_1.TREASURE_IMAGE.ANIMATED_TILE.QTY		.EQ $04	;#CONSTANT. The number of animated tiles embedded within the larger treasure pile image
 
 
 ;also see LOCAL VARIABLES in TM_1.TREASURE_MGT
