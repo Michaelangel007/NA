@@ -162,7 +162,10 @@ SCREEN_HOLE.2B78_2B7F	.EQ	$2B78	;$8bytes
 ;****USE THESE NEXT***
 
 ; (USED) SCREEN_HOLE.29F8_29FF +7 available
-; SCREEN_HOLE.2A78_2A7F +0-2 available, 4-5, 7
+; SCREEN_HOLE.2A78_2A7F +2 available, 4-5, 7
+
+;none used
+SCREEN_HOLE.2BF8_2BFF	.EQ	$2BF8	;$8bytes
 
 
 
@@ -195,7 +198,7 @@ SCREEN_HOLE.2B78_2B7F	.EQ	$2B78	;$8bytes
 ; $2A78..$2A7F --used--
 ; $2AF8..$2AFF --used--
 ; $2B78..$2B7F --used--
-; $2BF8..$2BFF
+; $2BF8..$2BFF --used--
 ; $2C78..$2C7F
 ; $2CF8..$2CFF
 ; $2D78..$2D7F
@@ -4648,8 +4651,10 @@ RMAP.LOOKUP					.EQ SCREEN_HOLE.2B78_2B7F+$6	;$2byte. ;USED TO STORE AN RMAP VAL
 ;========SOUND MANAGER==========
 @START
 SPEAKER		.EQ		$C030	;SPEAKER SOFTSWITCH (toggles speaker on/off)
-HALFTIME	.BS		$1		;!33 ;= (1/frequency)/(2*34)
-LENGTH		.BS		$1		;!29 ;Duration in units of 34*255 usec
+;HALFTIME	.BS		$1		;!33 ;= (1/frequency)/(2*34)
+HALFTIME	.EQ	SCREEN_HOLE.2A78_2A7F+$0	;$1byte. !33 ;= (1/frequency)/(2*34)
+;LENGTH		.BS		$1		;!29 ;Duration in units of 34*255 usec
+LENGTH		.EQ	SCREEN_HOLE.2A78_2A7F+$1	;$1byte. !29 ;Duration in units of 34*255 usec
 
 SOUND_DATA.POINTER		.EQ $C6 ;#POINTER. Used by PLAY.SOUND. Points to the hex table containing the frequency and duration values for the sound to play. 
 SOUND_DATA.WAIT.POINTER	.EQ $C8 ;#POINTER. Used by PLAY.SOUND. Points to the hex array containing the wait points and wait durations for the array connected to SOUND_DATA.POINTER
