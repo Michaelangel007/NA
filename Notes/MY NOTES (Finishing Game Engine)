@@ -315,13 +315,64 @@ Animation would be cool, like smoke from a camp fire and somebody drinking from 
 
 A song playing would be cool too. 
 
-Ideally Michael would write an HGR image diff program so that Bill could make the image in 816 paint, converting something in if needed
-from photoshop (photoshop -> outlaw, -> screen grab -> buckshot -> 816 paint)
+Instead of using the graphics spreadsheet, Ideally Michael would write an HGR image diff program so that Bill could make the image in 816 paint, converting something in if needed
+from photoshop (photoshop -> outlaw, -> screen grab -> buckshot -> 816 paint). In that case, code would be needed to render
+the image on screen, which Michael sent me in an email on 10/12/2017, subject "Re: DHGR Animation / Splash Screen". It's also included below.
+
 
 Need to wait until I see how much space is left on player disk so this is probbaly one of the last items to do.
 
 In the pre-storyline dev stage, maybe just connect a short routine to the (M)ake camp key which handles the health regen but
 doesn't do anything special. 
+
+
+
+--Michael' code for drawing diff output images at dymaic screen locations----
+@START
+SRC     = $FC
+DST     = $FE
+
+WIDTH   = 3
+HEIGHT  = 2
+SPRITES = $6000
+Y_ADDR  = $2A2B
+
+        ORG $300
+
+        LDA #<SPRITES
+        STA SRC+0
+        LDA #>SPRITES
+        STA SRC+1
+
+        LDA #<Y_ADDR
+        STA DST+0
+        LDA #>Y_ADDR
+        STA DST+1
+
+        LDX #HEIGHT
+NextLine
+        LDY #0
+CopyLine
+        LDA (SRC),Y
+        STA (DST),Y
+        INY
+        CPY #WIDTH
+        BNE CopyLine
+
+        CLC
+        LDA SRC
+        ADC #WIDTH
+        STA SRC
+
+        CLC
+        LDA DST+1
+        ADC #4
+        STA DST+1
+
+        DEX
+        BNE NextLine
+        RTS 
+
 
 @END
 
