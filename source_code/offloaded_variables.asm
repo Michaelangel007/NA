@@ -153,9 +153,9 @@ SCREEN_HOLE.28F8_28FF	.EQ	$28F8	;$8bytes
 SCREEN_HOLE.2978_297F	.EQ	$2978	;$8bytes
 SCREEN_HOLE.29F8_29FF	.EQ	$29F8	;$8bytes
 SCREEN_HOLE.2A78_2A7F	.EQ	$2A78	;$8bytes
-;+$6, +$7 available
+;all used
 SCREEN_HOLE.2AF8_2AFF	.EQ	$2AF8	;$8bytes
-;$+04-07 available
+;$+06-07 available
 SCREEN_HOLE.2B78_2B7F	.EQ	$2B78	;$8bytes
 
 
@@ -4579,13 +4579,12 @@ PLAYER.HOTKEYS.SPELLS.UNASSIGNED_CODE .EQ $FF ;#CONSTANT
 
 
 
-
+	
+			
+			
 ;PLAYER GOLD
 @START
-;PLAYER.GOLD		.BS $2,$02	;$02 is to set a default value for gold (testing) without using more bytes to do LDA/STA in the game launch driver
-
-
-PLAYER.GOLD		
+PLAYER.GOLD
 			;!9999
 			; .bs $01,$0F
 			; .bs $01,$27
@@ -4598,13 +4597,21 @@ PLAYER.GOLD
 			; .bs $01,$09
 			; .bs $01,$00
 			
+			
+			
+;**OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+							;To convert, uncomment the code below (I preserved the screen hole reservations) and uncomment the code in ";SET PLAYER.GOLD" (GAME.START.DRIVER)
+
+
+; ;PLAYER.GOLD	is to set a default value for gold (testing). To change the value see ";SET PLAYER.GOLD" in GAME.START.DRIVER
+; PLAYER.GOLD		.EQ	SCREEN_HOLE.2B78_2B7F+$4		;$2bytes. 
+				; ;==IN USE==				 +$5	
+
+				
 PLAYER.GOLD.MAX 	.EQ $270F ;#CONSTANT. The maximum gold the player can carry. PLAYER.GOLD is a 16-bit number but the gold max is limited to 4 BCD digits due to space on the video screen
 					   ;!9999
 					   
-					   
-; PLAYER.GOLD		
-			; .bs $01,$cd
-			; .bs $01,$01
+					  
 
 			
 			

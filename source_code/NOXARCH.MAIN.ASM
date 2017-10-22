@@ -2263,6 +2263,27 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 
 @MIDDLE ;PLAYER, TIME & GAME SETTINGS
 
+; ;SET PLAYER.GOLD
+	; ; ;!9999
+	; ; LDA #$0F
+	; ; STA PLAYER.GOLD+$0
+	; ; LDA #$27
+	; ; STA PLAYER.GOLD+$1
+			
+	; ;!9500
+	; LDA #$1C
+	; STA PLAYER.GOLD+$0
+	; LDA #$25
+	; STA PLAYER.GOLD+$1		
+			
+	; ; ;!0009
+	; ; LDA #$09
+	; ; STA PLAYER.GOLD+$0
+	; ; LDA #$00
+	; ; STA PLAYER.GOLD+$1
+
+	
+
 ;SET ADULT MODE ON/OFF
 	LDA #$01
 	STA GAME.ADULT.MODE ;$00 = OFF, $01 = ON
