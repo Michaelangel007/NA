@@ -3781,6 +3781,9 @@ COMBAT.MOVE_MANAGER ;**OPT** Memory. Move this routine to the combat module. Sho
 	STA COMBAT.PC.BLOCKED_MOVE.FLAG  ;($00 = not blocked | $01 = blocked)	
 	BEQ .PC.MOVE.NOT_BLOCKED	;if no, then execute move
 ;PC MOVE BLOCKED	
+
+
+	JSR PRINT.TEXT.WINDOW.CR ;print carriage return to combat scroll window
 			
 	;update scroll window	
 		LDA #GLOBAL.TEXT_BLOCK.COMMAND_BLOCKED	
@@ -3789,6 +3792,7 @@ COMBAT.MOVE_MANAGER ;**OPT** Memory. Move this routine to the combat module. Sho
 		LDA /GLOBAL.TEXT_BLOCK.COMMAND_BLOCKED	
 		STA TWF.STRING+$1						
 	JSR PRINT.TEXT.WINDOW
+
 	
 	JSR PLAY.SOUND.DUMB_ASS
 	JMP EXIT				;exit because in combat, MO.DRAW only needs to process the move for 1 S_ENTITY, whoevers turn it is. 
