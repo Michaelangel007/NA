@@ -3942,17 +3942,16 @@ MOB.GEN_FLAG.LT1				.EQ $33		;#CONSTANT
 ;========NPC MOVEMENT/SCHEDULES=====
 @START
 
-		
 ;===========NPC.PATHFINDER=========
 PATHFINDER.SPRITE.RECORD			.BS $0C		;Holds the information on the sprite for which pathfinder is generating a path. 
 
-NPC.PATHFINDER.ABORT_FLAG			.BS $01 	;$00 = No abort, $01 = aborted path is pending completion
-;;;NPC.PATHFINDER.ABORT_FLAG			.EQ SCREEN_HOLE.2678_267F+$6	;$1byte. $00 = No abort, $01 = aborted path is pending completion
+;NPC.PATHFINDER.ABORT_FLAG			.BS $01 	;$00 = No abort, $01 = aborted path is pending completion. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+NPC.PATHFINDER.ABORT_FLAG			.EQ SCREEN_HOLE.2AF8_2AFF+$6	;$1byte. $00 = No abort, $01 = aborted path is pending completion
 
 KEYPRESS.ABORT.ITERATIONS.DEFAULT	.EQ $03		;#CONSTANT. required iterations before auto-abort 
 ;set to $FF to disable auto abort. normally default value is $03
-KEYPRESS.ABORT.ITERATIONS			.BS $01		;usually set to the default value (see above constant). Or set to $FF to disable auto abort.
-;;;KEYPRESS.ABORT.ITERATIONS			.EQ SCREEN_HOLE.2678_267F+$7	;$1byte. usually set to the default value (see above constant). Or set to $FF to disable auto abort.
+;KEYPRESS.ABORT.ITERATIONS			.BS $01		;usually set to the default value (see above constant). Or set to $FF to disable auto abort. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+KEYPRESS.ABORT.ITERATIONS			.EQ SCREEN_HOLE.2AF8_2AFF+$7	;$1byte. usually set to the default value (see above constant). Or set to $FF to disable auto abort.
 
 
 ;NPC.PATHFINDER.DIRECTIONS_CHECKED	.BS $4		;tracks which directions, from the current tile, have been checked for open paths.
@@ -4388,22 +4387,22 @@ COLLISION_FLAG.WYVERN.LT2		.EQ	$8C		;#CONSTANT
 @START
 ;GAME SETTINGS
 GAME.ADULT.MODE						.BS $1	;($00 = OFF | $01 >= ON)
-;GAME.ADULT.MODE						.EQ SCREEN_HOLE.29F8_29FF ;$1byte. ($00 = OFF | $01 >= ON)
+;GAME.ADULT.MODE						.EQ SCREEN_HOLE.29F8_29FF ;$1byte. ($00 = OFF | $01 >= ON). **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;GAME.COMBAT_MATH_DISPLAY.MODE 		.BS $1	;($00 = OFF | $01 >= ON)
 GAME.COMBAT_MATH_DISPLAY.MODE 		.EQ SCREEN_HOLE.29F8_29FF+$6 ;$1byte. ($00 = OFF | $01 >= ON)
-GAME.SCROLL_SPEED					.BS $1	;the length of the delay inserted between HRCG text characters printed in the combat scroll window. 		
-;;;GAME.SCROLL_SPEED					.EQ SCREEN_HOLE.29F8_29FF+$7 ;$1byte. the length of the delay inserted between HRCG text characters printed in the combat scroll window. 		
+GAME.SCROLL_SPEED					.BS $1	;the length of the delay inserted between HRCG text characters printed in the combat scroll window. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600) 		
+;GAME.SCROLL_SPEED					.EQ SCREEN_HOLE.29F8_29FF+$7 ;$1byte. the length of the delay inserted between HRCG text characters printed in the combat scroll window. 		
 
 
 
 
 ;ICON RELATED
 PLAYER.HEIGHT.DEFAULT				.EQ $10			;#CONSTANT. INTENTIONALLY SET TO TILE HEIGHT+$3. THIS IT THE HEIGHT SET AT GAME LAUNCH AND AFTER PLAYER RETURNS TO A REGULAR TILE AFTER STEPPING ON A SINKING TILE LIKE QUICKSAND
-PLAYER.HEIGHT						.BS $1			;HEIGHT IN LINES. USED TO CONTROL SPECIAL EFFECTS LIKE SINKING IN SHALLOW WATER
+PLAYER.HEIGHT						.BS $1			;HEIGHT IN LINES. USED TO CONTROL SPECIAL EFFECTS LIKE SINKING IN SHALLOW WATER. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;PLAYER.HEIGHT						.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. HEIGHT IN LINES. USED TO CONTROL SPECIAL EFFECTS LIKE SINKING IN SHALLOW WATER
-PLAYER.WALKING.TILE					.BS	$1			;STORE THE TILE ID OF THE PLAYER ICON WHEN NO TRANSPORT IS ACTIVE
+PLAYER.WALKING.TILE					.BS	$1			;STORE THE TILE ID OF THE PLAYER ICON WHEN NO TRANSPORT IS ACTIVE. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;PLAYER.WALKING.TILE				.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. STORE THE TILE ID OF THE PLAYER ICON WHEN NO TRANSPORT IS ACTIVE
-PLAYER.WALKING.TILE.DEFAULT			.BS $1			;STORES THE DEFAULT TILE ID FOR THE PLAYER ICON IN CASE IT GETS CHANGED TEMPORARILY
+PLAYER.WALKING.TILE.DEFAULT			.BS $1			;STORES THE DEFAULT TILE ID FOR THE PLAYER ICON IN CASE IT GETS CHANGED TEMPORARILY. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;PLAYER.WALKING.TILE.DEFAULT		.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. STORES THE DEFAULT TILE ID FOR THE PLAYER ICON IN CASE IT GETS CHANGED TEMPORARILY
 PLAYER.ICON.BUFFER					.BS $20			;STORES THE CURRENT WALKING PLAYER ICON. KEEPS TRACK OF CHANGES TO IT SUCH AS WHEN THE PLAYER SINKS IN WATER.
 
@@ -4415,10 +4414,10 @@ PARTY.TOTAL.PC	.BS $1 ;The number of player characters currently enrolled in the
 ;PLAYER.TILE.ACTIVE					.BS $1			;THE TILE TYPE OF THE TRANSPORT RECORD POINTED TO BY THE INDEX STORED IN PLAYER.TRANSPORT.ACTIVE
 PLAYER.TILE.ACTIVE					.EQ SCREEN_HOLE.2A78_2A7F+$03	;$1byte. THE TILE TYPE OF THE TRANSPORT RECORD POINTED TO BY THE INDEX STORED IN PLAYER.TRANSPORT.ACTIVE
 
-PLAYER.TRANSPORT.ACTIVE				.BS $1			;TRACKS AN INDEX TO THE TRANSPORT OBJECT BOARDED. IF SET TO $FF, PLAYER IS WALKING AND PLAYER.MAP.ICON IS USED TO DETERMINE TILE_TYPE FOR PLAYER ICON. 
-;;;PLAYER.TRANSPORT.ACTIVE			.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. TRACKS AN INDEX TO THE TRANSPORT OBJECT BOARDED. IF SET TO $FF, PLAYER IS WALKING AND PLAYER.MAP.ICON IS USED TO DETERMINE TILE_TYPE FOR PLAYER ICON. 
+PLAYER.TRANSPORT.ACTIVE				.BS $1			;TRACKS AN INDEX TO THE TRANSPORT OBJECT BOARDED. IF SET TO $FF, PLAYER IS WALKING AND PLAYER.MAP.ICON IS USED TO DETERMINE TILE_TYPE FOR PLAYER ICON. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
+;PLAYER.TRANSPORT.ACTIVE			.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. TRACKS AN INDEX TO THE TRANSPORT OBJECT BOARDED. IF SET TO $FF, PLAYER IS WALKING AND PLAYER.MAP.ICON IS USED TO DETERMINE TILE_TYPE FOR PLAYER ICON. 
 
-PLAYER.TRANSPORT.SPEED				.BS $1			;THE NUMBER OF MOVES THE PLAYER GETS FOR EVERY ONE MOB MOVE. $00 = 1 MOVE. > $00 = 2 MOVES
+PLAYER.TRANSPORT.SPEED				.BS $1			;THE NUMBER OF MOVES THE PLAYER GETS FOR EVERY ONE MOB MOVE. $00 = 1 MOVE. > $00 = 2 MOVES. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;PLAYER.TRANSPORT.SPEED				.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. THE NUMBER OF MOVES THE PLAYER GETS FOR EVERY ONE MOB MOVE. $00 = 1 MOVE. > $00 = 2 MOVES
 
 ;PLAYER.TRANSPORT.STATUS				.BS $1			;$00 = NOT SET, $02 = FAST HORSE, $04 = WYVERN  (THIS VARIABLE EXISTS SO THAT PLAYER.TRANSPORT.SPEED CAN BE USED BY OTHER COMMANDS (LIKE JUMP) WITHOUT LOOSING KNOWLEDGE OF TRANSPORT STATUS (I.E. FAST HORSE ENABLED) WHEN THE OTHER COMMAND WAS ISSUED)
@@ -4466,9 +4465,9 @@ PLAYER.MT.ADJACENT_TILES.WEST1	.EQ $6D				;#CONSTANT. THE SCREEN ARRAY LOCATIONS
 
 ;MAP RELATED		
 PLAYER.MAP.ICON				.EQ PLAYER.WALKING.TILE		;HOLDS THE TILE_TYPE OF THE PLAYERS WALKING ICON (NOT BOARDED TRANSPORT)
-PLAYER.COLLISSION_OVERRIDE	.BS $1		;$00 = OFF, $01 = ON
+PLAYER.COLLISSION_OVERRIDE	.BS $1		;$00 = OFF, $01 = ON. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;PLAYER.COLLISSION_OVERRIDE	.EQ SCREEN_HOLE.2A78_2A7F	;$1byte. $00 = OFF, $01 = ON
-PLAYER.DARKNESS_OVERRIDE	.BS $1		;$00 = OFF, >=$01 = ON	
+PLAYER.DARKNESS_OVERRIDE	.BS $1		;$00 = OFF, >=$01 = ON. **OPT** Memory. Screenhole. Can be converted to screenhole once screen clear happens before GAME.SETUP.DRIVER & once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600)
 ;PLAYER.DARKNESS_OVERRIDE	.EQ SCREEN_HOLE.2AF8_2AFF	;$1byte. $00 = OFF, >=$01 = ON	
 ;PLAYER.PLS_STATUS			.BS $1		;PLAYER LIGHT SOURCE. $00 = OFF, $01 = TORCH
 PLAYER.PLS_STATUS			.EQ SCREEN_HOLE.2AF8_2AFF+$1	;$1byte. PLAYER LIGHT SOURCE. $00 = OFF, $01 = TORCH
