@@ -147,12 +147,14 @@ SCREEN_HOLE.2AF8_2AFF	.EQ	$2AF8	;$8bytes
 SCREEN_HOLE.2B78_2B7F	.EQ	$2B78	;$8bytes
 SCREEN_HOLE.2BF8_2BFF	.EQ	$2BF8	;$8bytes
 SCREEN_HOLE.2BF8_2BFF	.EQ	$2BF8	;$8bytes
+SCREEN_HOLE.2C78_2C7F	.EQ	$2C78	;$8bytes
 
 ;**above all are fully utilized, but I didn't double check. 
 
+SCREEN_HOLE.2CF8_2CFF	.EQ	$2CF8	;$8bytes
+SCREEN_HOLE.2D78_2D7F	.EQ	$2D78	;$8bytes
 
-;+7 is available
-SCREEN_HOLE.2C78_2C7F	.EQ	$2C78	;$8bytes
+
 
 
 
@@ -186,8 +188,8 @@ SCREEN_HOLE.2C78_2C7F	.EQ	$2C78	;$8bytes
 ; $2B78..$2B7F --used--
 ; $2BF8..$2BFF --used--
 ; $2C78..$2C7F --used--
-; $2CF8..$2CFF
-; $2D78..$2D7F
+; $2CF8..$2CFF --used--
+; $2D78..$2D7F --used--
 ; $2DF8..$2DFF
 ; $2E78..$2E7F
 ; $2EF8..$2EFF
@@ -498,19 +500,48 @@ FILL.VALUE 	.BS $1			;VALUE TO FILL WITH
 		
 KEYIN.STRING.LEFT_EDGE	.EQ FILL.VALUE
 
-SAVED.YREG.GLOBAL1						.BS $01		;1byt
-SAVED.YREG.GLOBAL2						.BS $01		;1byt
-SAVED.YREG.LOCAL						.BS $01		;1byt
-SAVED.YREG.LOCAL1						.BS $01		;1byt
-;SAVED.XREG.LOCAL2						.BS $01		;1byt
-SAVED.XREG.GLOBAL1						.BS $01		;1byt
-SAVED.XREG.LOCAL						.BS $01		;1byt
-SAVED.XREG.LOCAL1 						.BS $01		;1byt
-SAVED.ACC.GLOBAL1						.BS $01
-SAVED.ACC.LOCAL							.BS $01
-SAVED.ACC.LOCAL2						.BS $01
-TEMP									.BS $01		;1byt
-TEMP16									.BS $02		;1byt
+
+
+;SAVED.YREG.GLOBAL1						.BS $01		;1byt
+SAVED.YREG.GLOBAL1						.EQ SCREEN_HOLE.2C78_2C7F+$7		;1byt
+
+;SAVED.YREG.GLOBAL2						.BS $01		;1byt
+SAVED.YREG.GLOBAL2						.EQ SCREEN_HOLE.2CF8_2CFF+$0		;$1byte.
+
+;SAVED.YREG.LOCAL						.BS $01		;1byt
+SAVED.YREG.LOCAL						.EQ SCREEN_HOLE.2CF8_2CFF+$1		;$1byte.
+
+;SAVED.YREG.LOCAL1						.BS $01		;1byt
+SAVED.YREG.LOCAL1						.EQ SCREEN_HOLE.2CF8_2CFF+$2		;$1byte.
+
+;SAVED.XREG.GLOBAL1						.BS $01		;1byt
+SAVED.XREG.GLOBAL1						.EQ SCREEN_HOLE.2CF8_2CFF+$3		;$1byte.
+
+;SAVED.XREG.LOCAL						.BS $01		;1byt
+SAVED.XREG.LOCAL						.EQ SCREEN_HOLE.2CF8_2CFF+$4		;$1byte.
+
+;SAVED.XREG.LOCAL1 						.BS $01		;1byt
+SAVED.XREG.LOCAL1 						.EQ SCREEN_HOLE.2CF8_2CFF+$5		;$1byte.
+
+;SAVED.ACC.GLOBAL1						.BS $01
+SAVED.ACC.GLOBAL1						.EQ SCREEN_HOLE.2CF8_2CFF+$6		;$1byte.
+
+;SAVED.ACC.LOCAL							.BS $01
+SAVED.ACC.LOCAL							.EQ SCREEN_HOLE.2CF8_2CFF+$7		;$1byte.
+
+
+
+
+;SAVED.ACC.LOCAL2						.BS $01
+SAVED.ACC.LOCAL2						.EQ SCREEN_HOLE.2D78_2D7F+$0		;$1byte.
+
+;TEMP									.BS $01		;1byt
+TEMP									.EQ SCREEN_HOLE.2D78_2D7F+$1		;$1byte.
+
+;TEMP16									.BS $02		;2byt
+TEMP16									.EQ SCREEN_HOLE.2D78_2D7F+$2		;$2byte.
+										;==IN USE==				 +$3
+										
 
 KEYIN.NO_CLEAR .EQ FILL.END	;parmeter of KEYIN.ANIMATION.SINGLE used to tell it not to clear the keypress buffer
 KEYIN.SAVED	 .EQ FILL.END+$1
