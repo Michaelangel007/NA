@@ -154,6 +154,10 @@ SCREEN_HOLE.2C78_2C7F	.EQ	$2C78	;$8bytes
 SCREEN_HOLE.2CF8_2CFF	.EQ	$2CF8	;$8bytes
 SCREEN_HOLE.2D78_2D7F	.EQ	$2D78	;$8bytes
 
+;+$7 available
+SCREEN_HOLE.2DF8_2DFF	.EQ	$2DF8	;$8bytes
+SCREEN_HOLE.2E78_2E7F	.EQ	$2E78	;$8bytes
+
 
 
 
@@ -190,8 +194,8 @@ SCREEN_HOLE.2D78_2D7F	.EQ	$2D78	;$8bytes
 ; $2C78..$2C7F --used--
 ; $2CF8..$2CFF --used--
 ; $2D78..$2D7F --used--
-; $2DF8..$2DFF
-; $2E78..$2E7F
+; $2DF8..$2DFF --used--
+; $2E78..$2E7F --used--
 ; $2EF8..$2EFF
 ; $2F78..$2F7F
 ; $2FF8..$2FFF
@@ -547,11 +551,11 @@ KEYIN.NO_CLEAR .EQ FILL.END	;parmeter of KEYIN.ANIMATION.SINGLE used to tell it 
 KEYIN.SAVED	 .EQ FILL.END+$1
 
 
-; KEYIN.STRING.XREG		.EQ FILL.END+$0
-; KEYIN.STRING.YREG		.EQ FILL.END+$1
+;KEYIN.STRING.XREG	.BS $1
+KEYIN.STRING.XREG	.EQ SCREEN_HOLE.2D78_2D7F+$4		;$1byte.
 
-KEYIN.STRING.XREG	.BS $1
-KEYIN.STRING.YREG	.BS $1
+;KEYIN.STRING.YREG	.BS $1
+KEYIN.STRING.YREG	.EQ SCREEN_HOLE.2D78_2D7F+$5		;$1byte.
 
 ;INSERTION_SORT
 ;
@@ -570,17 +574,38 @@ KEYIN.STRING.YREG	.BS $1
 sep_low           .HS 02.08.18.50.F2.D8.8A.A0.E2 ;renamed from h_low
 sep_high          .HS 00.00.00.00.00.00.08.19.4C ;renamed from h_high
 
-sep_start_index  	.BS $1 ;renamed from h_start_index 
-sep_index        	.BS $1 ;renamed from h_index
-sort.entrance.point	.BS $2 ;renamed from h. address in the array where sort beings. It's the start of the array for an insertion sort but could be after the start for a shell sort. 
+;sep_start_index  	.BS $1 ;renamed from h_start_index 
+sep_start_index  	.EQ SCREEN_HOLE.2D78_2D7F+$6		;$1byte. 
+
+;sep_index        	.BS $1 ;renamed from h_index
+sep_index        	.EQ SCREEN_HOLE.2D78_2D7F+$7		;$1byte.
+
+;sort.entrance.point	.BS $2 ;renamed from h. address in the array where sort beings. It's the start of the array for an insertion sort but could be after the start for a shell sort. 
+sort.entrance.point	.EQ SCREEN_HOLE.2DF8_2DFF+$0  ;$2bytes. renamed from h. address in the array where sort beings. It's the start of the array for an insertion sort but could be after the start for a shell sort. 
+					;==IN USE== 			 +$1
+					
 sort.table.address	.EQ sort.entrance.point ;parameter containing HO/LO address of the table to be sorted. 
 
-array.record_size	.BS $1 ;**NEW**. # of bytes in the records in the array to be sorted. 
+;array.record_size	.BS $1 ;**NEW**. # of bytes in the records in the array to be sorted. 
+array.record_size	.EQ SCREEN_HOLE.2DF8_2DFF+$2  ;$1bytes. **NEW**. # of bytes in the records in the array to be sorted. 
 
-input.start.addr .BS $2 ;renamed from in_address
-arr_start      	.BS $2
-arr_end         .BS $2
-unsorted.record.index    	.BS $2 ;renamed from I. the record that is being sorted by the current iteration of .NEXT.UNSORTED_RECORD
+;input.start.addr 	.BS $2 ;renamed from in_address
+input.start.addr 	.EQ SCREEN_HOLE.2DF8_2DFF+$3  ;$2bytes. renamed from in_address
+					;==IN USE== 		  +$4
+
+;arr_start      	.BS $2
+arr_start      		.EQ SCREEN_HOLE.2DF8_2DFF+$5  ;$2bytes. 
+					;==IN USE== 		 	 +$6
+
+
+;arr_end        	 .BS $2
+arr_end        		 .EQ SCREEN_HOLE.2E78_2E7F+$0  ;$2bytes. 
+					;==IN USE== 		   	  +$1
+
+;unsorted.record.index    	.BS $2 ;renamed from I. the record that is being sorted by the current iteration of .NEXT.UNSORTED_RECORD
+unsorted.record.index    	.EQ SCREEN_HOLE.2E78_2E7F+$2  ;$2bytes. renamed from I. the record that is being sorted by the current iteration of .NEXT.UNSORTED_RECORD
+							;==IN USE== 		   	 +$3
+
 unsorted_record.values 		.EQ TEXT.WINDOW.BUFFER_STEP ;$10bytes. renamed from V. Must be set equal to array.record_size
 unsorted_record.values_plus1 .EQ TEXT.WINDOW.BUFFER_STEP+$10 ;$10bytes. renamed from v_plus_1. "" unsorted_record.values +$01 (the values stored, not the address). Must be set equal to array.record_size
 
