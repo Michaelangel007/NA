@@ -605,7 +605,28 @@ with the upper left most tile of the light pattern. (!31 bytes)
 	Note: I'm considering keeping on screen and offscreen separate to avoid speed hit of creating an extended screen array, writing to it, then copying
 	to the real screen array only the overlapping portion. 
 		
-		
+
+;-----from discussion with beth
+
+
+*Set the extended index at the start of each offscreen search routine and increment as the search iterates the offscreen tiles in the row/column that as loaded. 
+
+*In the offscreen ELS search algorith, track the real row (starts at $0, the top row of the regular sreen), and the extended row ($03, the 4th row from the
+top of the chart. Note the chart order is -3, -2, -1, 0 and $03 in this case refers to extended row 0 on the chart)
+
+*Use the real row number against a lookup table to calculate the number of side tiles when converting from an extended to regular index (SCREEN.DARK.DATA)
+
+regular index = extended index - top_offset* - side_tiles_offset**
+
+*(from upper left of regular screen to upper left of extended, $84 in th latest chart)
+**+4 tiles in real row 0, +!15 tiles per row for each row after real row 0. The +4 needs to be added each tile. These values all go in a lookup table
+
+	
+
+*The algorithm will know the extended row of the offscreen ELS. If it needs to know the row of each position in the light pattern, then:
+	*start row = ELS row -3
+	*use a row_increment lookup table, and add the lookup value to the current row. The first 4 values in the value would be 0.0.0.1 
+	
 @END
 
 
