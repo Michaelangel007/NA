@@ -765,6 +765,7 @@ TM_1.ITEM_DROP.RANDOM
 ;PARAMETERS: ACC = level group
 ;RETURN: TM_1.DROPPED_ITEM.ITEM_TYPE, TM_1.DROPPED_ITEM.ITEM_CODE
 
+;
 ;=====================SUBROUTINE DOCUMENTATION===========================================================================
 ;
 ;The level group parm is expected to be the level of the source of the item drop. For example,
