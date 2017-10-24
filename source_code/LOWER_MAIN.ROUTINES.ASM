@@ -23,4 +23,3 @@
 	.NO $2000		;FILLER TO THE UPPER LIMIT OF THE MEMORY RANGE ALLOCATED FOR THIS FILE 
 					;This enables SBASM to generate an error if/when the code overshoots this memory address.
 					;It also kees this target file at a fixed size so the track/sector stays the same on the disk image, which is needed to load the file via MY.RWTS
-					

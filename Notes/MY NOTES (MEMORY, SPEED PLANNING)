@@ -1,4 +1,11 @@
 
+*Free up Disk space
+	*program/boot disk. HGR table (for at least one hi-res page exists in splash screen program. If I setup the HGR table 
+	in GAME.BIN (offloaded_variables.asm) to a fixed address Michael and move his HGR table to that location, and then we don't need
+	to have it in GAME.BIN, putting in on disk twice. 
+						
+					
+					
 *Increasing Speed (top ideas)
 	*tile draw speed
 		*(hard) draw.tile. Unroll the loop

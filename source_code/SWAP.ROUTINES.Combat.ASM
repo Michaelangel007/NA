@@ -7481,6 +7481,7 @@ COMBAT.PRINT.HIT.OTHER ;prints a variety of text blocks depending on the value o
 ;ENTRANCE: COMBAT module routines
 ;RETURN: text block printed to combat scroll window
 
+
 	;ACC = parm: text block code
 	ASL ;X2
 	TAX

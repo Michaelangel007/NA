@@ -324,7 +324,7 @@ Need to wait until I see how much space is left on player disk so this is probba
 
 In the pre-storyline dev stage, maybe just connect a short routine to the (M)ake camp key which handles the health regen but
 doesn't do anything special. 
-
+@END
 
 
 --Michael' code for drawing diff output images at dymaic screen locations----

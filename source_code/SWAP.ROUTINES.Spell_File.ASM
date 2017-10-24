@@ -325,9 +325,16 @@ SPELL_FILE.AFTER_CAST
 	
 	;JSR COMBAT.PRINT.HIT
 	
+
+			TXA ;register is saved here because COMBAT.PRINT.HIT.OTHER has an ACC parameter. 
+			PHA
 	;print "hit" text block
 		LDA #$00 ;($00 = hit text block, $01 = killed text block, $02 = critial_hit text block, $03 = critial_hit_foiled text block)
 	JSR COMBAT.PRINT.HIT.OTHER
+			PLA
+			TAX
+
+	
 	
 	JSR DISPLAY.MOB.HP_STATUS_BAR	
 	JMP .DISPLAY.COMBAT.MATH
