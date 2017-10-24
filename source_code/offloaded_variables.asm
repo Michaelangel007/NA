@@ -155,9 +155,10 @@ SCREEN_HOLE.2CF8_2CFF	.EQ	$2CF8	;$8bytes
 SCREEN_HOLE.2D78_2D7F	.EQ	$2D78	;$8bytes
 SCREEN_HOLE.2DF8_2DFF	.EQ	$2DF8	;$8bytes
 SCREEN_HOLE.2E78_2E7F	.EQ	$2E78	;$8bytes
-
 SCREEN_HOLE.2EF8_2EFF	.EQ	$2EF8	;$8bytes
+SCREEN_HOLE.2F78_2F7F	.EQ	$2F78	;$8bytes
 
+SCREEN_HOLE.3078_307F	.EQ	$3078	;$8bytes
 
 
 
@@ -196,8 +197,8 @@ SCREEN_HOLE.2EF8_2EFF	.EQ	$2EF8	;$8bytes
 ; $2DF8..$2DFF --used--
 ; $2E78..$2E7F --used--
 ; $2EF8..$2EFF --used--
-; $2F78..$2F7F
-; $2FF8..$2FFF
+; $2F78..$2F7F --used--
+; $2FF8..$2FFF --used--
 ; $3078..$307F
 ; $30F8..$30FF
 ; $3178..$317F
@@ -921,8 +922,14 @@ TEXT				.EQ $C051
 ;MATH
 @START
 
-OP1      	.BS $2				;2byt
-OP2      	.BS $2				;2byt
+
+;OP1      	.BS $2				;2byt
+OP1      	.EQ SCREEN_HOLE.2F78_2F7F+$0	;$2byte. 
+			;==IN USE==				 +$1
+
+;OP2      	.BS $2				;2byt
+OP2      	.EQ SCREEN_HOLE.2F78_2F7F+$2	;$2byte. 
+			;==IN USE==				 +$3
 RESULT  	.EQ RESULT_STEP				;2byt
 
 ;DIV.16 VARIABLES
@@ -1056,12 +1063,15 @@ UPDATE.CHAR.POS.ADDRESS		.EQ	$FC22			;RECALCULATE TEXT SCREEN LINE VALUE STORED 
 UPDATE.CURSOR.POS.ADDRESS 	.EQ UPDATE.CHAR.POS.ADDRESS
 ;UPDATE.CURSOR.POS		 	.EQ UPDATE.CHAR.POS
 
-CURSOR.POSITION.SAVED		.BS $2 ;$2byts. 
-
+;CURSOR.POSITION.SAVED		.BS $2 ;$2byts. 
+CURSOR.POSITION.SAVED		.EQ SCREEN_HOLE.2F78_2F7F+$4	;$1byte. 
+							;=IN USE==				 +$5
+ 
 
 HTAB				.EQ $24				;(X) HORIZONTAL CURSOR POSITION
 VTAB				.EQ $25				;(Y) VERTICLE CURSOR POSITION
-COUT_CHAR_TYPE		.BS $1			;applied as a mask to character shape data ($00 = normal, $7F = inverse)
+;COUT_CHAR_TYPE		.BS $1			;applied as a mask to character shape data ($00 = normal, $7F = inverse)
+COUT_CHAR_TYPE		.EQ SCREEN_HOLE.2F78_2F7F+$6	;$1byte. applied as a mask to character shape data ($00 = normal, $7F = inverse)
 ;Text Window: ROM (the only problem with it is that it sucks)
 TW1					.EQ $20				;(X) TEXT WINDOW UPPER LEFT
 TW2					.EQ	$21				;(X) WIDTH
@@ -1072,7 +1082,8 @@ TW4					.EQ	$23				;(Y) BOTTOM ROW
 ;See ========NPC TALK=====(TEXT WINDOW FUNCTION)  in offloaded_variables.ASM
 
 
-CHAR				.BS		$1			
+;CHAR				.BS		$1			
+CHAR				.EQ SCREEN_HOLE.2F78_2F7F+$7	;$1byte.	
 
 CSW					.EQ		$36
 VECT				.EQ		$3EA		
@@ -1080,7 +1091,10 @@ VECT				.EQ		$3EA
 ;PRINT.STR VARIBLES
 ;STRING				.EQ 	$E4		;2byte. Pointer to the ascii string to be output to video screen.
 STRING				.EQ 	$FC		;2byte. Pointer to the ascii string to be output to video screen.
-PRINT.STR.MODE		.BS		$1		;($00 = normal | >=$01 = wait/pause functionality enabled)
+
+;PRINT.STR.MODE		.BS		$1		;($00 = normal | >=$01 = wait/pause functionality enabled)
+PRINT.STR.MODE		.EQ SCREEN_HOLE.3078_307F+$0	;$1byte. ($00 = normal | >=$01 = wait/pause functionality enabled)
+
 SCROLL_SPEED.INCREMENT 	.EQ $20
 SCROLL_SPEED.MAX		.EQ $80
 SCROLL_SPPED.PAUSE_KEY	.EQ $A0		;#CONSTANT. ASCII CODE.
