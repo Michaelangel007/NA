@@ -154,9 +154,9 @@ SCREEN_HOLE.2C78_2C7F	.EQ	$2C78	;$8bytes
 SCREEN_HOLE.2CF8_2CFF	.EQ	$2CF8	;$8bytes
 SCREEN_HOLE.2D78_2D7F	.EQ	$2D78	;$8bytes
 SCREEN_HOLE.2DF8_2DFF	.EQ	$2DF8	;$8bytes
-;+4-$7 available
 SCREEN_HOLE.2E78_2E7F	.EQ	$2E78	;$8bytes
 
+SCREEN_HOLE.2EF8_2EFF	.EQ	$2EF8	;$8bytes
 
 
 
@@ -195,7 +195,7 @@ SCREEN_HOLE.2E78_2E7F	.EQ	$2E78	;$8bytes
 ; $2D78..$2D7F --used--
 ; $2DF8..$2DFF --used--
 ; $2E78..$2E7F --used--
-; $2EF8..$2EFF
+; $2EF8..$2EFF --used--
 ; $2F78..$2F7F
 ; $2FF8..$2FFF
 ; $3078..$307F
@@ -498,8 +498,11 @@ GENERIC.ARRAY.POINTER		.EQ COPY.FROM_END ;used when a zero page pointer is neede
 
 
 FILL.START	.EQ	$EB			;START ADDRESS TO FILL
-FILL.END	.BS $2			;END ADDRESS TO FILL
-FILL.VALUE 	.BS $1			;VALUE TO FILL WITH
+;FILL.END	.BS $2			;END ADDRESS TO FILL
+FILL.END	.EQ SCREEN_HOLE.2EF8_2EFF+$0 	;$1byte. END ADDRESS TO FILL
+			;==IN USE==				 +$1
+;FILL.VALUE 	.BS $1			;VALUE TO FILL WITH
+FILL.VALUE 	.EQ SCREEN_HOLE.2EF8_2EFF+$2 	;$1byte. VALUE TO FILL WITH
 		
 KEYIN.STRING.LEFT_EDGE	.EQ FILL.VALUE
 
@@ -636,7 +639,7 @@ PAGE2				.EQ	$C055
 	
 
 ;COPY.STOP.ADDRESS			.BS		$01		
-;COPY.STOP.ADDRESS			.EQ SCREEN_HOLE.2DF8_2DFF+$7	;$1byte. 
+
 
 ;PAGE.FOREGROUND				.BS $1		;1byt	USED WHEN CALLING DRAW.TILE SUBROUTINE (POSSIBLY OTHERS IN FUTURE) TO SPECIFY THE BACKGROUND PAGE (WHICH IS USUALLY THE ONE DRAWN ON)
 PAGE.FOREGROUND				.EQ SCREEN_HOLE.2E78_2E7F+$4	;$1byte. USED WHEN CALLING DRAW.TILE SUBROUTINE (POSSIBLY OTHERS IN FUTURE) TO SPECIFY THE BACKGROUND PAGE (WHICH IS USUALLY THE ONE DRAWN ON)
@@ -857,16 +860,20 @@ parm.namhi 		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$FC
 
 
 
-parm.current.file .BS $1 ;if set to $01, then PRODOS.IO wrapper assumes it should open a new file via $D003 instead of using the current file via $D000
-;parm.current.file .EQ SCREEN_HOLE.2DF8_2DFF+$7	;$1byte. if set to $01, then PRODOS.IO wrapper assumes it should open a new file via $D003 instead of using the current file via $D000
+;parm.current.file .BS $1 ;if set to $01, then PRODOS.IO wrapper assumes it should open a new file via $D003 instead of using the current file via $D000
+parm.current.file .EQ SCREEN_HOLE.2EF8_2EFF+$3 	;$1byte. if set to $01, then PRODOS.IO wrapper assumes it should open a new file via $D003 instead of using the current file via $D000
 
-;BSR.STATE 		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$FD
-BSR.STATE 		.BS $1
-;BANK.STATE 		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$FE
-BANK.STATE 		.BS $1
+;BSR.STATE 		.BS $1
+BSR.STATE 		.EQ SCREEN_HOLE.2EF8_2EFF+$4 	;$1byte.
 
-BSR.STATE_SAVED .BS $1		;ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
-BANK.STATE_SAVED .BS $1		;BANK1/BANK2 soft-switch flag (bit7 = 1: BANK2, bit7=0 BANK1)
+;BANK.STATE 		.BS $1
+BANK.STATE 		.EQ SCREEN_HOLE.2EF8_2EFF+$5 	;$1byte.
+
+;BSR.STATE_SAVED .BS $1		;ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
+BSR.STATE_SAVED .EQ SCREEN_HOLE.2EF8_2EFF+$6 	;$1byte. ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
+
+;BANK.STATE_SAVED .BS $1		;BANK1/BANK2 soft-switch flag (bit7 = 1: BANK2, bit7=0 BANK1)
+BANK.STATE_SAVED .EQ SCREEN_HOLE.2EF8_2EFF+$7 	;$1byte. BANK1/BANK2 soft-switch flag (bit7 = 1: BANK2, bit7=0 BANK1)
 
 ;PRODOS.IO
 IO.ATTEMPTS			.EQ SHARED.VARIABLE_SPACE.BLOCK2+$FF
