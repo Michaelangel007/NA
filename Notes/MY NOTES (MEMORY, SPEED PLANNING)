@@ -98,46 +98,7 @@
 			;ever be used but we're not talking a lot of space savings for just a few.
 
 			
-	*Screen holes in hi-res page1/2 (info from Daniel Liverani)
-	
-	512 byte unused on Hires pg 1:
-	$2000+$77 = 2077 (8 bytes)
-	$2080+$77 = 20F7 (8 bytes)
-	$2100+$77 = 2177 (8 bytes)
-	$2180+$77 = 21F7 (8 bytes)
-	$2200+$77 = 2277 (8 bytes)      $200 on hires1
-
-	512 byte unused on Hires pg 2:
-	$4000+$77 = 4077 (8 bytes)
-	$4080+$77 = 40F7 (8 bytes)
-	$4100+$77 = 4177 (8 bytes)
-	$4180+$77 = 41F7 (8 bytes)
-	$4200+$77 = 4277 (8 bytes)     $200 on hires2
-
-	Tot 1024 bytes avaialble!
-
-	comments from Daniel:
-		you have to develop a routine
-		that pushes and pops the data from those holes
-		if you want to use it in a row
-		or you can use them with constant data
-		the downside is that that memory is not senquential
-		right
-
-		so addressing it needs some time costs
-		also for II+
-		there's the mysterious left row
-		bug
-		in the early II+ models
-		if you don't clear completely
-		all the bytes
-		of the hires $2000-$6000
-		(I used to avoid the cleaning of the unseen ones)
-		in the early models of II+
-		due to an hardwere video addressing bug
-		some of those bytes are turning on some pixels on the left
-		in some sort of -1 positiong 
-
+	*(DONE) Screen holes in hi-res page1/2 (info from Daniel Liverani)
 
 
 -surface/undermap only memory

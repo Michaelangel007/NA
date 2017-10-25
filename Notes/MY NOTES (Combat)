@@ -30,7 +30,7 @@ for character sheets might already handle everythign needed.
 	
 -Options to free up Combat module memory	
     *in addition to the **OPT** notes in the combat module, look at **OPT** notes in stats0 (SWAP.ROUTINES.Combat.stats_summary.ASM) 
-	*See "OVERHAUL **OPT** PLAN USING CONTROL TABLE" in stats0 for a way to possible reduce the size of stats0. It is described as borderline as to whether there would be material savings
+	*(I think this is done) See "OVERHAUL **OPT** PLAN USING CONTROL TABLE" in stats0 for a way to possible reduce the size of stats0. It is described as borderline as to whether there would be material savings
 		but it may be worth trying if I'm out of good options. 
 	*See  **OPT** note in stats0 ".HEALTH_STATUS" about making the health status and gender codes sequential so a lookup table can be used. This would be a savings
 		even if if I don't do the overhaul plan. 

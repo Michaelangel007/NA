@@ -626,6 +626,14 @@ regular index = extended index - top_offset* - side_tiles_offset**
 *The algorithm will know the extended row of the offscreen ELS. If it needs to know the row of each position in the light pattern, then:
 	*start row = ELS row -3
 	*use a row_increment lookup table, and add the lookup value to the current row. The first 4 values in the value would be 0.0.0.1 
+
+
+
+*To determine if an ELS is offscreen, instead to determine if it is onscreen. since the real row number is known, build a lookup
+table where each row has a record and the record contains the LO and HI extended index which is onscreen. Memory cost is 11 rows * 2 values = !22 bytes. 
+speed is fast because it's lookup table driven.
+
+
 	
 @END
 
@@ -679,7 +687,7 @@ regular index = extended index - top_offset* - side_tiles_offset**
 -Map Compression
 		*Keep existing system or rewrite to use ZX7 or one of Peter's other decompressors
 
--Change method for day/night transitions (combat system in-memory prerequisite)
+-(DONE) Change method for day/night transitions (combat system in-memory prerequisite)
 @start
 	*instead of the goofy copy from aux memory, just do a regular tile-swap (like beds) but instead
 	of triggering via map object presense, trigger by TOD. Once it's working, try using self modifying code
@@ -743,24 +751,25 @@ If force flag set, only force animation one out of every four sequential-moves (
 @end
 		
 -Combat System 
-		*make final decision on whether to keep in memory all the time. (see prerequisite above)
+@START
+		-make final decision on whether to keep in memory all the time. (see prerequisite above)
 			*8/20/17; I lost track of where I put my notes on ideas for fitting combat into memory. 
 			
 			Some of them are here:
 			
-			See MY NOTES (Combat) file, hdeading "===COMBAT ALWAYS IN MEMORY -NOTES=====" This section also contains a note about 
+			See MY NOTES (Combat) file, heading "===COMBAT ALWAYS IN MEMORY -NOTES=====" This section also contains a note about 
 			where my notes on the physical clipboard pad are on this topic
 
 			I'm pretty sure I also had some notes abou optimizations if it turned out I can't keep combat module in memory all the time.
 	
 				
-		-if combat stats in memory always, that means stats screen0 (stats summary) will always be in memory. 
-			*modify the inventory module so that screen0 is launched from memory always, instead of disk loaded for non-combat access. 
-			*See the "temporary" note in .DRAW.MENU_ICONS which described other adjustements needed and optimizations desired, once screen0 becomes a routine permenantly in memory
-			*If the combat module is permenantly in memory, I think this means the spell file would load into the swap space without clobbering the combat module.
-			With the entire swap module available, consider if at least some spells could stay in memory once loaded from disk (via load flag)
-			There are probably more spells code blocks than would fit in the swap space but it might be possible to organize the reserved memory blocks so the more common spells are in separate memory.
-			Loading inventory uses the swap space but the contents will be put back
+			-if combat stats in memory always, that means stats screen0 (stats summary) will always be in memory. 
+				*modify the inventory module so that screen0 is launched from memory always, instead of disk loaded for non-combat access. 
+				*See the "temporary" note in .DRAW.MENU_ICONS which described other adjustements needed and optimizations desired, once screen0 becomes a routine permenantly in memory
+				*If the combat module is permenantly in memory, I think this means the spell file would load into the swap space without clobbering the combat module.
+				With the entire swap module available, consider if at least some spells could stay in memory once loaded from disk (via load flag)
+				There are probably more spells code blocks than would fit in the swap space but it might be possible to organize the reserved memory blocks so the more common spells are in separate memory.
+				Loading inventory uses the swap space but the contents will be put back
 
 		-Make final connection between combat and inventory
 			*see comments in COMBAT.DISPLAY.STATS_SUMMARY
@@ -787,6 +796,8 @@ If force flag set, only force animation one out of every four sequential-moves (
 				*Since I'd be splitting off the source files from the mess that is c:\my_code, the size of the backups should be managable
 				*However, the build backups pull in lots of stuff other than source code (i.e disk images, excel sheets, batch files, etc)
 					so maybe I should keep doing those.  
+@END
+
 					
 -Apple IIgs optimization
 @start

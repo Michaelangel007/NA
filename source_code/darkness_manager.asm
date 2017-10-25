@@ -441,13 +441,13 @@ DARKNESS.ELS ;=====DARKNESS OFFSET BY EXTERNAL LIGHT SOURCE=====
 ;		*This subroutine is a big fat pig (3/4 super page). It is for the most part an unrolled loop.
 ;			the reason is because most array iterating that it does are for short segments 1-3 elements.
 ;
-;		*For implimenting the pattern of light tiles, the onscreen and offscreen top/bottom routines take;	
+;		*For implimenting the pattern of light tiles, the onscreen and offscreen top/bottom routines take
 ; 		an approach of starting in the column the ELS is located in, turning on the tiles to the left and right, then
 ;		moving down 1 row and doing the same. Repeating for the appropriate number of rows. 
 ;		
 ;		The reason for this start center then iterate left/right method is because the routine must check for 
 ;		the left/right screen edge. Onscreen routines also have to check for the top/bottom screen edge.  
-;		The offscreen left/right routines don't have to worry about that becuase by definition the ELS is offscreen left (or right) so the code
+;		The offscreen left/right routines don't have to worry about that because by definition the ELS is offscreen left (or right) so the code
 ;		knows where it is relative to the left/right screen edge, they just have to check for the top/bottom screen edge. 
 ;
 ;
