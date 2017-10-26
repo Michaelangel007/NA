@@ -1,0 +1,17 @@
+Source file: c:\my_code\na\source_code\darkness_manager.asm
+
+*** Error: Undefined label
+I   535         JMP     NEXT_TILE
+
+*** Error: Undefined label
+I  2959         ADC LIGHT_PATTERN.OFFSET_TABLE,X
+
+*** Error: Undefined label
+I  2969         SBC LIGHT_PATTERN.OFFSET_TABLE,X
+
+*** Error: Undefined label
+I  2998         SBC LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE,Y      ;contains the EXTENDED INDEX (LO byte only) of the left edge of the onscreen range for the row the current light position is in
+
+*** Error: Undefined label
+I  3077         ADC EXTENDED_ROW.INCREMENT.LOOKUP_TABLE,X       ;this lookup table will contain the row increment for each position in the light pattern. So 0,0,0,1,0 etc.
+

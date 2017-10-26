@@ -27,8 +27,10 @@
 ;**Shared Var space**: (TEXT WINDOW FUNCTIONS): SHARED.VARIABLE_SPACE.BLOCK1+$88 - $CC
 ;**Shared Var space**: (COMBAT overflow): SHARED.VARIABLE_SPACE.BLOCK1+$CD - ??
 ;
-;
 ;-----BLOCK2------**Shared Var space**
+;
+;**Shared Var space**:(darkness manager, ELS): SHARED.VARIABLE_SPACE.BLOCK2+$00 - ??
+;
 ;-Required When Entering Building
 ;**Shared Var space**: (NPC.INIT): SHARED.VARIABLE_SPACE.BLOCK2+$00 - $BF
 ;
@@ -2467,6 +2469,29 @@ SCREEN.DARK.ELS.ONSCREEN_ANCHOR			.EQ SAVED.YREG.LOCAL	;FOR OFFSCREEN ELS OBJECT
 SCREEN.DARK.ELS.FLOATING_TILE			.EQ SAVED.ACC.LOCAL		;USED IN THE ALGORITHM FOR ELS LIGHTING TO ITERATE THROUGH THE ROWS OF THE LIGHTING PATTERN WITHOUT STARTING AT THE ELS SCREEN TILE LOCATION EACH TIME. 
 SCREEN.DARK.ELS.COLUMN.COUNTER			.EQ SAVED.YREG.LOCAL1
 
+
+;new ELS algorithm
+EXTENDED.CONVERSION.OFFSET		.EQ $CC ;#CONSTANT
+EXTENDED_TILE_INDEX.ELS 		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$0 ;$2byte
+								;==IN USE==						+$1
+EXTENDED_ROW.CURRENT_POSITION 	.EQ SHARED.VARIABLE_SPACE.BLOCK2+$2 ;$1byte
+EXTENDED_ROW.CONVERSION.OFFSET	.EQ $06	;#CONSTANT
+TILE_INDEX.ELS					.EQ SHARED.VARIABLE_SPACE.BLOCK2+$3 ;$1byte
+ELS.ONSCREEN.ROW_ADJ			.EQ SHARED.VARIABLE_SPACE.BLOCK2+$4 ;$1byte. (REAL ROW * !16)
+REAL_ROW.CURRENT_POSITION		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$5 ;$1byte
+
+
+LIGHT_PATTERN.LOOP_COUNTER				.EQ SHARED.VARIABLE_SPACE.BLOCK2+$6 ;$1byte
+LIGHT_PATTERN.HALF_SIZE					.EQ $13					;#CONSTANT
+LIGHT_PATTERN.FULL_SIZE					.EQ $25					;#CONSTANT
+EXTENDED_ROW.ONSCREEN_BOUNDARY.TOP		.EQ EXTENDED_ROW.CONVERSION.OFFSET
+EXTENDED_ROW.ONSCREEN_BOUNDARY.BOTTOM	.EQ $11		;#CONSTANT
+ELS.ONSCREEN.ROW_WIDTH					.EQ $11
+EXTENDED.CONVERSION.ROW_OFFSET			.EQ SHARED.VARIABLE_SPACE.BLOCK2+$8 ;$1byte
+LIGHT_POSITION.EXTENDED_TILE_INDEX		.EQ SHARED.VARIABLE_SPACE.BLOCK2+$A ;$2byte
+										;==IN USE==						+$B
+
+								
 ;DESIGNATE EXTERNAL LIGHT SOURCE (ELS) TILES
 
 ;BUILDINGS
@@ -3649,18 +3674,18 @@ GMAP.X.LAST				.BS $1		;Stores the GMAP X-axis of player prior to the execution 
 GMAP.Y.LAST				.BS $1		;Stores the GMAP Y-axis of player prior to the execution of a movement command. Used to deal with differences in Mob and NPC sprite map tracking. 
 RMAP.X					.BS $1			;Tracks player x/y axis on regional map. 
 RMAP.Y					.BS $1			;Tracks player x/y axis on regional map. 
-RMAP					.BS $2			;TRACKS PLAYERS POSITION IN THE REGIONAL MAP ARRAY
+RMAP					.BS $2			;TRACKS PLAYERS POSITION IN THE REGIONAL MAP ARRAY (see "Region Map (array)" worksheet in "Game Map (alpha).xls", which might be renamed to surface at some point)
 PLAYER.WMAP.ZONE		.BS $1			;PLAYERS CURRENT WORLD ZONE LOCATION
 ;-----------------
 
 
-SMAP					.EQ SCREEN_HOLE.2278_227F+$5	;$2byte.
+SMAP					.EQ SCREEN_HOLE.2278_227F+$5	;$2byte. The RMAP of a particular position on screen. It is init to the upper left screen tile by TILE.LOOKUP.SCREEN. I think it is incremented when the player moves so that it always contains the RMAP for that screen position.
 						;==IN USE==				 +$6
 ;SMAP					.BS $2						
 
 						
 ;SMAP.CURRENT			.BS $2			;2byt
-SMAP.CURRENT			.EQ SCREEN_HOLE.2378_237F+$5	;$2byte. 
+SMAP.CURRENT			.EQ SCREEN_HOLE.2378_237F+$5	;$2byte. The RMAP of a particular tile on screen being examined by an algorithm. It is usually init from SMAP.
 						;==IN USE==				 +$6
 
 
