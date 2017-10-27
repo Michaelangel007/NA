@@ -32,12 +32,8 @@ BPL ;branch if high-bit is not set
 			LDA TROUBLESHOOTING.HOOK
 			CMP #$01
 			BNE .TEMP
-			; LDA *
-			; LDA *-2
-			; LDX *-1			;PROGRAM COUNTER AT BRK+$2 WILL BE RETURNED IN X-REG/Y-REG
-			; TAY
 			LDA #$AA			
-			JSR FULL.BRK
+			JSR FULL.BRK	;use stack to trace call
 .TEMP
 			LDA TEMP
 

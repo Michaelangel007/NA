@@ -1191,8 +1191,8 @@ SCREEN.TILE.DATA 			.EQ $0800	;$BB bytes.					;HOLDS TILE_TYPE DATA FOR EACH TIL
 
 ;	mirrors screen tile layout. 
 ;	Values for each tile are 0 (normal), 1 (dark)
-;SCREEN.DARK.DATA			.BS $BB		;ENDS AT $92BA
-SCREEN.DARK.DATA			.EQ $8BB	;$BB bytes. $00 = visible, $01 = hidden (dark)
+;SCREEN.DARK.DATA			.BS $BB		;
+SCREEN.DARK.DATA			.EQ $8BB	;$BB bytes. ENDS AT $975. Player position = $918. $00 = visible, $01 = hidden (dark)
 
 ;SCREEN.DARK.DATA_BEFORE	.BS $BB		
 SCREEN.DARK.DATA_BEFORE		.EQ $0976	;$BB bytes.	
