@@ -702,6 +702,9 @@ ELS.ONSCREEN.NEXT_TILE
 	;**FALL THROUGH**
 	
 	
+	
+				;!!!!!!!!!!     TESTING		!!!!!!!!
+				JMP EXIT_ELS
 
 			
 			
