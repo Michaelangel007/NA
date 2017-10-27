@@ -546,6 +546,10 @@ CALCULATE.ELS.LIGHT_ONSCREEN
 @START
 ;PARAMETERS: Y-REG (index to SCREEN.TILE.DATA)
 
+
+;
+
+
 ;=====PSEUDO CODE=========
 ;
 ;Definitions 
@@ -553,9 +557,6 @@ CALCULATE.ELS.LIGHT_ONSCREEN
 ;TILE_INDEX = index to SCREEN.TILE.DATA
 ;REAL ROW = row # in SCREEN.TILE.DATA
 ;EXTENDED ROW = row # in SCREEN.TILE.DATA.EXTENDED
-;
-;CONSTANTS
-;EXTENDED.CONVERSION.OFFSET	.EQ $CC
 ;
 ;
 ;
@@ -2914,13 +2915,6 @@ ELS.SET_LIGHT_PATTERN
 ;RETURN: updated SCREEN.DARK.DATA
 
 
-
-
-;***CREATE THIS LOOKUP TABLE
-;EXTENDED_ROW.INCREMENT.LOOKUP_TABLE,X	;this lookup table will contain the row increment for each position in the light pattern. So 0,0,0,1,0 etc.
-;LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE	;contains EXTENDED INDEX (LO byte only) of the left edge of the onscreen range for each row
-;LIGHT_PATTERN.OFFSET_TABLE				;contains the offset between each light position and the ELS
-
 ; -ELS.SET_LIGHT_PATTERN (subroutine)
 	; PARMAMETERS: EXTENDED_TILE_INDEX.ELS, EXTENDED_ROW.CURRENT_POSITION
 	; -Init Loop
@@ -3101,6 +3095,39 @@ ELS.SET_LIGHT_PATTERN
 .EXIT
 	RTS
 	
+@END
+
+
+;LOCAL TABLES
+@START
+;contains the offset between each light position and the ELS
+LIGHT_PATTERN.OFFSET_TABLE	.HS		64.63.62.44.43.42.41.40.24.23.22.21.20.1F.1E.03.02.01.00.01.02.03.1E.1F.20.21.22.23.24.40.41.42.43.44.62.63.64
+
+;contains EXTENDED INDEX (LO byte only) of the left edge of the onscreen range for each row
+LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE	.HS CC.ED.0E.2F.50.71.92.B3.D4
+
+;this lookup table will contain the row increment for each position in the light pattern. So 0,0,0,1,0 etc.
+EXTENDED_ROW.INCREMENT.LOOKUP_TABLE
+;
+;This table mirrors the shape of LIGHT_PATTERN.OFFSET_TABLE and uses the same index. As the algorithm iterates through the light pattern, 
+;a 1 indicates when the the row should be incremened (i.e. at the end of each row of the light pattern)
+;
+;										  with leading zeros
+;		0	0	1						   00.00.01
+;	0	0	0	0	1					00.00.00.00.01
+;0	0	0	0	0	0	1			 00.00.00.00.00.00.01
+;0	0	0	0	0	0	1			 00.00.00.00.00.00.01
+;0	0	0	0	0	0	1			 00.00.00.00.00.00.01
+;	0	0	0	0	1					00.00.00.00.01	
+;		0	0	1						   00.00.01	
+;
+;
+	.HS 00.00.01.00.00.00.00.01.00.00.00.00.00.00.01.00.00.00.00.00.00.01.00.00.00.00.00.00.01.00.00.00.00.01.00.00.01
+	
+	
+	
+	
+
 @END
 
 
