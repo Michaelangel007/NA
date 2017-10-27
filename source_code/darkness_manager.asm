@@ -547,7 +547,18 @@ CALCULATE.ELS.LIGHT_ONSCREEN
 ;PARAMETERS: Y-REG (index to SCREEN.TILE.DATA)
 
 
-;
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP
+			; LDA #$AA
+			; LDX #SCREEN.DARK.DATA
+			; LDY /SCREEN.DARK.DATA
+			; JMP FULL.BRK
+			; BRK
+; .TEMP
+			; LDA TEMP
+; ;
 
 
 ;=====PSEUDO CODE=========
@@ -649,12 +660,25 @@ CALCULATE.ELS.LIGHT_ONSCREEN
 	
 ;Calculate EXTENDED ROW of light pattern start (upper left tile of light pattern)	
 	LDA REAL_ROW.CURRENT_POSITION
-	SEC
-	SBC #EXTENDED_ROW.CONVERSION.OFFSET-3 ;light pattern always extends 3 rows above the ELS. Subtracting the offset converts to the ELS row and by 
+	CLC
+	ADC #EXTENDED_ROW.CONVERSION.OFFSET-3 ;light pattern always extends 3 rows above the ELS. Subtracting the offset converts to the ELS row and by 
 		;reducing the offset by 3 formula converts to the top row of the light pattern.
 	STA EXTENDED_ROW.CURRENT_POSITION
 	
-
+			; ;****TROUBLESHOOTING HOOK****
+			; LDA EXTENDED_TILE_INDEX.ELS+$0
+			; STA $BF00
+			; LDA EXTENDED_TILE_INDEX.ELS+$1
+			; STA $BF01
+			; LDA EXTENDED_ROW.CURRENT_POSITION
+			; STA $BF02
+			; LDA #$AA
+			; ;LDX #SCREEN.DARK.DATA
+			; ;LDY /SCREEN.DARK.DATA
+			; JMP FULL.BRK
+			; BRK
+			
+			
 ;Set flags to light on tiles within the light pattern
 
 		;EXTENDED_TILE_INDEX.ELS: already set above
@@ -671,24 +695,16 @@ CALCULATE.ELS.LIGHT_ONSCREEN
 ELS.ONSCREEN.NEXT_TILE
 	INY										;INCREMENT SCREEN ARRAY INDEX
 	CPY #SCREEN.ARRAY.LAST_ELEMENT2			;HAS LOOP EXAMINED ALL TILES IN SCREEN ARRAY?
-	BNE ELS.ONSCREEN.SEARCH.LOOP
-
+	;BNE ELS.ONSCREEN.SEARCH.LOOP
+	BEQ .COW
+	JMP ELS.ONSCREEN.SEARCH.LOOP
+.COW
 	;**FALL THROUGH**
 	
 	
 
 			
-			STA TEMP
-			LDA TROUBLESHOOTING.HOOK
-			CMP #$01
-			BNE .TEMP
-			LDA #$AA
-			LDX #SCREEN.DARK.DATA
-			LDY /SCREEN.DARK.DATA
-			JMP FULL.BRK
-			BRK
-.TEMP
-			LDA TEMP			
+			
 			
 ;=======================OLD ELS ONSCREEN ALGORITHM
 @START
