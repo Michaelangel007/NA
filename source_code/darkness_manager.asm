@@ -3081,7 +3081,7 @@ ELS.SET_LIGHT_PATTERN
 				; LDA TROUBLESHOOTING.HOOK
 				; CMP #$01
 				; BCC .TEMP
-				; CPX #$22  ;LIGHT_PATTERN.LOOP_COUNTER
+				; CPX #$1C  ;LIGHT_PATTERN.LOOP_COUNTER
 				; BNE .TEMP
 				
 				; LDA EXTENDED_ROW.CURRENT_POSITION		;convert to real row index for use with LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE
@@ -3125,10 +3125,24 @@ ELS.SET_LIGHT_PATTERN
 		; LDA #$81
 		; STA COW+$0
 ;check for offscreen left/right
+;(For all but REAL ROW $9, we can treat any underflow as automatically indicating off screen because the HO byte doesn't change within the row.
+;So, if an underflow occurs, it is because the light pattern position is further to the left than the left edge of the screen. If no underflow, then an additional
+;check is done to see if the light pattern position - the left edge is > the width of the screen row. 
+;REAL ROW $9 is a corner case because the HO byte of the light position index changes witin the row. The corner case is handled
+;via a special onscreen check coded just for that row)
+
 	LDA EXTENDED_ROW.CURRENT_POSITION		;convert to real row index for use with LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE
 	SEC
 	SBC #EXTENDED_ROW.CONVERSION.OFFSET
 	TAY
+
+.CORNER_CASE ;(in REAL ROW $9)	
+	CMP #$09 ;is light position in REAL ROW $9?
+	BNE .CORNER_CASE.DONE
+	LDA LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
+	CMP #$06
+	BCC .IS.ONSCREEN
+.CORNER_CASE.DONE
 	
 	;note: LIGHT_POSITION.EXTENDED_TILE_INDEX(2) is 16-bit, but we can do this check below only using the LO byte because the HO byte is the same for all EXTENDED INDEXs in the onscreen range. Thus, if an underflow on the LO bytes occur, it means the tile is offscreen. 
 	LDA LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
@@ -3205,7 +3219,7 @@ ELS.SET_LIGHT_PATTERN
 				; ; LDA TROUBLESHOOTING.HOOK
 				; ; CMP #$04
 				; ; BNE .TEMP
-				; CPX #$22  ;LIGHT_PATTERN.LOOP_COUNTER
+				; CPX #$1C  ;LIGHT_PATTERN.LOOP_COUNTER
 				; BNE .TEMP
 				; lda cow+$0 ;start  LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
 				; STA $BF00
