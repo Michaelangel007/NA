@@ -1127,21 +1127,21 @@ SEARCH.OFFSCREEN
 ; -Iterate Offscreen columns (consider using an indirect jump for "get rows/columns JSR" to consolidate this loop with the offscreen rows)
 	; *Set SMAP.CURRENT = ELS.OFFSCREEN.SMAP_UL(2) + ELS.OFFSCREEN.RMAP.LOOKUP_TABLE to ELS.OFFSCREEN.RMAP.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER)
 	; *Get offscreen column of tiles
-	; -Get starting EXTENDED_TILE_INDEX for column search
-		; *ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER*2) ;store the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched 
+	; -Get starting EXTENDED_TILE_INDEX.CURRENT for column search
+		; *ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER*2) ;table holds the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched 
 	; -get EXTENDED_ROW.CURRENT_POSITION
-			; *ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER) ;store the extended row of the starting position of each row/column in the order which they will be searched 
+			; *ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER) ;table holds the extended row of the starting position of each row/column in the order which they will be searched 
 ;	
 	; *set ELS.OFFSCREEN.COLUMN_ROW_SIZE = columns size constant
 	; *call ELS.OFFSCREEN.SEARCH (set parm ACC (columm mode))
 ;		
 	; *ELS.OFFSCREEN.ROW_COLUMN.COUNTER++
-	; *loop when ELS.OFFSCREEN.ROW_COLUMN.COUNTER != $04
+	; *loop when ELS.OFFSCREEN.ROW_COLUMN.COUNTER != $04 (should't this be $07? i.e 3 columns on each side, +1 since counter starts with $0)
 ;	
 ; -Iterate Offscreen rows
 	; *Set SMAP.CURRENT = ELS.OFFSCREEN.SMAP_UL(2) + ELS.RMAP.LOOKUP_TABLE to ELS.RMAP.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER)
 	; *Get offscreen row of tiles
-	; -Get starting EXTENDED_TILE_INDEX for column search
+	; -Get starting EXTENDED_TILE_INDEX.CURRENT for column search
 		; *ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER*2) ;store the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched 
 ;
 	; -get EXTENDED_ROW.CURRENT_POSITION
@@ -1153,10 +1153,13 @@ SEARCH.OFFSCREEN
 	; comment note: EXTENDED_TILE_INDEX.ELS .EQ EXTENDED_TILE_INDEX
 ;
 ; ELS.OFFSCREEN.SEARCH
-	; PARAMETERS: EXTENDED_ROW.CURRENT_POSITION, EXTENDED_TILE_INDEX.ELS, ACC (row/column mode)
+	; PARAMETERS: EXTENDED_ROW.CURRENT_POSITION, EXTENDED_TILE_INDEX.ELS*, ACC (row/column mode)
+;
+;*I'm thining this isn't needed since we're searching for the ELSs in this routine. 
+;
 ;	
-; *Init
-;	
+; -Init
+;	*ELS.OFFSCREEN.SEARCH.TILE_COUNTER
 ;	
 ; -Is tile an ELS?
 	; IF YES:			
@@ -1164,9 +1167,9 @@ SEARCH.OFFSCREEN
 ;
 ; -Row/column specific (do a branch)
 	; *EXTENDED_ROW.CURRENT_POSITION should be incremented when searching a row, but not when searching a column
-	; *Increment EXTENDED_TILE_INDEX.ELS (+1 for rows, +offset constant for columns)
+	; *Increment EXTENDED_TILE_INDEX.CURRENT (+1 for rows, +offset constant for columns)
 	; *ELS.OFFSCREEN.SEARCH.TILE_COUNTER++
-	; *Loop until ELS.OFFSCREEN.COLUMN_ROW_SIZE
+	; *Loop while ELS.OFFSCREEN.SEARCH.TILE_COUNTER < ELS.OFFSCREEN.COLUMN_ROW_SIZE
 ;
 ;=========================================================================(END PSEUDO CODE)		
 

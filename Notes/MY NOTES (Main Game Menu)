@@ -1,0 +1,19 @@
+
+
+-Menu Items
+
+*Mocking Board menu item
+
+For reference, here is what Ultima IV and V did:
+
+https://www.youtube.com/watch?time_continue=2&v=7UDYCFQreHM
+U4 = 15:00, U5 = 16:00
+
+This was postd by Eric Rangell to the Nox Forums here:
+http://nox-archaist.20348.n8.nabble.com/Mockingboard-Support-technical-brainstorming-tp11p48.html
+
+
+--------------------------------
+
+*The plan was to have the random number seed get init by player's first key press (I think) in the main game menu. I put notes on this in the
+game driver, now moved to the end of LOADER.P
