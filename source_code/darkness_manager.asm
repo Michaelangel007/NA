@@ -482,7 +482,7 @@ DARKNESS.ELS ;=====DARKNESS OFFSET BY EXTERNAL LIGHT SOURCE=====
 	LDA TIME.SUN.STATUS		;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
 	CMP #$01	;IS DAY?
 	BNE ELS.ONSCREEN.SEARCH
-	JMP EXIT_ELS
+	JMP ELS.EXIT
 
 
 ELS.ONSCREEN.SEARCH
@@ -1144,7 +1144,7 @@ ELS.ONSCREEN.NEXT_TILE
 	; *loop when ELS.OFFSCREEN.ROW_COLUMN.COUNTER != $07
 ;
 ; -Iterate Offscreen columns (consider using an indirect jump for "get rows/columns JSR" to consolidate this loop with the offscreen rows)
-	; *Set SMAP.CURRENT = ELS.OFFSCREEN.SMAP_UL.OFFSET(2) + ELS.OFFSCREEN.RMAP.LOOKUP_TABLE to ELS.OFFSCREEN.RMAP.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER)
+	; *Set SMAP.CURRENT = ELS.OFFSCREEN.SMAP_UL.OFFSET(2) + ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE to ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER)
 	; *Get offscreen column of tiles
 	; -Get starting EXTENDED_TILE_INDEX.CURRENT for column search
 		; *ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER*2) ;table holds the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched 
@@ -1185,6 +1185,7 @@ ELS.ONSCREEN.NEXT_TILE
 
 
 ELS.OFFSCREEN.SEARCH
+@START
 ;PARAMETERS: none
 ;ENTRANCE: direct
 ;RETURN: updated SCREEN.DARK.DATA
@@ -1206,9 +1207,9 @@ ELS.OFFSCREEN.SEARCH
 .SEARCH.LOOP
 
 .CALCULATE.SMAP.CURRENT
-;SMAP.CURRENT = ELS.OFFSCREEN.SMAP_UL.OFFSET(2) + ELS.OFFSCREEN.RMAP.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER)
+;SMAP.CURRENT = ELS.OFFSCREEN.SMAP_UL.OFFSET(2) + ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE(ELS.OFFSCREEN.ROW_COLUMN.COUNTER)
 
-;CALCULATE index to ELS.OFFSCREEN.RMAP.LOOKUP_TABLE 
+;CALCULATE index to ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE 
 
 	;XREG: ELS.OFFSCREEN.ROW_COLUMN.COUNTER
 	TXA
@@ -1217,11 +1218,11 @@ ELS.OFFSCREEN.SEARCH
 	
 	LDA #ELS.OFFSCREEN.SMAP_UL.OFFSET
 	CLC
-	ADC ELS.OFFSCREEN.RMAP.LOOKUP_TABLE+$0,Y
+	ADC ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE+$0,Y
 	STA SMAP.CURRENT+$0
 	
 	LDA /ELS.OFFSCREEN.SMAP_UL.OFFSET
-	ADC ELS.OFFSCREEN.RMAP.LOOKUP_TABLE+$1,Y	;16-BIT add
+	ADC ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE+$1,Y	;16-BIT add
 	STA SMAP.CURRENT+$1
 
 .GET.OFFSCREEN.TILES
@@ -1234,7 +1235,7 @@ ELS.OFFSCREEN.SEARCH
 
 	
 		;SMAP.CURRENT: already set above
-	JSR TILE.LOOKUP.OFFSCREEN.ROWS
+	JSR TILE.LOOKUP.OFFSCREEN.ROW
 	
 	;NOT parms of TILE.LOOKUP.OFFSCREEN.ROWS. This is a parm of ELS.OFFSCREEN.SEARCH.ROW_COLUMNand is set here to take advantage of the row/column mode branch
 	LDA ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE,X	;use loop counter as index because the records are only $1byte
@@ -1248,7 +1249,7 @@ ELS.OFFSCREEN.SEARCH
 	
 	
 		;SMAP.CURRENT: already set above
-	JSR TILE.LOOKUP.OFFSCREEN.COLUMNS 
+	JSR TILE.LOOKUP.OFFSCREEN.COLUMN
 
 	
 	;NOT parms of TILE.LOOKUP.OFFSCREEN.COLUMNS. This is a parm of ELS.OFFSCREEN.SEARCH.ROW_COLUMN and is set here to take advantage of the row/column mode branch
@@ -1259,8 +1260,17 @@ ELS.OFFSCREEN.SEARCH
 
 
 .EXECUTE.SEARCH
+
+		;Get starting EXTENDED_TILE_INDEX.CURRENT for the row/column being searched on this iteration	
+		LDA ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE+$0,Y ;table holds the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched 
+		STA EXTENDED_TILE_INDEX.CURRENT+$0
+
+		LDA ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE+$1,Y ;table holds the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched 
+		STA EXTENDED_TILE_INDEX.CURRENT+$1
+		
+		
 		;EXTENDED_ROW.CURRENT_POSITION	;already set above
-		LDA ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode)
+		;ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode). already set above
 		;ELS.OFFSCREEN.COLUMN_ROW_SIZE	;already set above	
 	JSR ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	
@@ -1278,7 +1288,7 @@ ELS.OFFSCREEN.SEARCH
 	;** FALLS THROUGH **
 
 
-
+@END
 	
 
 
@@ -3074,15 +3084,10 @@ ELS.EXIT
 
 ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 @START
-;PARAMETERS: ACC: ($00 = row mode | >=$01 = column mode), EXTENDED_ROW.CURRENT_POSITION, EXTENDED_TILE_INDEX.ELS*, 
+;PARAMETERS: ELS.OFFSCREEN.SEARCH.MODE ($00 = row mode | >=$01 = column mode), ($00 = row mode | >=$01 = column mode), EXTENDED_ROW.CURRENT_POSITION, ELS.OFFSCREEN.COLUMN_ROW_SIZE
 
 		
-; ELS.OFFSCREEN.SEARCH
-	; PARAMETERS: EXTENDED_ROW.CURRENT_POSITION, EXTENDED_TILE_INDEX.ELS*, ACC (row/column mode)
-;
-;*I'm thining this isn't needed since we're searching for the ELSs in this routine. 
-;
-;	
+;----PSEUDO CODE----
 ; -Init
 ;	*ELS.OFFSCREEN.SEARCH.TILE_COUNTER
 ;	
@@ -3096,6 +3101,124 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	; *ELS.OFFSCREEN.SEARCH.TILE_COUNTER++
 	; *Loop while ELS.OFFSCREEN.SEARCH.TILE_COUNTER < ELS.OFFSCREEN.COLUMN_ROW_SIZE
 
+	
+.SAVE_REGISTERS
+	TXA
+	PHA
+	TYA
+	PHA
+	
+.INIT
+	LDX #$00		;init loop counter, index to SCREEN.TILE.HOPPER (ELS.OFFSCREEN.SEARCH.TILE_COUNTER in pseudo code)
+	
+	
+.LOOP.ELS.SEARCH
+	LDA SCREEN.TILE.HOPPER,X
+	LDY PLAYER.MAP.LOCATION_TYPE
+	; CMP #MAP.TYPE.TOWN_VILLAGE
+	; BEQ .LOCATION_TYPE.BUILDING.TILES
+	; JMP NEXT_TILE
+	
+	CPY #MAP.TYPE.UNDERMAP
+	BEQ .LOCATION_TYPE.UNDERMAP.TILES
+	
+	;is a building map active
+	;**OPT** Memory. Speed. Right now there is only one code for location type, which is used to determine the tile_set to use and for other location-type specific features. There are a lot of the later. It might be a savings if the 
+					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
+					;but I suspect it would pay off. 
+	CPY #MAP.TYPE.BUILDING.GRE 	;is map type = building?
+	BCC .NEXT_TILE_STEP						;if no
+	CPY #MAP.TYPE.BUILDING.LT	;is map type = building?
+	BCS .NEXT_TILE_STEP						;if no
+	;**FALLS THROUGH**						;if yes	
+
+
+.LOCATION_TYPE.BUILDING.TILES
+	;ACC = tile_ID from SCREEN.TILE.HOPPER
+	CMP #DARK_FLAGS.ELS.EQ1
+	BEQ .ELS.FOUND
+	
+	CMP #DARK_FLAGS.ELS.EQ2
+	BEQ .ELS.FOUND
+	
+	CMP #DARK_FLAGS.ELS.EQ3
+	BEQ .ELS.FOUND
+	
+	CMP #DARK_FLAGS.ELS.EQ4
+	BEQ .ELS.FOUND
+	
+	CMP #DARK_FLAGS.ELS.EQ5
+	BEQ .ELS.FOUND
+	
+.NEXT_TILE_STEP	
+	JMP	.NEXT_TILE
+
+
+.LOCATION_TYPE.UNDERMAP.TILES
+	;ACC = tile_ID from SCREEN.TILE.HOPPER
+	CMP #DARK_FLAGS.ELS.GRE6
+	BCC .NEXT_TILE
+	CMP #DARK_FLAGS.ELS.LT6
+	BCS .NEXT_TILE
+	;**FALLS THROUGH**
+
+
+.ELS.FOUND
+		;EXTENDED_TILE_INDEX.ELS: parm already set
+		;EXTENDED_ROW.CURRENT_POSITION: parm already set
+	JSR ELS.SET_LIGHT_PATTERN
+
+
+.NEXT_TILE
+
+	; *EXTENDED_ROW.CURRENT_POSITION should be incremented when searching a row, but not when searching a column
+	; *Increment EXTENDED_TILE_INDEX.CURRENT (+1 for rows, +offset constant for columns)
+	
+.ROW_COLUMN.SPECIFIC.INCREMENTS	
+	LDA ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode)
+	BNE .COLUMN_MODE
+.ROWS_MODE
+	INC EXTENDED_ROW.CURRENT_POSITION
+	
+	;INC (16-BIT) EXTENDED_TILE_INDEX.CURRENT
+	LDA EXTENDED_TILE_INDEX.CURRENT+$0
+	CLC
+	ADC #$01
+	STA EXTENDED_TILE_INDEX.CURRENT+$0
+	LDA EXTENDED_TILE_INDEX.CURRENT+$1
+	ADC #$00 ;16-bit ADD
+	STA EXTENDED_TILE_INDEX.CURRENT+$1
+	
+	JMP .ROW_COLUMN.SPECIFIC.INCREMENTS.DONE
+	
+.COLUMN_MODE
+	;Increment EXTENDED_TILE_INDEX.CURRENT down 1 tile
+	LDA EXTENDED_TILE_INDEX.CURRENT+$0
+	CLC
+	ADC #ELS.EXTENDED_INDEX.OFFSET.NORTH_SOUTH
+	STA EXTENDED_TILE_INDEX.CURRENT+$0
+	LDA EXTENDED_TILE_INDEX.CURRENT+$1
+	ADC #$00 ;16-bit ADD
+	STA EXTENDED_TILE_INDEX.CURRENT+$1		
+.ROW_COLUMN.SPECIFIC.INCREMENTS.DONE	
+	
+.COMMON	
+	INX 							;INCREMENT INDEX TO SCREEN.TILE.HOPPER INDEX
+	CPX ELS.OFFSCREEN.COLUMN_ROW_SIZE
+	BNE .LOOP.ELS.SEARCH
+
+
+
+	
+.EXIT
+
+.RESTORE_REGISTERS
+	PLA
+	TAY
+	PLA
+	TAX
+	
+	RTS
 
 @END
 
@@ -3450,7 +3573,7 @@ EXTENDED_ROW.INCREMENT.LOOKUP_TABLE
 	
 
 ;Store the offsets, rows then columns...to calculate the offsets, need to refer to RMAP array, and count number of columns/rows between upper left of extended array and the start position)
-ELS.OFFSCREEN.RMAP.LOOKUP_TABLE		.HS 50.02.80.02.B0.02.80.05.B0.05.E0.05 	;searched rows
+ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE		.HS 50.02.80.02.B0.02.80.05.B0.05.E0.05 	;searched rows
 									.HS 6D.03.6E.03.6F.03.81.03.82.03.83.03		;searched rows
 
 ;table holds the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched
