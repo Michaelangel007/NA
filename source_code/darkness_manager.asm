@@ -3108,10 +3108,10 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 			; BRK		
 
 			
-			LDA #$00
-			STA HTAB
-			STA VTAB
-		JSR UPDATE.CHAR.POS
+			; LDA #$00
+			; STA HTAB
+			; STA VTAB
+		; JSR UPDATE.CHAR.POS
 
 
 
@@ -3131,9 +3131,9 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 			
 
 
-			; LDA #$AA
-			; JSR FULL.BRK
-			; BRK
+			LDA #$AA
+			JSR FULL.BRK
+			BRK
 			
 			
 			

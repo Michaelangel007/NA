@@ -707,9 +707,14 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 
 .SET.AUX_MAIN.ZPAGE_BSR
 		LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
-		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 
-		;set main zpage & bsr 
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 		
+		;aux enabled. set main zpage & bsr
+		;(this is needed because COUT.ADDRESS (in ROM) uses zpage variables to track HTAB, VTAB, hi-res line number etc.)		
 		STA $C008 ;enable main zero-page & main BSR 
+			TSX							;transfer AUX stack pointer to X-REG
+			STX STACK_POINTER.SAVED_AUX	;save AUX stack pointer
+			
 			LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
 			TXS ;transfer X-REG to stack pointer		
 .SET.AUX_MAIN.ZPAGE_BSR.DONE
@@ -719,11 +724,7 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 		;ENABLE ROM ROUTINES
 		LDA $C082			;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
 
-		
-
-			
-			
-			
+					
 				;save registers (HRCG uses X-REG)
 				TXA
 				PHA
@@ -732,23 +733,34 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 
 		JSR COUT.ADDRESS
 		
-
-			; STA TEMP
-			; LDA TROUBLESHOOTING.HOOK
-			; CMP #$01
-			; BNE .TEMP2
-			
-			; LDA #$AA
-			; JSR full.BRK
-			; BRK
-; .TEMP2
-			; LDA TEMP
-			
-			
-			
 				;restore registers
 				PLA
 				TAX
+				
+.RESTORE.AUX_MAIN.ZPAGE_BSR
+		LDA AUX_MAIN.ZPAGE_BSR.STATE	;(bit7 = 1: AUX, bit7=0 MAIN)
+		BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled when the COUT wrapper was called. 	
+		;set AUX zpage & bsr (restore to original state)
+			TSX			;transfer stack pointer to X-REG
+			STX STACK_POINTER.SAVED	;save main stack pointer
+			
+			LDX STACK_POINTER.SAVED_AUX	;restore AUX stack pointer to X-REG
+			TXS ;transfer X-REG to stack pointer					
+		STA $C009 ;enable aux zero-page & aux BSR 	
+.RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
+
+
+		
+
+	
+	
+	
+	
+	
+
+			
+			
+
 
 
 			
@@ -780,6 +792,21 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 	STA HRCG.PAGES ;($01 = hi-res page 1, $02 = hi-res page 2, $03 = both pages)
 
 
+
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP2
+			; pla
+			; tax
+			; pla
+			; tay
+			; LDA #$AA
+			; JSR full.BRK
+			; BRK
+; .TEMP2
+			; LDA TEMP
+			
 
 			
 	RTS

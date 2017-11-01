@@ -1915,8 +1915,8 @@ GET.BSR_BANK.STATUS
 	LDA $C011		;BANK1/BANK2 soft-switch flag (bit7 = 1: BANK2, bit7=0 BANK1)
 	STA BANK.STATE
 
-	LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
-	STA AUX_MAIN.ZPAGE_BSR.STATE
+	; LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
+	; STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
 			
 			
 	RTS
@@ -1924,16 +1924,16 @@ GET.BSR_BANK.STATUS
 
 RESTORE.BSR_BANK.STATUS
 @START
-;RESTORE AUX/MAIN ZPAGE & BSR STATE
-	LDA AUX_MAIN.ZPAGE_BSR.STATE
-	BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 
-;.MAIN.ZPAGE_BSR.ENABLED - skipped. This is the default status and we don't want to muck up the stack pointe. The stack pointer would only have been saved if aux zpage/stack was enabled since GET.BSR_BANK.STATUS was called
+; ;RESTORE AUX/MAIN ZPAGE & BSR STATE
+	; LDA AUX_MAIN.ZPAGE_BSR.STATE
+	; BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 
+; ;.MAIN.ZPAGE_BSR.ENABLED - skipped. This is the default status and we don't want to muck up the stack pointe. The stack pointer would only have been saved if aux zpage/stack was enabled since GET.BSR_BANK.STATUS was called
 	
-;.AUX.ZPAGE_BSR.ENABLED
-		TSX			;transfer stack pointer to X-REG
-		STX STACK_POINTER.SAVED	;save stack pointer
-	STA $C009 ;enable aux zero-page & aux BSR 
-.RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
+; ;.AUX.ZPAGE_BSR.ENABLED
+		; TSX			;transfer stack pointer to X-REG
+		; STX STACK_POINTER.SAVED	;save stack pointer
+	; STA $C009 ;enable aux zero-page & aux BSR 
+; .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
 
 
 ;RESTORE ROM/BSR STATE
