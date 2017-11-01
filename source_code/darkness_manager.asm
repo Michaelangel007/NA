@@ -3108,10 +3108,10 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 			; BRK		
 
 			
-			; LDA #$00
-			; STA HTAB
-			; STA VTAB
-		; JSR UPDATE.CHAR.POS
+			LDA #$00
+			STA HTAB
+			STA VTAB
+		JSR UPDATE.CHAR.POS
 
 
 
@@ -3119,21 +3119,21 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 			; LDA #$01
 			; STA TROUBLESHOOTING.HOOK
 			
-			; LDA COW
-			; ORA #$B0
-			; STA COW
-			; INC COW
-			; LDA COW
-			LDA #$B0
+			LDA COW
+			ORA #$B0
+			STA COW
+			INC COW
+			LDA COW
+			;LDA #$B0
 		JSR COUT
 		
-			JSR KEYIN
+			; JSR KEYIN
 			
 
 
-			LDA #$AA
-			JSR FULL.BRK
-			BRK
+			; LDA #$AA
+			; JSR FULL.BRK
+			; BRK
 			
 			
 			
