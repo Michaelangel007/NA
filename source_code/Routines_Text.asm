@@ -635,6 +635,9 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 	
 
 
+			
+			
+			
 	
 	STA SAVED.ACC.LOCAL		;save parameter, output character
 
@@ -682,37 +685,70 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 		STA AUX_MOVE.DEST+$1
 		CLC                ;CLEAR CARRY FLAG DESGINATD MOVE FROM AUX -> MAIN MEMORY 
 		JSR AUX_MOVE
-		
-	JSR GET.BSR_BANK.STATUS
 
 
 
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP
+
+			; STA $C008 ;enable main zero-page & main BSR 
+			; LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
+			; TXS ;transfer X-REG to stack pointer
+
+; .TEMP
+			; LDA TEMP
 
 
 
 			
+	JSR GET.BSR_BANK.STATUS
+
+.SET.AUX_MAIN.ZPAGE_BSR
+		LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
+		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 
+		;set main zpage & bsr 
+		STA $C008 ;enable main zero-page & main BSR 
+			LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
+			TXS ;transfer X-REG to stack pointer		
+.SET.AUX_MAIN.ZPAGE_BSR.DONE
+
+
+	
 		;ENABLE ROM ROUTINES
 		LDA $C082			;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
 
-			
-			;save registers (HRCG uses X-REG)
-			TXA
-			PHA
-		;REQUIRED FOR BEFORE BRK BECAUSE APPLE MONITOR IS A ROM ROUTINE
-		LDA SAVED.ACC.LOCAL		;restore output character
+		
 
 			
-
-
 			
+			
+				;save registers (HRCG uses X-REG)
+				TXA
+				PHA
+			;REQUIRED FOR BEFORE BRK BECAUSE APPLE MONITOR IS A ROM ROUTINE
+			LDA SAVED.ACC.LOCAL		;restore output character
+
 		JSR COUT.ADDRESS
 		
 
-
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP2
 			
-			;restore registers
-			PLA
-			TAX
+			; LDA #$AA
+			; JSR full.BRK
+			; BRK
+; .TEMP2
+			; LDA TEMP
+			
+			
+			
+				;restore registers
+				PLA
+				TAX
 
 
 			
@@ -1569,6 +1605,16 @@ UPDATE.CHAR.POS ;============MOVES CURSOR TO HTAB/VTAB POSITION ON TEXT SCREEN
 	
 	JSR GET.BSR_BANK.STATUS
 
+.SET.AUX_MAIN.ZPAGE_BSR
+		LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
+		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 
+		;set main zpage & bsr 
+		STA $C008 ;enable main zero-page & main BSR 
+			LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
+			TXS ;transfer X-REG to stack pointer		
+.SET.AUX_MAIN.ZPAGE_BSR.DONE
+
+	
 ;ENABLE ROM ROUTINES
 	LDA $C082				;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
 							;REQUIRED FOR BEFORE BRK BECAUSE APPLE MONITOR IS A ROM ROUTINE

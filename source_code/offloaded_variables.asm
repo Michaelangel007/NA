@@ -159,7 +159,7 @@ SCREEN_HOLE.2F78_2F7F	.EQ	$2F78	;$8bytes
 ;**above all are fully utilized, but I didn't double check. 
 
 
-;$3 - $7 available. 
+;$4 - $7 available. 
 SCREEN_HOLE.3078_307F	.EQ	$3078	;$8bytes
 
 
@@ -871,6 +871,9 @@ BSR.STATE 		.EQ SCREEN_HOLE.2EF8_2EFF+$4 	;$1byte.
 
 ;BANK.STATE 		.BS $1
 BANK.STATE 		.EQ SCREEN_HOLE.2EF8_2EFF+$5 	;$1byte.
+
+AUX_MAIN.ZPAGE_BSR.STATE	.EQ SCREEN_HOLE.3078_307F+$3	;$1byte
+
 
 ;BSR.STATE_SAVED .BS $1		;ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
 BSR.STATE_SAVED .EQ SCREEN_HOLE.2EF8_2EFF+$6 	;$1byte. ROM/BSR soft-switch flag (bit7 = 1: BSR, bit7=0 ROM)
