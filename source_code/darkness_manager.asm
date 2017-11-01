@@ -1273,12 +1273,32 @@ ELS.OFFSCREEN.SEARCH
 		;ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode). already set above
 		;ELS.OFFSCREEN.COLUMN_ROW_SIZE	;already set above	
 	JSR ELS.OFFSCREEN.SEARCH.ROW_COLUMN
-	
+
+						; LDA #$00
+						; STA HTAB
+						; STA VTAB
+					; JSR UPDATE.CHAR.POS
+
+
+
+
+						; ; LDA #$01
+						; ; STA TROUBLESHOOTING.HOOK
+						; TXA
+						; ORA #$B0
+					; JSR COUT
+
+					; JSR KEYIN
+		
+			; LDA #$AA
+			; JSR FULL.BRK
+			; BRK		
+
 	
 .INCREMENT.COUNTERS
 	INX ;increment search loop counter
 	CPX #$04
-	BNE .SEARCH.LOOP
+	BCC .SEARCH.LOOP
 	LDA #$01	;switch to column mode
 	STA ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode)
 	CPX #$07
@@ -3103,37 +3123,37 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 
 
 
-			; LDA #$AA
-			; JSR FULL.BRK
-			; BRK		
+			; ; LDA #$AA
+			; ; JSR FULL.BRK
+			; ; BRK		
 
 			
-			LDA #$00
-			STA HTAB
-			STA VTAB
-		JSR UPDATE.CHAR.POS
+			; LDA #$00
+			; STA HTAB
+			; STA VTAB
+		; JSR UPDATE.CHAR.POS
 
 
 
 
-			; LDA #$01
-			; STA TROUBLESHOOTING.HOOK
+			; ; LDA #$01
+			; ; STA TROUBLESHOOTING.HOOK
 			
-			LDA COW
-			ORA #$B0
-			STA COW
-			INC COW
-			LDA COW
-			;LDA #$B0
-		JSR COUT
+			; LDA COW
+			; ORA #$B0
+			; STA COW
+			; INC COW
+			; LDA COW
+			; ;LDA #$B0
+		; JSR COUT
 		
-			; JSR KEYIN
+			; ; JSR KEYIN
 			
 
 
-			; LDA #$AA
-			; JSR FULL.BRK
-			; BRK
+			; ; LDA #$AA
+			; ; JSR FULL.BRK
+			; ; BRK
 			
 			
 			
@@ -3638,6 +3658,8 @@ ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE
 
 @END	
 
+
+@END
 
 
 DARKNESS.SCREEN.UPDATE ; ======ERASE TILES IF NEEDED======
