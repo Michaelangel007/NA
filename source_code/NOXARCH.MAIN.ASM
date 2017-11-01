@@ -2132,23 +2132,23 @@ GAME.START.DRIVER ;takes control from NOXARCH.MAIN
 	;MAIN ISLAND: GMAP.X=$18, GMAP.Y=$37, ZONE $09: GMAP.X=$18, GMAP.Y=$17
 		
 		;lda #$68
-		;LDA #$57	;new island: kfest presentation (by lake)
+		LDA #$57	;new island: kfest presentation (by lake)
 		;LDA #$60	;new island: half-way between town and dungeon
 		;LDA #$76	;new island: by town 
 		;LDA #$67	;new island: by burning village
 		;LDA #$53	;new island: by dungeon
-		LDA #$18  ;$18 (on origial island)
+		;LDA #$18  ;$18 (on origial island)
 		STA GMAP.X
 		STA PARM.GMAP.X
 ;		STA GMAP.X.LAST. see GAME.LAUNCH
 		
 		;lda #$4f
-		;LDA #$55	;new island: kfest presentation (by lake)
+		LDA #$55	;new island: kfest presentation (by lake)
 		;LDA #$6A	;new island: half-way between town and dungeon
 		;LDA #$72   ;new island: by town 
 		;LDA #$5A	;new island: by burning village
 		;LDA #$6A	;new island: by dungeon
-		LDA #$37   ;$37 (on origial island)
+		;LDA #$37   ;$37 (on origial island)
 		STA GMAP.Y
 		STA PARM.GMAP.Y
 ;		STA GMAP.Y.LAST. see GAME.LAUNCH

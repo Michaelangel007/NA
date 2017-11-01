@@ -634,20 +634,20 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 ;RETURN: character output to video screen
 	
 
-
+;SAVE REGISTERS (HRCG, accessed via COUT.ADDRESS, uses X-REG)
+;(see below )
 			
 			
-			
+;SAVE PARAMETERS			
 	
 	STA SAVED.ACC.LOCAL		;save parameter, output character
-
-		
+				
 ;CALCULATE CHARACTER SHAPE ADDRESS
 	AND #$7F		;CLEAR HI BIT  
 	STA HRCG.SHAPE.OFFSET
 	LDA #$00
 	STA HRCG.SHAPE.OFFSET+$1
-	
+
 ;CALC1	
 	SEC
 	LDA HRCG.SHAPE.OFFSET
@@ -659,7 +659,12 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 	ASL HRCG.SHAPE.OFFSET		; *8 < 768
 	ROL HRCG.SHAPE.OFFSET+$1	; transfer overflow bit from carry flag to HO byte
 
-			
+
+;SAVE REGISTERS (HRCG, accessed via COUT.ADDRESS, uses X-REG)
+	TXA
+	PHA
+
+	
 ;LOAD CHARACTER SHAPE TABLE
 			
 		;AUX MEMORY	-> MAIN MEMORY 
@@ -725,17 +730,13 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 		LDA $C082			;READ ENABLE ROM, DISABLE WRITE ON BSM (NORMAL STATE).
 
 					
-				;save registers (HRCG uses X-REG)
-				TXA
-				PHA
+
 			;REQUIRED FOR BEFORE BRK BECAUSE APPLE MONITOR IS A ROM ROUTINE
 			LDA SAVED.ACC.LOCAL		;restore output character
 
-		JSR COUT.ADDRESS
+		JSR COUT.ADDRESS	;note: HRCG uses X-REG
 		
-				;restore registers
-				PLA
-				TAX
+
 				
 .RESTORE.AUX_MAIN.ZPAGE_BSR
 		LDA AUX_MAIN.ZPAGE_BSR.STATE	;(bit7 = 1: AUX, bit7=0 MAIN)
@@ -749,21 +750,7 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 		STA $C009 ;enable aux zero-page & aux BSR 	
 .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
 
-
-		
-
 	
-	
-	
-	
-	
-
-			
-			
-
-
-
-			
 	JSR RESTORE.BSR_BANK.STATUS
 
 
@@ -808,7 +795,11 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 			; LDA TEMP
 			
 
-			
+;RESTORE REGISTERS
+	PLA
+	TAX
+
+				
 	RTS
 
 @END
