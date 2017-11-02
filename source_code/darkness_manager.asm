@@ -4204,10 +4204,18 @@ INNERLOOP
 ;SEARCH FOR OBSCURING TILES
 	LDA SCREEN.DARK.DATA,Y				;LOAD SCREEN POSITION OF CURRENT TILE BEING EVALUATED
 
-	;VETO THIS TILE?
+;VETO THIS TILE?
+.VETO_CHECK
+;(don't examine this tile if the tile is already dark and a non-building map is active)
+;(building map tiles are always examined because otherwise ELS's can be visible over walls. The same issue
+;could apply in non-building maps but the plan is to design around that limitation. The main reason for not examining all
+;tiles regardless of dark status and map type is because if Undermap is active examining all tiles really slows down movement. It's
+;slower than movement at night on the surface though I'm not sure why)
+
 	CMP #$01							;IS CURRENT TILE FLAGGED DARK?
-	;BEQ OUTERLOOP						;IF YES, NEXT TILE
-	BNE .DRAW_TILE.CHECK
+	;;BEQ OUTERLOOP						;IF YES, NEXT TILE
+	;BEQ .NO.DRAW	
+	BNE .VETO_CHECK.DONE
 
 	;is map type = building?
 	LDA PLAYER.MAP.LOCATION_TYPE
@@ -4217,8 +4225,10 @@ INNERLOOP
 .CHECK2
 	CMP #MAP.TYPE.BUILDING.LT	
 	BCS OUTERLOOP						;IF NO, NEXT TILE
+	JMP .NO.DRAW						;If yes (Map Type = Building)
 	;**FALLS THROUGH** ;If yes (Map Type = Building)
 .IN_BUILDING
+.VETO_CHECK.DONE
 	
 .DRAW_TILE.CHECK	
 	;DRAW CURRENT TILE?
@@ -4227,6 +4237,8 @@ INNERLOOP
 	BNE .NO.DRAW					
 	JMP DRAWTILE						;IF YES, DRAW THE TILE
 .NO.DRAW
+
+
 
 	;DETERMINE IF CURRENT TILE IS AN OBSCURING TILE
 INNERLOOP.REENTRY1
