@@ -646,8 +646,7 @@ CALCULATE.ELS.LIGHT_ONSCREEN
 ;Calculate EXTENDED ROW of light pattern start (upper left tile of light pattern)	
 	LDA REAL_ROW.CURRENT_POSITION
 	CLC
-	ADC #EXTENDED_ROW.CONVERSION.OFFSET-3 ;light pattern always extends 3 rows above the ELS. Subtracting the offset converts to the ELS row and by 
-		;reducing the offset by 3 formula converts to the top row of the light pattern.
+	ADC #EXTENDED_ROW.CONVERSION.OFFSET ;Subtracting the offset converts to the ELS row
 	STA EXTENDED_ROW.CURRENT_POSITION
 	
 			; ;;****TROUBLESHOOTING HOOK****
@@ -1216,12 +1215,20 @@ ELS.OFFSCREEN.SEARCH
 	ASL ;X2 ($2byte record)
 	TAY 
 	
-	LDA #ELS.OFFSCREEN.SMAP_UL.OFFSET
+	LDA RMAP+$0								;Regional map array element (RMAP) of the player icon (LO)
+	SEC
+	SBC #ELS.OFFSCREEN.SMAP_UL.OFFSET
+	STA ELS.OFFSCREEN.SMAP_UL+$0
+	LDA RMAP+$1								;Regional map array element of the player icon (HO)
+	SBC /ELS.OFFSCREEN.SMAP_UL.OFFSET		;16-bit subtract
+	STA ELS.OFFSCREEN.SMAP_UL+$1
+	
+	LDA ELS.OFFSCREEN.SMAP_UL+$0			;Regional map array element of the upper left position in the extended screen array (LO)
 	CLC
 	ADC ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE+$0,Y
 	STA SMAP.CURRENT+$0
 	
-	LDA /ELS.OFFSCREEN.SMAP_UL.OFFSET
+	LDA ELS.OFFSCREEN.SMAP_UL+$1			;Regional map array element of the upper left position in the extended screen array (HO)
 	ADC ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE+$1,Y	;16-BIT add
 	STA SMAP.CURRENT+$1
 
@@ -1233,9 +1240,43 @@ ELS.OFFSCREEN.SEARCH
 	LDA #SCREEN.ROW.SIZE	
 	STA ELS.OFFSCREEN.COLUMN_ROW_SIZE
 
-	
+
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP
+			; CPX #$02 ;$0 = 1st row on top, $9 = 1st column on right
+			; BNE .TEMP
+			; LDA RMAP+$0
+			; STA $BF00
+			; LDA RMAP+$1
+			; STA $BF01
+			; LDA #ELS.OFFSCREEN.SMAP_UL.OFFSET
+			; STA $BF02
+			; LDA /ELS.OFFSCREEN.SMAP_UL.OFFSET
+			; STA $BF03
+			; LDA ELS.OFFSCREEN.SMAP_UL+$0
+			; STA $BF04
+			; LDA ELS.OFFSCREEN.SMAP_UL+$1
+			; STA $BF05
+			; LDA ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE+$0,Y
+			; STA $BF06
+			; LDA ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE+$1,Y
+			; STA $BF07
+			; LDA SMAP.CURRENT+$0
+			; STA $BF08
+			; LDA SMAP.CURRENT+$1
+			; STA $BF09
+			; LDA #$AA
+
+			; ; LDX #SCREEN.TILE.HOPPER
+			; ; LDY /SCREEN.TILE.HOPPER
+			; JSR FULL.BRK	;use stack to trace call
+; .TEMP
+			; LDA TEMP
+			
 		;SMAP.CURRENT: already set above
-	JSR TILE.LOOKUP.OFFSCREEN.ROW
+	JSR TILE.LOOKUP.OFFSCREEN.ROW					;**OPT** Memory. This subroutine and the column equivilent could be moved to main memory. 
 	
 	;NOT parms of TILE.LOOKUP.OFFSCREEN.ROWS. This is a parm of ELS.OFFSCREEN.SEARCH.ROW_COLUMNand is set here to take advantage of the row/column mode branch
 	LDA ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE,X	;use loop counter as index because the records are only $1byte
@@ -1245,9 +1286,7 @@ ELS.OFFSCREEN.SEARCH
 	;NOT parms of TILE.LOOKUP.OFFSCREEN.COLUMNS. This is a parm of ELS.OFFSCREEN.SEARCH.ROW_COLUMN and is set here to take advantage of the row/column mode branch
 	LDA #SCREEN.COLUMN.SIZE 
 	STA ELS.OFFSCREEN.COLUMN_ROW_SIZE
-	
-	
-	
+
 		;SMAP.CURRENT: already set above
 	JSR TILE.LOOKUP.OFFSCREEN.COLUMN
 
@@ -1274,36 +1313,23 @@ ELS.OFFSCREEN.SEARCH
 		;ELS.OFFSCREEN.COLUMN_ROW_SIZE	;already set above	
 	JSR ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 
-						; LDA #$00
-						; STA HTAB
-						; STA VTAB
-					; JSR UPDATE.CHAR.POS
-
-
-
-
-						; ; LDA #$01
-						; ; STA TROUBLESHOOTING.HOOK
-						; TXA
-						; ORA #$B0
-					; JSR COUT
-
-					; JSR KEYIN
-		
-			; LDA #$AA
-			; JSR FULL.BRK
-			; BRK		
 
 	
 .INCREMENT.COUNTERS
 	INX ;increment search loop counter
-	CPX #$04
-	BCC .SEARCH.LOOP
+	CPX #$06
+	;BCC .SEARCH.LOOP
+	BCS  .COW1					;**OPT** Memory. 
+	JMP .SEARCH.LOOP
+
+.COW1
 	LDA #$01	;switch to column mode
 	STA ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode)
-	CPX #$07
-	BNE .SEARCH.LOOP
-	
+	CPX #$0C
+	;BNE .SEARCH.LOOP
+	BEQ .COW2					;**OPT** Memory.
+	JMP .SEARCH.LOOP
+.COW2	
 	
 	;** FALLS THROUGH **
 
@@ -3122,42 +3148,21 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	; *Loop while ELS.OFFSCREEN.SEARCH.TILE_COUNTER < ELS.OFFSCREEN.COLUMN_ROW_SIZE
 
 
-
-			; ; LDA #$AA
-			; ; JSR FULL.BRK
-			; ; BRK		
-
-			
-			; LDA #$00
-			; STA HTAB
-			; STA VTAB
-		; JSR UPDATE.CHAR.POS
-
-
-
-
-			; ; LDA #$01
-			; ; STA TROUBLESHOOTING.HOOK
-			
-			; LDA COW
-			; ORA #$B0
-			; STA COW
-			; INC COW
-			; LDA COW
-			; ;LDA #$B0
-		; JSR COUT
-		
-			; ; JSR KEYIN
-			
-
-
-			; ; LDA #$AA
-			; ; JSR FULL.BRK
-			; ; BRK
-			
-			
-			
 	
+			STA TEMP
+			LDA TROUBLESHOOTING.HOOK
+			CMP #$01
+			BNE .TEMP
+			CPX #$02	;$0 = 1st row on top, $9 = 1st column on right
+			BNE .TEMP
+
+			LDA #$01
+			STA TROUBLESHOOTING.HOOK2
+.TEMP
+			LDA TEMP
+			
+			
+			
 .SAVE_REGISTERS
 	TXA
 	PHA
@@ -3169,12 +3174,15 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	
 	
 .LOOP.ELS.SEARCH
+
+		
 	LDA SCREEN.TILE.HOPPER,X
 	LDY PLAYER.MAP.LOCATION_TYPE
 	; CMP #MAP.TYPE.TOWN_VILLAGE
 	; BEQ .LOCATION_TYPE.BUILDING.TILES
 	; JMP NEXT_TILE
-	
+
+		
 	CPY #MAP.TYPE.UNDERMAP
 	BEQ .LOCATION_TYPE.UNDERMAP.TILES
 	
@@ -3183,13 +3191,39 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
 					;but I suspect it would pay off. 
 	CPY #MAP.TYPE.BUILDING.GRE 	;is map type = building?
-	BCC .NEXT_TILE_STEP						;if no
+	BCC .NEXT_TILE						;if no
 	CPY #MAP.TYPE.BUILDING.LT	;is map type = building?
-	BCS .NEXT_TILE_STEP						;if no
+	BCS .NEXT_TILE							;if no
 	;**FALLS THROUGH**						;if yes	
 
 
 .LOCATION_TYPE.BUILDING.TILES
+
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP
+			; CPX #$02	;$0 = 1st row on top, $9 = 1st column on right
+			; BNE .TEMP
+			; LDA EXTENDED_TILE_INDEX.ELS+$0
+			; ; STA $BF00
+			; ; LDA EXTENDED_TILE_INDEX.ELS+$1
+			; ; STA $BF01
+			; ; LDA EXTENDED_ROW.CURRENT_POSITION
+			; ; STA $BF02
+			
+			; lda temp
+			; sta $bf00
+			; lda ELS.OFFSCREEN.COLUMN_ROW_SIZE
+			; sta $bf01
+			; LDA #$AA
+			; LDX #SCREEN.TILE.HOPPER
+			; LDY /SCREEN.TILE.HOPPER
+			; JSR FULL.BRK	;use stack to trace call
+; .TEMP
+			; LDA TEMP
+			
+			
 	;ACC = tile_ID from SCREEN.TILE.HOPPER
 	CMP #DARK_FLAGS.ELS.EQ1
 	BEQ .ELS.FOUND
@@ -3200,7 +3234,7 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	CMP #DARK_FLAGS.ELS.EQ3
 	BEQ .ELS.FOUND
 	
-	CMP #DARK_FLAGS.ELS.EQ4
+	CMP #DARK_FLAGS.ELS.EQ4	;testing: currently set to sconce: right wall
 	BEQ .ELS.FOUND
 	
 	CMP #DARK_FLAGS.ELS.EQ5
@@ -3219,23 +3253,25 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	;**FALLS THROUGH**
 
 
-.ELS.FOUND
-		;EXTENDED_TILE_INDEX.ELS: parm already set
+.ELS.FOUND		
+			
+		;EXTENDED_TILE_INDEX.ELS: parm already set, it is .EQ to EXTENDED_ROW.CURRENT_POSITION
 		;EXTENDED_ROW.CURRENT_POSITION: parm already set
+		LDA EXTENDED_ROW.CURRENT_POSITION
+		PHA
 	JSR ELS.SET_LIGHT_PATTERN
-
+		PLA
+		STA EXTENDED_ROW.CURRENT_POSITION ;restore to the ELS value. ELS.SET_LIGHT_PATTERN modifies the value. 
 
 .NEXT_TILE
 
-	; *EXTENDED_ROW.CURRENT_POSITION should be incremented when searching a row, but not when searching a column
+	; *EXTENDED_ROW.CURRENT_POSITION should be incremented when searching a column, but not when searching a row
 	; *Increment EXTENDED_TILE_INDEX.CURRENT (+1 for rows, +offset constant for columns)
 	
 .ROW_COLUMN.SPECIFIC.INCREMENTS	
 	LDA ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode)
 	BNE .COLUMN_MODE
-.ROWS_MODE
-	INC EXTENDED_ROW.CURRENT_POSITION
-	
+.ROWS_MODE	
 	;INC (16-BIT) EXTENDED_TILE_INDEX.CURRENT
 	LDA EXTENDED_TILE_INDEX.CURRENT+$0
 	CLC
@@ -3248,6 +3284,8 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	JMP .ROW_COLUMN.SPECIFIC.INCREMENTS.DONE
 	
 .COLUMN_MODE
+	INC EXTENDED_ROW.CURRENT_POSITION
+
 	;Increment EXTENDED_TILE_INDEX.CURRENT down 1 tile
 	LDA EXTENDED_TILE_INDEX.CURRENT+$0
 	CLC
@@ -3261,8 +3299,10 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 .COMMON	
 	INX 							;INCREMENT INDEX TO SCREEN.TILE.HOPPER INDEX
 	CPX ELS.OFFSCREEN.COLUMN_ROW_SIZE
-	BNE .LOOP.ELS.SEARCH
-
+	;BNE .LOOP.ELS.SEARCH
+	BEQ .COW3					;**opt** MEMORY
+	JMP .LOOP.ELS.SEARCH
+.COW3
 
 
 	
@@ -3283,7 +3323,7 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 
 ELS.SET_LIGHT_PATTERN
 @START
-;PARMAMETERS: EXTENDED_TILE_INDEX.ELS, EXTENDED_ROW.CURRENT_POSITION
+;PARMAMETERS: EXTENDED_TILE_INDEX.ELS, EXTENDED_ROW.CURRENT_POSITION (should contain the row of the ELS)
 ;ENTRANCE: ELS routines
 ;RETURN: updated SCREEN.DARK.DATA
 
@@ -3295,6 +3335,13 @@ ELS.SET_LIGHT_PATTERN
 	
 	
 .INIT
+;Calculate EXTENDED ROW of light pattern start (upper left tile of light pattern)	
+	LDA EXTENDED_ROW.CURRENT_POSITION
+	SEC
+	SBC #$03 ;light pattern always extends 3 rows above the ELS.
+	STA EXTENDED_ROW.CURRENT_POSITION
+	
+	
 	LDX #$00 ;init LIGHT_PATTERN.LOOP_COUNTER
 .LOOP.SET.LIGHT_PATTERN	
 
@@ -3382,49 +3429,46 @@ ELS.SET_LIGHT_PATTERN
 ;.COW ;STEP above only needed to fit debugging code
 
 
-				; ;**TROUBLESHOOTING HOOK**
-				; STA TEMP
-				; LDA TROUBLESHOOTING.HOOK
-				; CMP #$01
-				; BCC .TEMP
-				; CPX #$1C  ;LIGHT_PATTERN.LOOP_COUNTER
-				; BNE .TEMP
+				;**TROUBLESHOOTING HOOK**
+				STA TEMP
+				LDA TROUBLESHOOTING.HOOK2
+				CMP #$01
+				BCC .TEMP
+				CPX #$16  ;LIGHT_PATTERN.LOOP_COUNTER
+				BNE .TEMP
 				
-				; LDA EXTENDED_ROW.CURRENT_POSITION		;convert to real row index for use with LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE
-				; SEC
-				; SBC #EXTENDED_ROW.CONVERSION.OFFSET
-				; TAY
-				; ;note: LIGHT_POSITION.EXTENDED_TILE_INDEX(2) is 16-bit, but we can do this check below only using the LO byte because the HO byte is the same for all EXTENDED INDEXs in the onscreen range. Thus, if an underflow on the LO bytes occur, it means the tile is offscreen. 
-				; LDA LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
-				; SEC
-				; SBC LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE,Y	;contains the EXTENDED INDEX (LO byte only) of the left edge of the onscreen range for the row the current light position is in
+				LDA EXTENDED_ROW.CURRENT_POSITION		;convert to real row index for use with LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE
+				SEC
+				SBC #EXTENDED_ROW.CONVERSION.OFFSET
+				TAY
+				;note: LIGHT_POSITION.EXTENDED_TILE_INDEX(2) is 16-bit, but we can do this check below only using the LO byte because the HO byte is the same for all EXTENDED INDEXs in the onscreen range. Thus, if an underflow on the LO bytes occur, it means the tile is offscreen. 
+				LDA LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
+				SEC
+				SBC LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE,Y	;contains the EXTENDED INDEX (LO byte only) of the left edge of the onscreen range for the row the current light position is in
 				
+				LDA EXTENDED_ROW.CURRENT_POSITION 
+				STA $BF00				
+				STY $BF01 ;LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE index
+				LDA LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
+				STA $BF02				
+				LDA LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE,Y
+				STA $BF03				
+							
 				; LDA EXTENDED_ROW.CURRENT_POSITION 
-				; STA $BF00				
-				; STY $BF01 ;LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE index
-				; LDA LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
-				; STA $BF02				
-				; LDA LIGHT_POSITION.ONSCREEN.LOOKUP_TABLE,Y
-				; STA $BF03				
-				
-				
-				
-				
-				; ; LDA EXTENDED_ROW.CURRENT_POSITION 
-				; ; STA $BF00
-				; ; LDA #EXTENDED_ROW.ONSCREEN_BOUNDARY.TOP
-				; ; STA $BF01
-				; ; LDA #EXTENDED_ROW.ONSCREEN_BOUNDARY.BOTTOM
-				; ; STA $BF02
-				; ; LDA COW+$0 ;trace which routine triggered offscreen
-				; ; STA $BF03
-				; LDA #$AC
-				; ;LDX LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
-				; ;LDY LIGHT_POSITION.EXTENDED_TILE_INDEX+$1
-				; JMP FULL.BRK
-				; BRK
-; .TEMP
-				; LDA TEMP
+				; STA $BF00
+				; LDA #EXTENDED_ROW.ONSCREEN_BOUNDARY.TOP
+				; STA $BF01
+				; LDA #EXTENDED_ROW.ONSCREEN_BOUNDARY.BOTTOM
+				; STA $BF02
+				; LDA COW+$0 ;trace which routine triggered offscreen
+				; STA $BF03
+				LDA #$AC
+				;LDX LIGHT_POSITION.EXTENDED_TILE_INDEX+$0
+				;LDY LIGHT_POSITION.EXTENDED_TILE_INDEX+$1
+				JMP FULL.BRK
+				BRK
+.TEMP
+				LDA TEMP
 
 				
 				
@@ -3469,7 +3513,33 @@ ELS.SET_LIGHT_PATTERN
 				; -if LIGHT.EXTENDED_TILE_INDEX - lookup value < #ELS.ONSCREEN.ROW_WIDTH then onscreen
 					; *Note: After dong the subtraction, if carry flag clear (underflow) then offscreen. 
 
-.IS.ONSCREEN	
+.IS.ONSCREEN
+
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK2
+			; CMP #$01
+			; BNE .TEMP2
+			; CPX #$08	;$0 = 1st row on top, $9 = 1st column on right
+			; BNE .TEMP2
+			; LDA EXTENDED_TILE_INDEX.ELS+$0
+			; STA $BF00
+			; LDA EXTENDED_TILE_INDEX.ELS+$1
+			; STA $BF01
+			; LDA EXTENDED_ROW.CURRENT_POSITION
+			; STA $BF02
+			
+			; ; lda temp
+			; ; sta $bf00
+			; lda ELS.OFFSCREEN.COLUMN_ROW_SIZE
+			; sta $bf03
+			; LDA #$AA
+			; LDX #SCREEN.TILE.HOPPER
+			; LDY /SCREEN.TILE.HOPPER
+			; JSR FULL.BRK	;use stack to trace call
+; .TEMP2
+			; LDA TEMP	
+
+			
 	
 .SET.LIGHT_POSITION
 ;(*LIGHT_POSITION.TILE_INDEX =  LIGHT_POSITION.EXTENDED_TILE_INDEX - ARRAY CONVERSION OFFSET - (REAL_ROW.CURRENT_POSITION * !16)  )
@@ -3585,10 +3655,10 @@ ELS.SET_LIGHT_PATTERN
 
 .EXIT_TEST
 	CPX #LIGHT_PATTERN.FULL_SIZE
-	BNE .LOOP.SET.LIGHT_PATTERN
-	; BEQ .COW
-	; JMP .LOOP.SET.LIGHT_PATTERN
-; .COW				
+	;BNE .LOOP.SET.LIGHT_PATTERN
+	BEQ .COW
+	JMP .LOOP.SET.LIGHT_PATTERN
+.COW				
 
 
 ;RESTORE REGISTERS
@@ -3632,8 +3702,8 @@ EXTENDED_ROW.INCREMENT.LOOKUP_TABLE
 	
 
 ;Store the offsets, rows then columns...to calculate the offsets, need to refer to RMAP array, and count number of columns/rows between upper left of extended array and the start position)
-ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE		.HS 50.02.80.02.B0.02.80.05.B0.05.E0.05 	;searched rows
-									.HS 6D.03.6E.03.6F.03.81.03.82.03.83.03		;searched rows
+ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE		.HS 03.00.33.00.63.00.A3.02.D3.02.03.03 	;searched rows
+											.HS 90.00.91.00.92.00.A4.00.A5.00.A6.00		;searched columns
 
 ;table holds the EXTENDED_TILE_INDEX of the starting position of each row/column in the order which they will be searched
 ELS.OFFSCREEN.EXTENDED_TILE_INDEX.LOOKUP_TABLE	
