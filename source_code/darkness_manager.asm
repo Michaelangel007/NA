@@ -702,6 +702,7 @@ ELS.ONSCREEN.NEXT_TILE
 
 	;**FALL THROUGH**
 	
+@END
 	
 	
 				; ;!!!!!!!!!!     TESTING		!!!!!!!!
@@ -1110,6 +1111,16 @@ ELS.ONSCREEN.NEXT_TILE
 @END
 
 
+
+
+
+ELS.OFFSCREEN.SEARCH
+@START
+;PARAMETERS: none
+;ENTRANCE: direct
+;RETURN: updated SCREEN.DARK.DATA
+
+
 ;=====PSEUDO CODE=========
 ;
 ;-Definitions 
@@ -1182,12 +1193,6 @@ ELS.ONSCREEN.NEXT_TILE
 
 
 
-
-ELS.OFFSCREEN.SEARCH
-@START
-;PARAMETERS: none
-;ENTRANCE: direct
-;RETURN: updated SCREEN.DARK.DATA
 
 .INIT
 	LDX #$00	;loop counter. This counter/index is labeled ELS.OFFSCREEN.ROW_COLUMN.COUNTER in the pseudo code
