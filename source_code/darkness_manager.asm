@@ -477,7 +477,9 @@ DARKNESS.ELS ;=====DARKNESS OFFSET BY EXTERNAL LIGHT SOURCE=====
 			; LDA #MAP.TYPE.TOWN_VILLAGE
 			; STA PLAYER.MAP.LOCATION_TYPE
 
-			
+	
+
+	
 ;IF DAY THEN EXIT
 	LDA TIME.SUN.STATUS		;$00 = SUN RISING, $01 = DAY, $02 = SUN SETTING, $03 = NIGHT
 	CMP #$01	;IS DAY?
@@ -1323,18 +1325,18 @@ ELS.OFFSCREEN.SEARCH
 .INCREMENT.COUNTERS
 	INX ;increment search loop counter
 	CPX #$06
-	;BCC .SEARCH.LOOP
-	BCS  .COW1					;**OPT** Memory. 
-	JMP .SEARCH.LOOP
+	BCC .SEARCH.LOOP
+	; BCS  .COW1					;**OPT** Memory. 
+	; JMP .SEARCH.LOOP
 
-.COW1
+; .COW1
 	LDA #$01	;switch to column mode
 	STA ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode)
 	CPX #$0C
-	;BNE .SEARCH.LOOP
-	BEQ .COW2					;**OPT** Memory.
-	JMP .SEARCH.LOOP
-.COW2	
+	BNE .SEARCH.LOOP
+	; BEQ .COW2					;**OPT** Memory.
+	; JMP .SEARCH.LOOP
+; .COW2	
 	
 	;** FALLS THROUGH **
 
@@ -3304,10 +3306,10 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 .COMMON	
 	INX 							;INCREMENT INDEX TO SCREEN.TILE.HOPPER INDEX
 	CPX ELS.OFFSCREEN.COLUMN_ROW_SIZE
-	;BNE .LOOP.ELS.SEARCH
-	BEQ .COW3					;**opt** MEMORY
-	JMP .LOOP.ELS.SEARCH
-.COW3
+	BNE .LOOP.ELS.SEARCH
+	; BEQ .COW3					;**opt** MEMORY
+	; JMP .LOOP.ELS.SEARCH
+; .COW3
 
 
 	
@@ -3661,10 +3663,10 @@ ELS.SET_LIGHT_PATTERN
 .EXIT_TEST
 	CPX #LIGHT_PATTERN.FULL_SIZE
 	;BNE .LOOP.SET.LIGHT_PATTERN
-	BEQ .COW
-	JMP .LOOP.SET.LIGHT_PATTERN
-.COW				
+	BEQ .EXIT
+	JMP .LOOP.SET.LIGHT_PATTERN			
 
+.EXIT
 
 ;RESTORE REGISTERS
 	PLA
@@ -3672,7 +3674,7 @@ ELS.SET_LIGHT_PATTERN
 	PLA
 	TAX
 
-.EXIT
+
 	RTS
 	
 @END
@@ -3853,7 +3855,7 @@ DARKNESS.OBS ;=====DARKNESS WHICH IS BASED ON OBSCURING TILES=====
 
 
 
-;*********NOTE ON CODE STRUCTURE: This routine has a spaghetti-eque design to avoid JSRs and extra JMPs where possible,
+;*********NOTE ON CODE STRUCTURE: This routine has a spaghetti-esque design to avoid JSRs and extra JMPs where possible,
 ;by keeping code in range for branches. The main logic is in OUTERLOOP and INNERLOOP. They routines make calls to ERASE.TILE, DRAWTILE, and when done control is transfered
 ;to DRAW.MISC to finish up a few odds and ends, and then finially exit via RTS.  
 
@@ -4204,8 +4206,21 @@ INNERLOOP
 
 	;VETO THIS TILE?
 	CMP #$01							;IS CURRENT TILE FLAGGED DARK?
-	BEQ OUTERLOOP						;IF YES, NEXT TILE
+	;BEQ OUTERLOOP						;IF YES, NEXT TILE
+	BNE .DRAW_TILE.CHECK
 
+	;is map type = building?
+	LDA PLAYER.MAP.LOCATION_TYPE
+	CMP #MAP.TYPE.BUILDING.GRE 	
+	BCS .CHECK2							;MAP Type might = building
+	JMP OUTERLOOP						;IF NO, NEXT TILE
+.CHECK2
+	CMP #MAP.TYPE.BUILDING.LT	
+	BCS OUTERLOOP						;IF NO, NEXT TILE
+	;**FALLS THROUGH** ;If yes (Map Type = Building)
+.IN_BUILDING
+	
+.DRAW_TILE.CHECK	
 	;DRAW CURRENT TILE?
 	LDA SCREEN.DARK.DATA_BEFORE, Y		;**OPT** Memory. Combine the screen dark and before arrays. Track the before status with the high bit. It should take same memory to LDA the same array and do a BMI as it is to LDA a different array and to a BEQ/BNE	
 	CMP #$01							;WAS CURRENT DARK BEFORE? (LAST MOVE)
