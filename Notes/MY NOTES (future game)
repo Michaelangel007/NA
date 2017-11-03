@@ -6,3 +6,10 @@
 	
 
 *See Tile Draw Speed in "MY NOTES (MEMORY, SPEED PLANNING)"
+
+
+*Michael Pohreski suggested way points stored on disk and a flocking algorithm instead of A*. For some
+reason the math didn't seem to work on that when Beth suggested it but now I'm not sure why.
+
+4 waypoints * 2 byte (X,Y) * 32 NPCs per location * 16 locations = !4096 bytes of disk, and only !256 bytes per location. Since I'm using 
+16 pages of memory to store saved Nox A* paths, this seems just fine.

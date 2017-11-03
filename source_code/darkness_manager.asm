@@ -427,28 +427,22 @@ DARKNESS.ELS ;=====DARKNESS OFFSET BY EXTERNAL LIGHT SOURCE=====
 
 ;=====================SUBROUTINE DOCUMENTATION====================================
 ;
-;See spreadsheet my_code/rpg project/maps/darkness/"TOD, ELS, PLS Charts".xls
+;See spreadsheet my_code/NA/maps_shapes/maps/darkness/"TOD, ELS, PLS Charts".xls ("TOD/ELS/PLS Spreadsheet")
 ;
-;This subroutine sets the tiles to $00 (light/visible) shown in the ELS section of this spreadsheet.
+;If it is day, this subroutines aborts to exit. 
+;
+;If it is night, then this subroutine sets the tiles to $00 (light/visible) shown in the ELS section of this spreadsheet.
 ;Since the ELS could be in any screen location, or even off screen, this routine involves
 ;a search through SCREEN.TILE.DATA, and the first 3 offscreen rows and column beyond each screen edge. 
 ;Additionally, all screen tile location references (for setting tiles to light/dark) must be relative to the
 ;location of the ELS found. 
 ;
-;If it is day, this subroutines aborts to exit. 
+;To support the offscreen search a logical construct was created refered to as the Extended Screen Array or SCREEN.TILE.DATA.EXTENDED
+;(see TOD/ELS/PLS Spreadsheet, diagram labeled OFFSCREEN (LEFT, RIGHT, TOP, BOTTOM). This was necessary in order for the algorithm
+;to use a common loop (ELS.SET_LIGHT_PATTERN) to set the light pattern for all ELSs (onscreen and offscreen). The key issue solved by 
+;SCREEN.TILE.DATA.EXTENDED is enabling the loop to determine if a given position in the light pattern is onscreen or offscreen.
+;I discussed the issue in detailed with Beth Daggert in an email thread starting 10/10/2017 (see personal gmail, subject "Nox Archaist: Darkness Revisited")
 ;
-;Technical Notes:
-;		*This subroutine is a big fat pig (3/4 super page). It is for the most part an unrolled loop.
-;			the reason is because most array iterating that it does are for short segments 1-3 elements.
-;
-;		*For implimenting the pattern of light tiles, the onscreen and offscreen top/bottom routines take
-; 		an approach of starting in the column the ELS is located in, turning on the tiles to the left and right, then
-;		moving down 1 row and doing the same. Repeating for the appropriate number of rows. 
-;		
-;		The reason for this start center then iterate left/right method is because the routine must check for 
-;		the left/right screen edge. Onscreen routines also have to check for the top/bottom screen edge.  
-;		The offscreen left/right routines don't have to worry about that because by definition the ELS is offscreen left (or right) so the code
-;		knows where it is relative to the left/right screen edge, they just have to check for the top/bottom screen edge. 
 ;
 ;
 ;There is a notable bug/skipped feature:
@@ -492,6 +486,24 @@ ELS.ONSCREEN.SEARCH
 ;PARAMETERS: none
 ;ENTRANCE: direct
 ;RETURN: updated SCREEN.DARK.DATA
+
+;=====================SUBROUTINE DOCUMENTATION===========================================================================
+;
+;
+;ELS.ONSCREEN.SEARCH.LOOP: loops through SCREEN.TILE.DATA looking for the ELS tile_ID range and when an ELS is found
+;CALCULATE.ELS.LIGHT_ONSCREEN is called. 
+;
+;CALCULATE.ELS.LIGHT_ONSCREEN sets parameters for ELS.SET_LIGHT_PATTERN which sets the tiles of SCREEN.DARK.DATA to dark ($01) which
+;are withing the light pattern of the ELS. The light pattern using a lookup table which contains the extended screen array offsets
+;between the ELS and each position in the light patter, starting in the upper left position of the light pattern. The extended screen index
+;is converted to a SCREEN.DARK.DATA index. 
+;
+;For the lookup table with the offsets, see See TOD/ELS/PLS Spreadsheet, ELS worksheet, diagram labeled "LIGHT_PATTERN.OFFSET_TABLE"
+;
+;
+
+;=============================================================================================================================
+
 
 
 ;INIT VARIABLES
@@ -715,6 +727,22 @@ ELS.ONSCREEN.NEXT_TILE
 			
 ;=======================OLD ELS ONSCREEN ALGORITHM
 @START
+
+;Technical Notes:
+;		*This subroutine is a big fat pig (3/4 super page). It is for the most part an unrolled loop.
+;			the reason is because most array iterating that it does are for short segments 1-3 elements.
+;
+;		*For implimenting the pattern of light tiles, the onscreen and offscreen top/bottom routines take
+; 		an approach of starting in the column the ELS is located in, turning on the tiles to the left and right, then
+;		moving down 1 row and doing the same. Repeating for the appropriate number of rows. 
+;		
+;		The reason for this start center then iterate left/right method is because the routine must check for 
+;		the left/right screen edge. Onscreen routines also have to check for the top/bottom screen edge.  
+;		The offscreen left/right routines don't have to worry about that because by definition the ELS is offscreen left (or right) so the code
+;		knows where it is relative to the left/right screen edge, they just have to check for the top/bottom screen edge. 
+
+
+
 ; ;CALCUALTE LIGHTING EFFECT OF CURRENT ONSCREEN ELS OBJECT
 ; @MIDDLE
 ;	
@@ -1122,6 +1150,45 @@ ELS.OFFSCREEN.SEARCH
 ;ENTRANCE: direct
 ;RETURN: updated SCREEN.DARK.DATA
 
+;=====================SUBROUTINE DOCUMENTATION===========================================================================
+;
+;
+;.SEARCH.LOOP retreives offscreen tiles data, one column or row at a time, using TILE.LOOKUP.OFFSCREEN.COLUMN and TILE.LOOKUP.OFFSCREEN.ROW
+;To do this it needs to store the RMAP(2) value of the 1st tile in the column or ROW in the SMAP.CURRENT paramters. It calculates this 
+;value from the Extended Array Index of the player icon. 
+;
+;To do this, a lookup table and an offset constant is used to calculate the extended index of the upper left extended tile ("Anchor Tile")
+;within the relevant offscreen rectangle. See TOD/ELS/PLS Spreadsheet, diagram labeled OFFSCREEN (LEFT, RIGHT, TOP, BOTTOM), the offset constant is the difference between
+;the player icon and colum 3, row 3 (extended index = $66).
+;
+;The lookup table (ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE) contains the 2 byte offset between the Anchor Tile and the starting extended index
+;of each offscreen row and column to be search, in the order of rows (top to bottom), then columns (left to right). The use of the Anchor tile allows
+;the lookup table value to always be added. If the lookup table contained the offset between the player icon and the column/row start, then both addition
+;and subtraction would be needed, requiring a large code block for each. 
+;
+;A diagram exists for ELS.OFFSCREEN.RMAP_OFFSET.LOOKUP_TABLE. See my_code/NA/maps_shapes/maps/darkness/"ELS Table Diagram1"
+;
+;
+;When .SEARCH.LOOP retreives a row/column of offscreen tiles, it calls ELS.OFFSCREEN.SEARCH, which iterates through SCREEN.TILE.HOPPER (TILE.LOOKUP.OFFSCREEN.COLUMN/ROW both return their results to this array)
+;searching for the ELS tile_ID range. When an ELS is found, ELS.SET_LIGHT_PATTERN is called.
+;
+;ELS.OFFSCREEN.SEARCH needs to track several values as it iterates which are parameters to ELS.SET_LIGHT_PATTERN, both
+;EXTENDED_ROW.CURRENT_POSITION and TILE_INDEX.ELS. 
+;
+;TILE_INDEX.ELS is .EQ to EXTENDED_TILE_INDEX.CURRENT. EXTENDED_TILE_INDEX.CURRENT is incremented on each iteration 
+;of ELS.OFFSCREEN.SEARCH so that it will contain the Extended Screen Index of the ELS if an ELS is found in that tile.
+;
+;EXTENDED_ROW.CURRENT_POSITION is set using the ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE, which contains the Extended Row number of
+;the offscreen rows and columns in the order they are searched. A diagram exists for 
+;ELS.OFFSCREEN.EXTENDED_ROW.LOOKUP_TABLE. See my_code/NA/maps_shapes/maps/darkness/"ELS Table Diagram2"
+;
+;
+;
+;=============================================================================================================================
+
+
+
+
 
 ;=====PSEUDO CODE=========
 ;
@@ -1201,14 +1268,6 @@ ELS.OFFSCREEN.SEARCH
 	;set row mode
 	STX ELS.OFFSCREEN.SEARCH.MODE ;($00 = row mode | >=$01 = column mode) 
 
-; -Init
-	; *set ELS.OFFSCREEN.SMAP_UL.OFFSET(2) = upper left RMAP value of SCREEN.TILE.DATA.EXTENDED 
-				; (create a new constant for this. Look at the RMAP chart and count the number of columns/rows in the offset to get the value
-				; This is done so that the RMAP start position of all ROW/COLUMN lookups is an offset that can be added to ELS.OFFSCREEN.SMAP_UL.OFFSET.
-				; Store the offsets in ELS.RMAP.LOOKUP_TABLE, rows then columns...to calculate the offsets, need to refer to RMAP array, and count number of columns/rows between upper left or extended array and the start position)
-	; *set ELS.OFFSCREEN.ROW_COLUMN.COUNTER = $00 (index to ELS.RMAP.LOOKUP_TABLE)
-	
-
 
 .SEARCH.LOOP
 
@@ -1247,7 +1306,7 @@ ELS.OFFSCREEN.SEARCH
 	LDA #SCREEN.ROW.SIZE	
 	STA ELS.OFFSCREEN.COLUMN_ROW_SIZE
 
-
+			;***TROUBLESHOOTING HOOK**
 			; STA TEMP
 			; LDA TROUBLESHOOTING.HOOK
 			; CMP #$01
@@ -1275,7 +1334,7 @@ ELS.OFFSCREEN.SEARCH
 			; LDA SMAP.CURRENT+$1
 			; STA $BF09
 			; LDA #$AA
-
+			;
 			; ; LDX #SCREEN.TILE.HOPPER
 			; ; LDY /SCREEN.TILE.HOPPER
 			; JSR FULL.BRK	;use stack to trace call
@@ -3137,7 +3196,7 @@ ELS.EXIT
 
 ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 @START
-;PARAMETERS: ELS.OFFSCREEN.SEARCH.MODE ($00 = row mode | >=$01 = column mode), ($00 = row mode | >=$01 = column mode), EXTENDED_ROW.CURRENT_POSITION, ELS.OFFSCREEN.COLUMN_ROW_SIZE
+;PARAMETERS: ELS.OFFSCREEN.SEARCH.MODE ($00 = row mode | >=$01 = column mode), ($00 = row mode | >=$01 = column mode), EXTENDED_ROW.CURRENT_POSITION, ELS.OFFSCREEN.COLUMN_ROW_SIZE, EXTENDED_TILE_INDEX.CURRENT
 
 		
 ;----PSEUDO CODE----
@@ -3155,21 +3214,9 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 	; *Loop while ELS.OFFSCREEN.SEARCH.TILE_COUNTER < ELS.OFFSCREEN.COLUMN_ROW_SIZE
 
 
-	
-			STA TEMP
-			LDA TROUBLESHOOTING.HOOK
-			CMP #$01
-			BNE .TEMP
-			CPX #$02	;$0 = 1st row on top, $9 = 1st column on right
-			BNE .TEMP
 
-			LDA #$01
-			STA TROUBLESHOOTING.HOOK2
-.TEMP
-			LDA TEMP
 			
-			
-			
+					
 .SAVE_REGISTERS
 	TXA
 	PHA
@@ -3262,7 +3309,7 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 
 .ELS.FOUND		
 			
-		;EXTENDED_TILE_INDEX.ELS: parm already set, it is .EQ to EXTENDED_ROW.CURRENT_POSITION
+		;EXTENDED_TILE_INDEX.ELS: parm already set, it is .EQ to EXTENDED_TILE_INDEX.CURRENT
 		;EXTENDED_ROW.CURRENT_POSITION: parm already set
 		LDA EXTENDED_ROW.CURRENT_POSITION
 		PHA
@@ -3328,7 +3375,7 @@ ELS.OFFSCREEN.SEARCH.ROW_COLUMN
 
 @END
 
-ELS.SET_LIGHT_PATTERN
+ELS.SET_LIGHT_PATTERN ;use for onscreen and offscreen ELSs
 @START
 ;PARMAMETERS: EXTENDED_TILE_INDEX.ELS, EXTENDED_ROW.CURRENT_POSITION (should contain the row of the ELS)
 ;ENTRANCE: ELS routines
