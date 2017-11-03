@@ -1,3 +1,37 @@
-;UNDERMAP.L1_2E			.HS	E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.20.0C.0D.8D.0C.0C.8D.0A.2D.E8.E8.E8.E8.E8.E8.2C.14.6E.6F.70.6D.7D.7D.7D.11.2D.E8.E8.E8.20.8D.16.7D.7D.7D.7D.71.72.7D.7D.7D.13.E8.E8.2C.14.6D.7D.7D.7D.7D.7D.72.71.71.01.7D.35.8D.8D.16.6D.7D.7D.7D.7D.7D.7D.7D.7D.72.01.7D.7C.7D.7D.7D.7D.7D.7D.7D.7D.7D.7D.7D.7D.72.03.7D.37.8E.8E.0B.6E.7D.7D.7D.7D.7D.7D.7D.7D.71.03.7D.03.E8.E8.2E.10.7D.7D.7D.7D.7D.7D.7D.71.72.7D.7D.03.E8.E8.E8.2E.12.6E.70.6D.6F.7D.7D.71.7D.7D.7D.15.E8.E8.E8.E8.22.8E.0F.0B.7C.7D.7D.7D.7D.07.17.2F.E8.E8.E8.E8.E8.E8.E8.2E.12.7D.7D.7D.1F.2F.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.22.0E.8E.0E.23.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8	
-UNDERMAP.L1_2E			.HS	E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.20.0C.0D.8D.0C.0C.8D.0A.2D.E8.E8.E8.E8.E8.E8.2C.14.6E.6F.70.6D.7D.7D.7D.11.2D.E8.E8.E8.20.8D.16.7D.7D.7D.7D.71.72.7D.7D.7D.13.E8.E8.2C.14.6D.7D.7D.7D.7D.7D.72.71.71.01.7D.35.8D.8D.16.6D.7D.7D.7D.7D.7D.7D.7D.7D.72.01.7D.7C.7D.7D.7D.7D.7D.7D.7D.7D.7D.7D.7D.7D.72.03.7D.37.8E.8E.0B.6E.7D.7D.7D.7D.7D.7D.7D.7D.71.03.7D.03.E8.E8.2E.10.7D.7D.7D.7D.7D.7D.7D.71.72.7D.7D.03.E8.E8.E8.2E.12.6E.70.6D.6F.7D.7D.71.7D.7D.7D.15.E8.E8.E8.E8.22.8E.0F.0B.7C.7D.7D.7D.7D.07.17.2F.E8.E8.E8.E8.E8.E8.E8.2E.12.7D.7D.7D.1F.2F.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.22.0E.8E.0E.23.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8
-																																																																																																												    ;X 
+;UNDERMAP.L1_2E			.HS	E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.20.0C.0D.8D.0C.0C.8D.0A.2D.E8.E8.E8.E8.E8.E8.2C.14.6E					STA TEMP
+					TXA
+					PHA
+					LDA TROUBLESHOOTING.HOOK2
+					CMP #$01
+					BNE .TEMP
+					;CPY #$58 ;is darkness algorithm looking a the door tile in question (triggers when player is on right edge tile of road, then press 0 and move)
+					;CPY #$59 ;is darkness algorithm looking a the door tile in question (triggers when player is on middle tile of road, then press 0 and move)
+					; CPX #$10 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; CPX #$0C ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; CPX #$08 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; CPX #$04 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					
+					LDX SAVED.XREG.LOCAL						;restore map object array index
+					CPX #$00
+					BNE .TEMP
+					LDA MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
+					CMP #$01
+					BNE .TEMP
+					STY $BF00 ;MOVE DIRECTION
+					LDA MOB.ADJACENT_TILES,Y		;load adjacent screen tile location, in direction of saved path move, as index for map objects screen arrays
+					STA $BF01 ;SCREEN TILE LOCATION
+					TAY
+					LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
+					STX $BF02 ;MAP OBJECT RECORD #
+					
+					LDA #$AA
+					;LDY MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
+					LDY MOB.FLAG2
+					ldx MOB.SCREEN_STATUS.SS
+					; LDX #SCREEN.MO_GENERAL.DATA
+					; LDY /SCREEN.MO_GENERAL.DATA
+					JSR FULL.BRK	;use stack to trace call
+.TEMP
+					PLA
+					TAX
+					LDA TEMP

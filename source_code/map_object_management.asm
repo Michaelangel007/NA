@@ -802,24 +802,12 @@ MANAGE.OBJECTS
 ;and X-REG is free to be used for other things during the loop.
 ;If the map object index is needed during the loop, load SAVED.XREG.LOCAL.
 
-					STA TEMP
-					LDA TROUBLESHOOTING.HOOK2
-					CMP #$01
-					BNE .TEMP
-					;CPY #$58 ;is darkness algorithm looking a the door tile in question (triggers when player is on right edge tile of road, then press 0 and move)
-					;CPY #$59 ;is darkness algorithm looking a the door tile in question (triggers when player is on middle tile of road, then press 0 and move)
-					; CPX #$10 ;door MO $14, = $24
-					; CPX #$0C ;door MO $14, = $10
-					; CPX #$08 ;door MO $14, = $10
-					CPX #$0C
-					; BNE .TEMP
-					LDA #$AA
-					; LDX #SCREEN.MO_GENERAL.DATA
-					; LDY /SCREEN.MO_GENERAL.DATA
-					JSR FULL.BRK	;use stack to trace call
-.TEMP
-					LDA TEMP
-		
+;debug: door ($14) is set to #$24 here when X= $0C
+;debug: door ($14) is set to #$10 here when X= $00
+
+
+
+					
 	LDA MAP_OBJECTS.GENERAL+$2,X			;empty record?
 	CMP #$00	
 	BNE GENERAL.ENTRANCE
@@ -879,6 +867,9 @@ GENERAL.ENTRANCE
 	
 .LOAD.MAP_OBJECT.RECORD
 @START
+;debug: door ($14) is set to #$24 here when X= $0C
+
+					
 ;The current general map object record is loaded into a holding array so that it can be manipulated.  
 	LDA MAP_OBJECTS.GENERAL+$0,X	;load object GMAP.X
 	STA GENERAL_MO.RECORD+$0		;save to current object record
@@ -891,11 +882,6 @@ GENERAL.ENTRANCE
 			
 	LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte
 	STA GENERAL_MO.RECORD+$3		;save to current object record
-
-	
-
-
-
 					
 @END	
 
@@ -908,7 +894,17 @@ GENERAL.ENTRANCE
 ;NOTE: Uses GMAP.X (reflects player move, or in the case of initial screen draw the actual player position)
 ;SPRITE.ENTRANCE uses GMAP.X/Y.LAST because it has to evaluate the sprite position both before and after the player move. 
 	
+
 	
+	
+;debug: door ($14) is set to #$24 here when X= $0C
+
+	
+	
+
+					
+					
+					
 .DO.CONVERSION
 	LDA GMAP.X						;player GMAP X-axis
 	CMP GENERAL_MO.RECORD+$0		;object GMAP X-Axis
@@ -973,6 +969,12 @@ GENERAL.ENTRANCE
 .ONSCREEN_CHECK ;
 @START
 
+
+;debug: door ($14) is set to #$24 here when X= $0C
+
+
+
+
 			
 ;CHECK TO SEE IF CURRENT GENERAL  MO IS LOCATED ON THE VIEW SCREEN
 	LDA GENERAL_MO.RECORD+$0
@@ -1014,7 +1016,17 @@ GENERAL.ENTRANCE
 ;determining whether the general MO's x,y is less than the player x,y.
 ;This is done so that negative numbers can be avoided. 
 ;=================================================================================
-			
+
+;debug door ($14), when X= $00 hook2 doesn't trigger here. X=$00 is an offsceen object (door).
+
+
+
+					
+
+
+
+
+					
 ;IDENTIFY SCREEN TILE #							;OBJECT IS ON SCREEN, WHERE DO WE DRAW IT?
 				
 	LDA GENERAL_MO.RECORD+$0
@@ -1089,7 +1101,10 @@ GENERAL.ENTRANCE
 .GENERAL.DRAWTILE	
 @START
 
-			
+					
+					
+;debug: door ($14) is set to #$24 here when X= $0C
+					
 	LDY MAP_OBJECTS.TILE_LOCATION			;LOAD SCREEN ARRAY LOCATION OF THE CURRENT TRANSPORT MO					
 
 				
@@ -1144,11 +1159,10 @@ GENERAL.ENTRANCE
 .CHECK.DOOR
 
 
-;debug: door is set to #$24 here
+;debug: door ($14) is set to #$24 here when X= $0C
 
 
-					
-					
+
 ;IS OBJECT AN OPEN DOOR?
 ;	LDA GENERAL_MO.RECORD+$3		;load data byte of general map object record
 	;ACC = byte $03 of MO record
@@ -1202,6 +1216,10 @@ GENERAL.ENTRANCE
 	JMP .EXIT
 	
 .SAVE.TILE_TYPE
+
+
+					
+					
 	LDA GENERAL_MO.RECORD+$2
 	STA SAVED_TILE_TYPE
 	
@@ -1363,6 +1381,13 @@ GENERAL.ENTRANCE
 
 	LDA GENERAL_MO.RECORD+$3	
 	STA MAP_OBJECTS.GENERAL+$3,X
+	
+	
+;debug: door ($14) is set to #$10 here when X= $00
+	
+
+
+					
 	;**FALLS THROUGH
 @END
 SPRITE.ENTRANCE ;	
@@ -1584,7 +1609,12 @@ SWITCH.MOB_NPC
 	LDA MAP_OBJECTS.NPC+$7,X
 	STA SPRITE.RECORD+$7
 
+;debug: door ($14) is set to #$10 here when X= $00 (NPC mode)
 
+	
+
+
+					
 	;SET S_ENTITY TYPE
 	
 	;is combat active
@@ -1979,7 +2009,9 @@ MOB.SS.REGI0N_CHECK	;======DETERMINES IF AN OFFSCREEN SS IS LOCATED ON THE REGIO
 @END
 	
 MOB.IDENTIFY.LOCATION ;				
-@START	
+@START
+;debug: door ($14) is set to #$10 here when X= $00 (NPC mode)
+					
 	LDA MOB.SCREEN_STATUS.SS
 	CMP #$01 									;IS MOB AN OFFSCREEN SS?
 	BEQ MOB.IDENTIFY.MAP_LOCATION				;IF YES, FIND THE RMAP LOCATION FOR USE WITH COLLISION CHECKS ONLY
@@ -5772,6 +5804,7 @@ MOB.MOVE.MAKE ;
 ;code. There could be things I didn't remember when writing this. 
 ;=================================================================================
 
+;debug: door ($14) is set to #$10 here when X= $00 (NPC mode)
 
 
 			
@@ -5781,7 +5814,8 @@ MOB.MOVE.MAKE ;
 .CHECK.DOOR
 ;IS THERE A CLOSED, UNLOCKED DOOR IN THE DIRECTION OF MOVE?
 	TAY ;transfer move direction code to Y-REG as index
-	
+
+					
 	LDA MOB.ADJACENT_TILES,Y		;load adjacent screen tile location, in direction of saved path move, as index for map objects screen arrays
 	TAY
 	LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
@@ -6014,6 +6048,10 @@ MOB.MOVE.PASS
 ;CHECK TO SEE IF TILE SHOULD BE DRAWN (NORMALLY IT ISN'T ON A PASS)
 ;					NOTE: THIS BECAUSE THE MOB'S POSITION HASN'T CHANGED. HOWEVER, IF IT'S A DOUBLE MOVER'S SECOND MOVE WHEN THE SLOW PROGRESS/PASS OCCURS, IT'S POSITION HAS CHANGED. 	
 ;
+
+;debug: door ($14) is set to #$24 here when X= $00 (NPC mode)
+
+
 
 
 			
@@ -6418,6 +6456,9 @@ SPRITE.INITIATED.COMBAT
 MOB.DRAWTILE ;
 @START			
 
+					
+					
+					
 			; STA TEMP
 			; LDA TROUBLESHOOTING.HOOK
 			; CMP #$01
@@ -6835,10 +6876,17 @@ SAVE.SPRITE.RECORD
 ;player-relative.X of NPC	player-relative.Y of NPC	Tile_type	Set to $03 (SS)	Active Anchor	Path Index	In Transit?	at-anchor move routine flag	RMAP.X of NPC	RMAP.Y of NPC	Sprite_Type
 ;See Map Objects spreadsheet for authoratative version
 
-		
+;debug door $14: hook2 doesn't trigger when X= $00, NPC mode. !!!!X-REG doesn't contain the map object index here
+
+
 ;SAVE CURRENT SPRITE RECORD UPDATES TO THE MAP OBJECTS ARRAY
 	LDX SAVED.XREG.LOCAL						;restore map object array index
 
+;debug: door ($14) is set to #$24 here when X= $00 (NPC mode)
+	
+
+					
+					
 	LDA MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob record, $01=npc record
 	CMP #$01 
 	BEQ .SAVE.SPRITE.TO_NPC
@@ -6900,6 +6948,10 @@ SAVE.SPRITE.RECORD
 	LDA SPRITE.RECORD+$6
 	STA MAP_OBJECTS.NPC+$6,X
 
+
+;debug: door ($14) is set to #$24 here when X= $00 (NPC mode)
+
+					
 	;**SKIP BYTE $07
 @END
 		
@@ -6908,7 +6960,12 @@ SAVE.SPRITE.RECORD
 
 FLIP.NPC_MOB.RECORD.FLAG			
 @START
-	
+;debug: door ($14) is set to #$10 here when X= $00
+
+
+
+
+					
 	LDY #$00
 .LOOP									;since SPRITE.RECORD is larger than MAP.OBJECTS.MOB, we need to init SPRITE.RECORD on each iteration or left over data from MAP.OBJECTS.MOB could get leftover. 
 	LDA #$00

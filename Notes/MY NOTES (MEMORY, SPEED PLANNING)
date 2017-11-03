@@ -7,6 +7,9 @@
 					
 					
 *Increasing Speed (top ideas)
+	-since graphics engine is in BSR, read shape data from aux directly instead of using aux_move
+		*May need to move draw.tile back to graphics engine file or make a duplicate copy. I can’t remember why I moved it to main memory. Possibly because darkness (in aux bsr) needs to call draw.tile.single. If combat moves to UX BSR then it would need it too. 
+	
 	*tile draw speed
 		*(hard) draw.tile. Unroll the loop
 			Search for "-Alternatives" in examples/6502/graphics/unrolled_draw_loop (John Brooks). 
