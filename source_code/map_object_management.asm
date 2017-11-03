@@ -802,7 +802,23 @@ MANAGE.OBJECTS
 ;and X-REG is free to be used for other things during the loop.
 ;If the map object index is needed during the loop, load SAVED.XREG.LOCAL.
 
-
+					STA TEMP
+					LDA TROUBLESHOOTING.HOOK2
+					CMP #$01
+					BNE .TEMP
+					;CPY #$58 ;is darkness algorithm looking a the door tile in question (triggers when player is on right edge tile of road, then press 0 and move)
+					;CPY #$59 ;is darkness algorithm looking a the door tile in question (triggers when player is on middle tile of road, then press 0 and move)
+					; CPX #$10 ;door MO $14, = $24
+					; CPX #$0C ;door MO $14, = $10
+					; CPX #$08 ;door MO $14, = $10
+					CPX #$0C
+					; BNE .TEMP
+					LDA #$AA
+					; LDX #SCREEN.MO_GENERAL.DATA
+					; LDY /SCREEN.MO_GENERAL.DATA
+					JSR FULL.BRK	;use stack to trace call
+.TEMP
+					LDA TEMP
 		
 	LDA MAP_OBJECTS.GENERAL+$2,X			;empty record?
 	CMP #$00	
@@ -876,11 +892,16 @@ GENERAL.ENTRANCE
 	LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte
 	STA GENERAL_MO.RECORD+$3		;save to current object record
 
+	
+
+
+
+					
 @END	
 
 
 			
-.CONVERT.GMAP.TO.PLAYER_RELATIVE.XY
+.CONVERT.GMAP.TO.PLAYER_RELATIVE.XY ;**OPT** Memory. If I recall there is no reason not to change the routines that use player_relative XY, I just put this conversion in as a bandaid when converting to GMAP for map object records. 
 @START
 ;Formula: PLAYER GMAP.X/Y - MO GMAP.X/Y + $80/$80 (ground zero, player location in relative grid) = MO Player Relative X/Y
 
@@ -1070,7 +1091,8 @@ GENERAL.ENTRANCE
 
 			
 	LDY MAP_OBJECTS.TILE_LOCATION			;LOAD SCREEN ARRAY LOCATION OF THE CURRENT TRANSPORT MO					
-							
+
+				
 ;DOUBLE CHECK THAT WE REALLY WANT TO DRAW A MAP OBJECT TILE IN THIS LOCATION 	
 ;IS TILE HIDDEN (DARKNESS)?	
 	LDA SCREEN.DARK.DATA,Y			
@@ -1120,6 +1142,13 @@ GENERAL.ENTRANCE
 	;**FALLS THROUGH**
 		
 .CHECK.DOOR
+
+
+;debug: door is set to #$24 here
+
+
+					
+					
 ;IS OBJECT AN OPEN DOOR?
 ;	LDA GENERAL_MO.RECORD+$3		;load data byte of general map object record
 	;ACC = byte $03 of MO record

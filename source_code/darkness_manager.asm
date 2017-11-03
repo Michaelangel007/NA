@@ -4311,16 +4311,20 @@ INNERLOOP.REENTRY1
 					;there were a tile-set code separate from location type code, and there was a default tile-set picked using the location-type code if tile-set code was set to default. This might require adding another byte to some hex tables
 					;but I suspect it would pay off. 
 	CMP #MAP.TYPE.BUILDING.GRE 	;is map type = building?
-	BCC NEXTTILE							;if no
+	;BCC NEXTTILE							;if no
+	BCC .NEXTTILE_STEP							;if no
 	CMP #MAP.TYPE.BUILDING.LT	;is map type = building?
-	BCS NEXTTILE							;if no
+	;BCS NEXTTILE							;if no
+	BCS .NEXTTILE_STEP							;if no
 	JMP .IN.BUILDING						;if yes		
 
 	
 .DARKNESS.CALCULATE_STEP
 	JMP DARKNESS.CALCULATE
 
-
+.NEXTTILE_STEP
+	JMP NEXTTILE
+	
 .IN.SURFACE
 	LDA TEMP							;RESTORE TILE TYPE
 	CMP #DARK_FLAGS.EQ1					;OBSCURING TILE?
@@ -4357,9 +4361,13 @@ INNERLOOP.REENTRY1
 	;**FALLS THROUGH**
 	
 .IN.BUILDING.OR.UNDERMAP
+
+				JSR DEBUG.DOOR
+
+				
 	;CHECK FOR DOORS
 	LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
-	CPX #$FF						;is a general map objec present?
+	CPX #$FF						;is a general map object present?	
 	BEQ .NEXT.CHECK					;if no, then continue with other checks
 	LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record
 	CMP #MO.DOOR.CLOSING			;is there a closing door (door MO record will be set to closed this turn) on the current tile?
@@ -4370,6 +4378,8 @@ INNERLOOP.REENTRY1
 	BCS .NEXT.CHECK					;if no, then continue with other checks
 
 .CHECK.WINDOW_CELL.DOOR
+
+;debug: hook here doesn't trigger
 	
 	LDA MAP_OBJECTS.GENERAL+$2,X	;load tile type of general map object
 

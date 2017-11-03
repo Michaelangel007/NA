@@ -3383,4 +3383,22 @@ CONVERT.COLUMN_ROW.TO.SCREEN_ARRAY_INDEX ;The screen array index is also /aka th
 
 
 
+DEBUG.DOOR
+
+					STA TEMP
+					LDA TROUBLESHOOTING.HOOK
+					CMP #$01
+					BNE .TEMP
+					CPY #$58 ;is darkness algorithm looking a the door tile in question
+					BNE .TEMP
+					LDA #$01
+					STA TROUBLESHOOTING.HOOK2
+					; LDA #$AA
+					; LDX #SCREEN.MO_GENERAL.DATA
+					; LDY /SCREEN.MO_GENERAL.DATA
+					; JSR FULL.BRK	;use stack to trace call
+.TEMP
+					LDA TEMP
+			
+					RTS
 
