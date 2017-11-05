@@ -805,8 +805,13 @@ MANAGE.OBJECTS
 ;debug: door ($14) is set to #$24 here when X= $0C
 ;debug: door ($14) is set to #$10 here when X= $00
 
+;debug: door ($0C) is set to #$10 here when X= $10
+;debug: door ($0C) is set to #$10 here when X= $30
 
 
+
+
+					
 					
 	LDA MAP_OBJECTS.GENERAL+$2,X			;empty record?
 	CMP #$00	
@@ -2364,7 +2369,10 @@ MOB.IDENTIFY.TILE_LOCATION
 	
 MOB.MOVEMENT				
 @START
+;debug: door ($0C) is set to #$10 here when X= $78 (NPC mode)
 
+
+					
 
 
 
@@ -3982,7 +3990,9 @@ COMBAT.MOVE_MANAGER ;**OPT** Memory. Move this routine to the combat module. Sho
 		
 NPC.MOVE_MANAGER	
 @START
+;debug: door ($0C) is set to #$10 here when X= $78 (NPC mode)
 
+					
 ;VIABLE IDEAS NOT IMPLEMENTED
 ;*Ability to get lost. (probably a flag on byte 7). % chance that at any given point on the path, the NPC will stop using the path (set index to $00 maybe), and when index is $00 use a random movement algorithm
 ;*Ability to wander  (probably a flag on byte 7). % change on any given path move the the NPC will ignore it and instead use a random move (set flag on byte 5 indicating off path). Once off path % chance that the NPC make another random move or return to path as a flocking point. 
@@ -4647,6 +4657,11 @@ MOTH_BALLED.ADHOC.SPRITE.PATHFINDER ;MOTH-BALLED   ;Used by Mobs and Hostile NPC
 
 SPRITE.RANDOM.MOVE.ENTRANCE ;BUILDING NPCs 
 @START
+;debug: door ($0C) is set to #$10 here when X= $78 (NPC mode)
+
+
+					
+					
 	;Load direction codes into primary and secondary moves
 	;no preference will be given to primary moves, the order is arbitrary.
 	LDA #$00	
@@ -5465,7 +5480,11 @@ FLOCKING_POINT.CHECK ; NPC ACTIVE ANCHOR IS FLOCKING POINT
 	STA NPC.ACTIVE.ANCHOR.Y
 
 	
-			
+
+
+
+
+					
 .CALCULATE.DISTANCE				;**OPT** Memory. there is a simular .CALCULATE.DISTANCE routine in NPC.PATHFINDER. (npc_building.ASM). Maybe they can merge into a single subroutine called by JSR		
 @START
 ;CALCULATE DISTANCE FROM FLOCKING POINT
@@ -5805,13 +5824,20 @@ MOB.MOVE.MAKE ;
 ;=================================================================================
 
 ;debug: door ($14) is set to #$10 here when X= $00 (NPC mode)
+;debug: door ($0C) is set to #$24 here when X= $78 (NPC mode)
 
 
+					
+					
 			
 ;ACC = MOB.MOVE.CURRENT (note, calling subroutines must save the move code to MOB.MOVE.CURRENT and have it in the ACC when making the call)
 	STA MOB.MOVE.LAST
 			
 .CHECK.DOOR
+;VALIDATE ENTRANCE
+	LDY MOB.SCREEN_STATUS.NPM		;($00=onsceen | $01 = offscreen). Is NPC onscreen?
+	BNE	.CHECK.DOOR.DONE			;If no, then skip check. Offscreen map objects cannot be detected using the screen arrays such as SCREEN.MO_GENERAL.DATA.
+	
 ;IS THERE A CLOSED, UNLOCKED DOOR IN THE DIRECTION OF MOVE?
 	TAY ;transfer move direction code to Y-REG as index
 
@@ -5820,20 +5846,75 @@ MOB.MOVE.MAKE ;
 	TAY
 	LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
 	CPX #$FF						;is a general map object present?
-	BEQ .BRANCH.TO.MOVE.ROUTINE		;if no, then path is impassable.
+	BEQ .CHECK.DOOR.DONE			;if no, then path is impassable.  (update 11/5/2017; I think this should say "if no, then path is passable" but I'm not 100% sure)
 
 	
-	;CHECK FOR CLOSED DOORS
+	;CHECK FOR CLOSED DOORS	
 	LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record
 	CMP #$10						;is there a closed, unlocked, door on the path move location?	
-	BNE .BRANCH.TO.MOVE.ROUTINE		;if no, then path is blocked by an impassable object
+	BNE .CHECK.DOOR.DONE			;if no, then path is blocked by an impassable object
 
 	;NPC OPENS DOOR					;if yes
 	LDA #$24						;set data byte to code for open door timer with 3 moves
 	STA MAP_OBJECTS.GENERAL+$3,X	
 
+	
+					; STA TEMP
+					; TXA
+					; PHA
+					; LDA TROUBLESHOOTING.HOOK2
+					; CMP #$01
+					; BNE .TEMP
+					; ;CPY #$58 ;is darkness algorithm looking a the door tile in question (triggers when player is on right edge tile of road, then press 0 and move)
+					; ;CPY #$59 ;is darkness algorithm looking a the door tile in question (triggers when player is on middle tile of road, then press 0 and move)
+					; ; CPX #$10 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; ; CPX #$0C ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; ; CPX #$08 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; ; CPX #$04 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+
+					; LDX SAVED.XREG.LOCAL						;restore map object array index
+					; CPX #$78
+					; BNE .TEMP
+					; LDA MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
+					; CMP #$01
+					; BNE .TEMP
+					
+					
+					STY $BF00
+					LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
+					STX $BF01
+					LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record
+					STA $BF02
+					LDA #MOB.ADJACENT_TILES
+					STA $BF03
+					LDA /MOB.ADJACENT_TILES
+					STA $BF04
+					LDa MOB.SCREEN_STATUS.NPM		;($00=onsceen | $01 = offscreen). Is NPC onscreen?
+					sta $bf05
+					; LDA MAP_OBJECTS.GENERAL+$2,X			;empty record?
+					; STA $BF00
+					; LDA MAP_OBJECTS.MOB+$2,X				;empty record?
+					; STA $BF01
+					; LDA MAP_OBJECTS.NPC+$2,X				;empty record?
+					; STA $BF02	
+					
+					LDA #$AA
+					ldx SAVED.XREG.LOCAL						;restore map object array index
+					; ;LDY MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
+					; ; LDY PLAYER.WALKING.TILE.DEFAULT
+					; ; ldx PLAYER.WALKING.TILE
+					; ; LDX #SCREEN.MO_GENERAL.DATA
+					; ; LDY /SCREEN.MO_GENERAL.DATA
+					JSR FULL.BRK	;use stack to trace call
+.TEMP
+					PLA
+					TAX
+					LDA TEMP
+
+					
 	;**FALLS THROUGH**
 	
+.CHECK.DOOR.DONE
 
 .BRANCH.TO.MOVE.ROUTINE	
 ;====BRANCH TO CORRECT MOVE ROUTINE=======
@@ -6050,6 +6131,7 @@ MOB.MOVE.PASS
 ;
 
 ;debug: door ($14) is set to #$24 here when X= $00 (NPC mode)
+;debug: door ($C0) is set to #$10 here when X= $00 (NPC mode)
 
 
 
@@ -7016,6 +7098,9 @@ FLIP.NPC_MOB.RECORD.FLAG
 INCREMENT_INDEX
 @START
 
+					
+					
+
 ;DID MOB INITIATE COMBAT?	
 	LDA COMBAT_SE.MODE.PARM	;($00 = player initiated or init value in map objects manager | $01 = mob initiated | $FF = test mode)
 	BNE EXIT ;if yes, branch
@@ -7076,7 +7161,11 @@ INCREMENT_INDEX
 	JMP PRIMARY_LOOP	
 
 EXIT
+;debug: door ($0C) is set to #$24 here
 
+
+					
+					
 
 				
 

@@ -1,37 +1,40 @@
-;UNDERMAP.L1_2E			.HS	E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.E8.20.0C.0D.8D.0C.0C.8D.0A.2D.E8.E8.E8.E8.E8.E8.2C.14.6E					STA TEMP
+					PHA ;save ACC
 					TXA
 					PHA
-					LDA TROUBLESHOOTING.HOOK2
-					CMP #$01
-					BNE .TEMP
-					;CPY #$58 ;is darkness algorithm looking a the door tile in question (triggers when player is on right edge tile of road, then press 0 and move)
-					;CPY #$59 ;is darkness algorithm looking a the door tile in question (triggers when player is on middle tile of road, then press 0 and move)
-					; CPX #$10 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
-					; CPX #$0C ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
-					; CPX #$08 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
-					; CPX #$04 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
 					
-					LDX SAVED.XREG.LOCAL						;restore map object array index
-					CPX #$00
-					BNE .TEMP
-					LDA MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
-					CMP #$01
-					BNE .TEMP
-					STY $BF00 ;MOVE DIRECTION
-					LDA MOB.ADJACENT_TILES,Y		;load adjacent screen tile location, in direction of saved path move, as index for map objects screen arrays
-					STA $BF01 ;SCREEN TILE LOCATION
-					TAY
-					LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
-					STX $BF02 ;MAP OBJECT RECORD #
+					LDA #$00
+					STA VARIABLE1.HTAB
+					LDA #$00
+					STA VARIABLE1.VTAB
+					LDA #$00
+					STA VARIABLE2.HTAB
+					LDA #$01
+					STA VARIABLE2.VTAB								
 					
-					LDA #$AA
-					;LDY MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
-					LDY MOB.FLAG2
-					ldx MOB.SCREEN_STATUS.SS
-					; LDX #SCREEN.MO_GENERAL.DATA
-					; LDY /SCREEN.MO_GENERAL.DATA
-					JSR FULL.BRK	;use stack to trace call
-.TEMP
+					LDA $BE0F ;byte3 of general map object reoord $0C
+					;LDX VARIABLE2		;use XREG as variable value
+				JSR MONITOR.VARIABLE
+				JSR KEYIN ;pause optional
+					STA TEMP
+			;	
+			;
+			;--------------------------------
+			;OPTIONAL: detect "Q" to break	
+			;note: place directly after template1. This way at the JSR KEYIN in template 1, if "Q" is pressed the code breaks to 
+			;the monitor so troubleshooting can be done.  
+						; CMP #$D1
+						; BNE .TEMP
+						; LDA #$AA
+						; JSR PREP.BRK
+						; BRK
+			; .TEMP
+						; LDA TEMP
+			;--------------------------------
+			;
 					PLA
 					TAX
-					LDA TEMP
+					PLA ;restore ACC
+		
+			;
+			;----------------------------END TEMPLATE	
+					

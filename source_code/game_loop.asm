@@ -1335,12 +1335,17 @@ EAST
 	LDA #$00
 	STA ANIMATION.FORCED			;RESET TO OFF. IT'S ONLY TURNED ON IF PLAYER IS STANDING ON CERTAIN TERRAIN TYPE	
 
+;debug: door ($0C) is set to #$24 here 
 
 			
-			
+
+					
 	JMP GAME.PRIMARY_LOOP 
 
 .EXIT.ALTERNATE
+;debug: door ($0C) is set to #$24 here 
+
+
 					
 	JMP GAME.PRIMARY_LOOP.ALTERNATE.ENTRANCE
 

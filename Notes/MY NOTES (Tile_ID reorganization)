@@ -58,3 +58,12 @@ Functionality sub-groups
 	**NOTE: make each of these groups a column in the spreadsheet with X if the tile is in the group
 then sort the sheet differnt way to find an efficient order. Tiles which are only in one catagory should be easy to group together. The trick part are tiles which are in multiple groups. Then 
 one group has to take priority, which should be based on the group which yeild the most speed/memory gains. 
+
+
+-Clean-up (after re-org is complete)
+	*Setup spider webs for slow progress
+	-make Jacob's ladder a light source
+		(Also see Mike's comment below.
+		Empty Jacobs Ladder solution if we don't have the memory to change the tile - 
+		Have the empty one show up early in the game. Make it something the local wizard is working on.  The player doesn't see it working until later in the game when they meet a more powerful wizard on a different location.  The early game empty one  never works.  
+		Should a working Ladder be a light source?

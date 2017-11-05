@@ -1553,168 +1553,168 @@ KEYIN.BCD ;============WAITS FOR A BCD (!0-9) KEYPRESS=======
 	
 @END
 
-;MONITOR.VARIABLE  ;(print onscreen) **use .DEBUG.PRINT_0 or .DEBUG.PRINT_X if only 1 BCD digit is needed i.e. the number diplayed is !0-!9**
+MONITOR.VARIABLE  ;(print onscreen) **use .DEBUG.PRINT_0 or .DEBUG.PRINT_X if only 1 BCD digit is needed i.e. the number diplayed is !0-!9**
 @START
 ;PARAMETERS: ACC (variable1 to monitor), X-REG (variable2 to monitor)
 ;			 VARIABLE1.HTAB, VARIABLE1.VTAB, VARIABLE2.HTAB, VARIABLE2.VTAB
 
-;TEMPLATE1
+;;TEMPLATE1
 		; PHA ;save ACC
 		; TXA
 		; PHA
-		;
-		; LDA #$24
+		
+		; LDA #$00
 		; STA VARIABLE1.HTAB
-		; LDA #$07
+		; LDA #$00
 		; STA VARIABLE1.VTAB
-		; LDA #$26
+		; LDA #$00
 		; STA VARIABLE2.HTAB
-		; LDA #$08
+		; LDA #$01
 		; STA VARIABLE2.VTAB								
-		;
+		
 		; LDA VARIABLE1
 		; LDX VARIABLE2
 	; JSR MONITOR.VARIABLE
 	; JSR KEYIN ;pause optional
 		; STA TEMP
-;	
-;
-;--------------------------------
-;OPTIONAL: detect "Q" to break	
-;note: place directly after template1. This way at the JSR KEYIN in template 1, if "Q" is pressed the code breaks to 
-;the monitor so troubleshooting can be done.  
-			; CMP #$D1
-			; BNE .TEMP
-			; LDA #$AA
-			; JSR PREP.BRK
-			; BRK
-; .TEMP
-			; LDA TEMP
-;--------------------------------
-;
+; ;	
+; ;
+; ;--------------------------------
+; ;OPTIONAL: detect "Q" to break	
+; ;note: place directly after template1. This way at the JSR KEYIN in template 1, if "Q" is pressed the code breaks to 
+; ;the monitor so troubleshooting can be done.  
+			; ; CMP #$D1
+			; ; BNE .TEMP
+			; ; LDA #$AA
+			; ; JSR PREP.BRK
+			; ; BRK
+; ; .TEMP
+			; ; LDA TEMP
+; ;--------------------------------
+; ;
 		; PLA
 		; TAX
 		; PLA ;restore ACC
-		;
-
-						
-			
-	; STA TEMP16 		;save variable to monitor #1
-	; STX TEMP16+$1	;save variable to monitor #2
-
-; ;SAVE REGISTERS	
-	; TXA
-	; PHA
-	
-	; TYA
-	; PHA
-
-; ;SAVE ZERO PAGE VARIABLES
-
-	; ;used by COUT.ADDRESS
-	; LDA $EA
-	; PHA
-	
-	; LDA $EB
-	; PHA
 		
-	; ;MONITOR REGISTERS
-	
-				; ;SAVE CURSOR POSITION
-				; LDA HTAB	
-				; STA CURSOR.POSITION.SAVED+$0
-				; LDA VTAB
-				; STA CURSOR.POSITION.SAVED+$1
+; ;
+; ;----------------------------END TEMPLATE						
+			
+	STA TEMP16 		;save variable to monitor #1
+	STX TEMP16+$1	;save variable to monitor #2
 
-					; LDA VARIABLE1.HTAB
+;SAVE REGISTERS	
+	TXA
+	PHA
+	
+	TYA
+	PHA
+
+;SAVE ZERO PAGE VARIABLES
+
+	;used by COUT.ADDRESS
+	LDA $EA
+	PHA
+	
+	LDA $EB
+	PHA
+		
+	;MONITOR REGISTERS
+	
+				;SAVE CURSOR POSITION
+				LDA HTAB	
+				STA CURSOR.POSITION.SAVED+$0
+				LDA VTAB
+				STA CURSOR.POSITION.SAVED+$1
+
+					LDA VARIABLE1.HTAB
+					STA HTAB
+					LDA VARIABLE1.VTAB
+					STA VTAB
+					
+				JSR	UPDATE.CHAR.POS				
+	
+
+	
+			
+				;variable1 (ACC)
+					LDA TEMP16+$0 ;restore variable to monitor
+				JSR CONVERT.HEX_TO_ASCII
+					LDA RESULT+$1	
+				JSR COUT
+					LDA RESULT+$0
+			JSR COUT
+					LDA #$A0 ;space
+				JSR COUT
+
+
+
+			
+					;text window location
+					; LDA #$21 
 					; STA HTAB
-					; LDA VARIABLE1.VTAB
+					; LDA #$5 
 					; STA VTAB
 					
-				; JSR	UPDATE.CHAR.POS				
-	
-
-	
-			
-				; ;variable1 (ACC)
-					; LDA TEMP16+$0 ;restore variable to monitor
-				; JSR CONVERT.HEX_TO_ASCII
-					; LDA RESULT+$1	
-				; JSR COUT
-					; LDA RESULT+$0
-			; JSR COUT
-					; LDA #$A0 ;space
-				; JSR COUT
-
-
-
-			
-					; ;text window location
-					; ; LDA #$21 
-					; ; STA HTAB
-					; ; LDA #$5 
-					; ; STA VTAB
-					
 				
-					; ; LDA #$26
-					; ; STA HTAB
-					; ; LDA #$8 
-					; ; STA VTAB
-					; LDA VARIABLE2.HTAB
+					; LDA #$26
 					; STA HTAB
-					; LDA VARIABLE2.VTAB
-					; STA VTAB				
-				; JSR	UPDATE.CHAR.POS
+					; LDA #$8 
+					; STA VTAB
+					LDA VARIABLE2.HTAB
+					STA HTAB
+					LDA VARIABLE2.VTAB
+					STA VTAB				
+				JSR	UPDATE.CHAR.POS
 
 
 
 			
 			
-				; ;variable2 (X-REG)
-					; LDA TEMP16+$1
-				; JSR CONVERT.HEX_TO_ASCII
-					; LDA RESULT+$1
-				; JSR COUT
-					; LDA RESULT+$0
-				; JSR COUT				
+				;variable2 (X-REG)
+					LDA TEMP16+$1
+				JSR CONVERT.HEX_TO_ASCII
+					LDA RESULT+$1
+				JSR COUT
+					LDA RESULT+$0
+				JSR COUT				
 
 
 
 
 
 			
-		; ;RESTORE CURSOR POSITION
-				; LDA CURSOR.POSITION.SAVED+$0
-				; STA HTAB	
-				; LDA CURSOR.POSITION.SAVED+$1
-				; STA VTAB
-			; JSR	UPDATE.CHAR.POS
+		;RESTORE CURSOR POSITION
+				LDA CURSOR.POSITION.SAVED+$0
+				STA HTAB	
+				LDA CURSOR.POSITION.SAVED+$1
+				STA VTAB
+			JSR	UPDATE.CHAR.POS
 
-; .EXIT
+.EXIT
 
 
-; ;RESTORE ZERO PAGE VARIABLES
+;RESTORE ZERO PAGE VARIABLES
 
-	; ;used by COUT.ADDRESS
-	; PLA
-	; STA $EB
+	;used by COUT.ADDRESS
+	PLA
+	STA $EB
 
-	; PLA
-	; STA $EA
+	PLA
+	STA $EA
 	
 
 	
-; ;RESTORE REGISTERS
-	; PLA
-	; TAY
+;RESTORE REGISTERS
+	PLA
+	TAY
 	
-	; PLA
-	; TAX	
+	PLA
+	TAX	
 
 
 
 			
-	; RTS
+	RTS
 @END
 		
 ;.DEBUG.PRINT_0 ;prints onscreen marker to track program flow. **OPT** Memory. Remove when resolved.  

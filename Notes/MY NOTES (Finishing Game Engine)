@@ -1,6 +1,14 @@
 
 -Spells ;wait until after tile_id reorg due to open issue with summon spells (see notes below)
 @start
+	-Consider allowing each player to have !10 (key 0-9) spells readied. It's awkward for the spells menu to be readying things globally for
+	the party in the spells menu when all other menus ready things for the active player. Additionally, having the hotkeys globlal interfers with
+	the storyline context of magic being channeled through the mages fingers and (0-9) represent the fingers. 
+			*Ask Beth what she thinkgs of keeping it global from a UI and storyline standpoint...i.e it would be a PITA to change, assess
+			how big of a deal it is.
+			*Consider 8 spells per play (1-8), because I can then use screen holes to store the data and it's a power of 2 which could come in handy.
+				Could be explained as channeled through all fingers except thumbs (they are needed from something else)
+	
 	-mabybe add level check before permitting spell to be cast. 
 			*Spells aren't player specific. PLAYER.HOTKEYS.SPELLS array applies to the entire party. As a result, any PC can try to cast a spell assigned to a hotkey.
 				magic points are a gate, but there might be some higher end spells which I don't want to cost much M.P. Adding level as a gate would make that possible. 
@@ -531,6 +539,11 @@ to get boats in the south after visiting the north. Ideas below:
 @START 
 *HP MAX
 	;something needs to be cleaned up with this. I think it's that these values aren't stored on the character sheet and they need to be so they can be displayed on the stats screen. 
+
+	
+-(N)ew order command. Swap order of characters
+	*may not be practical to code this until saved game capability is setup and the driver and the front of game loop loads data from disk. May need character creation routines to be done. 
+
 
 @END
 

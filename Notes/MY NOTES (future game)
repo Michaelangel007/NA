@@ -13,3 +13,9 @@ reason the math didn't seem to work on that when Beth suggested it but now I'm n
 
 4 waypoints * 2 byte (X,Y) * 32 NPCs per location * 16 locations = !4096 bytes of disk, and only !256 bytes per location. Since I'm using 
 16 pages of memory to store saved Nox A* paths, this seems just fine.
+
+
+
+-COMBAT
+	*Add chance for defender to interfere with spell casting attack, if combatants are in melee range. This is already setup for range weapons.
+	
