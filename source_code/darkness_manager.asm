@@ -1184,6 +1184,12 @@ ELS.OFFSCREEN.SEARCH
 ;
 ;
 ;
+;!!WARNING!!: originally I thought that I was going to need to treat a row where an underflow when subtracting the upper left offset as being offscreen (i.e. skip row and go to next). For some
+;reason everything seems to work fine without that, but something to keep in mind if there are problems later. 
+;I made this comment based on some sketchy notes that I only vaguely rememebr the context on. I think the subtraction calculation refered to
+;is in the .CALCULATE.SMAP.CURRENT section below. 
+;
+;
 ;=============================================================================================================================
 
 
@@ -4362,7 +4368,7 @@ INNERLOOP.REENTRY1
 	
 .IN.BUILDING.OR.UNDERMAP
 
-				JSR DEBUG.DOOR
+				;JSR DEBUG.DOOR
 
 				
 	;CHECK FOR DOORS
