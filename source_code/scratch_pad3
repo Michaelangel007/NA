@@ -1,3 +1,63 @@
+ 
+			; ; STA TEMP
+					; ; TXA
+					; ; PHA
+					; ; LDA TROUBLESHOOTING.HOOK2
+					; ; CMP #$01
+					; ; BNE .TEMP
+					; ; ;CPY #$58 ;is darkness algorithm looking a the door tile in question (triggers when player is on right edge tile of road, then press 0 and move)
+					; ; ;CPY #$59 ;is darkness algorithm looking a the door tile in question (triggers when player is on middle tile of road, then press 0 and move)
+					; ; ; CPX #$10 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; ; ; CPX #$0C ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; ; ; CPX #$08 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+					; ; ; CPX #$04 ;door MO $14, = $24 (top of loop, MANAGE.OBJECTS)
+
+					; ; LDX SAVED.XREG.LOCAL						;restore map object array index
+					; ; CPX #$78
+					; ; BNE .TEMP
+					; ; LDA MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
+					; ; CMP #$01
+					; ; BNE .TEMP
+					
+					
+					; STY $BF00 ;screen index of the destination tile, net of NPC's move
+					; LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
+					; STX $BF01
+					; LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record
+					; STA $BF02
+
+					; LDa MOB.SCREEN_STATUS.NPM		;($00=onsceen | $01 = offscreen). Is NPC onscreen?
+					; sta $bf03
+					; ; LDA MAP_OBJECTS.GENERAL+$2,X			;empty record?
+					; ; STA $BF00
+					; ; LDA MAP_OBJECTS.MOB+$2,X				;empty record?
+					; ; STA $BF01
+					; ; LDA MAP_OBJECTS.NPC+$2,X				;empty record?
+					; ; STA $BF02	
+					; lda #MOB.ADJACENT_TILES
+					; sta $bf04
+					; lda /MOB.ADJACENT_TILES
+					; sta $bf05
+					
+					; LDA #$AA
+					; ldx SAVED.XREG.LOCAL						;restore map object array index
+					; LDY MOB.MOVE.LAST
+					; ; ;LDY MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
+					; ; ; LDY PLAYER.WALKING.TILE.DEFAULT
+					; ; ; ldx PLAYER.WALKING.TILE
+					; ; ; LDX #SCREEN.MO_GENERAL.DATA
+					; ; ; LDY /SCREEN.MO_GENERAL.DATA
+					; JSR FULL.BRK	;use stack to trace call
+; .TEMP
+					; PLA
+					; TAX
+					; LDA TEMP
+
+
+--------------
+
+
+
 					PHA ;save ACC
 					TXA
 					PHA
