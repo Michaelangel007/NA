@@ -5830,11 +5830,15 @@ MOB.MOVE.MAKE ;
 					
 					
 			
-;ACC = MOB.MOVE.CURRENT (note, calling subroutines must save the move code to MOB.MOVE.CURRENT and have it in the ACC when making the call)
+	;ACC = MOB.MOVE.CURRENT (note, calling subroutines must save the move code to MOB.MOVE.CURRENT and have it in the ACC when making the call)
 	STA MOB.MOVE.LAST
 			
 .CHECK.DOOR
 ;VALIDATE ENTRANCE
+
+	;ACC = MOB.MOVE.CURRENT
+	CMP #$04 	;is move = pass?
+	BEQ .CHECK.DOOR.DONE			;If yes, then skip door check. Necessary because MOB.ADJACENT_TILES is set during the collision checks before the move direction is determined. 
 	LDY MOB.SCREEN_STATUS.NPM		;($00=onsceen | $01 = offscreen). Is NPC onscreen?
 	BNE	.CHECK.DOOR.DONE			;If no, then skip check. Offscreen map objects cannot be detected using the screen arrays such as SCREEN.MO_GENERAL.DATA.
 	
@@ -5880,26 +5884,28 @@ MOB.MOVE.MAKE ;
 					; BNE .TEMP
 					
 					
-					STY $BF00
+					STY $BF00 ;screen index of the destination tile, net of NPC's move
 					LDX SCREEN.MO_GENERAL.DATA,Y	;load general map object data for current tile location
 					STX $BF01
 					LDA MAP_OBJECTS.GENERAL+$3,X	;load data byte of general map object record
 					STA $BF02
-					LDA #MOB.ADJACENT_TILES
-					STA $BF03
-					LDA /MOB.ADJACENT_TILES
-					STA $BF04
+
 					LDa MOB.SCREEN_STATUS.NPM		;($00=onsceen | $01 = offscreen). Is NPC onscreen?
-					sta $bf05
+					sta $bf03
 					; LDA MAP_OBJECTS.GENERAL+$2,X			;empty record?
 					; STA $BF00
 					; LDA MAP_OBJECTS.MOB+$2,X				;empty record?
 					; STA $BF01
 					; LDA MAP_OBJECTS.NPC+$2,X				;empty record?
 					; STA $BF02	
+					lda #MOB.ADJACENT_TILES
+					sta $bf04
+					lda /MOB.ADJACENT_TILES
+					sta $bf05
 					
 					LDA #$AA
 					ldx SAVED.XREG.LOCAL						;restore map object array index
+					LDY MOB.MOVE.LAST
 					; ;LDY MANAGE_OBJECTS.NPC_MOB.RECORD.FLAG		;$00=mob iteration, $01=npc iteration, $02=next map object record
 					; ; LDY PLAYER.WALKING.TILE.DEFAULT
 					; ; ldx PLAYER.WALKING.TILE
