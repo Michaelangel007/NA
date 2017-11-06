@@ -773,7 +773,7 @@ If force flag set, only force animation one out of every four sequential-moves (
 			See MY NOTES (Combat) file, heading "===COMBAT ALWAYS IN MEMORY -NOTES=====" This section also contains a note about 
 			where my notes on the physical clipboard pad are on this topic
 
-			I'm pretty sure I also had some notes abou optimizations if it turned out I can't keep combat module in memory all the time.
+			I'm pretty sure I also had some notes about optimizations if it turned out I can't keep combat module in memory all the time.
 	
 				
 			-if combat stats in memory always, that means stats screen0 (stats summary) will always be in memory. 

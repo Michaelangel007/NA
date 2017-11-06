@@ -1632,15 +1632,21 @@ READ_WRITE.CHR_SHEET.POINTER
 		
 ;SET MEMORY STATE
 	
+	;JSR GET.BSR_BANK.STATUS
+	
 	;ENABLE BANK-SWITCHED RAM ($D000 Bank 1)
 	LDA $C08B 
 	LDA $C08B
 						
-		; TSX			;transfer stack pointer to X-REG
-		; STX TEMP	;save stack pointer
+
+.SAVE.AUX_MAIN.STATE
+	;save aux/zpage/bsr sate. 
+	LDA $C016		;MAIN/AUX ZPAGE & BSR. (bit7 = 1: AUX, bit7=0 MAIN)
+	STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+	;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
 	STA $C009 ;enable aux zero-page & aux BSR 
 
-	
+		
 ;SET PARAMETERS (passed via registers)		
 		
 	LDX #$00
@@ -1662,9 +1668,12 @@ READ_WRITE.CHR_SHEET.POINTER
 	BNE .READ_WRITE.CHR_SHEET.LOOP
 	
 ;RESTORE MEMORY STATE
+.RESTORE.AUX_MAIN.STATE
+	;restore aux/zpage/bsr state. 
+	LDA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+	BMI .RESTORE.AUX_MAIN.STATE.DONE ;branch if aux was originally enabled
 	STA $C008 ;enable main zero-page & main BSR 
-		; LDX TEMP	;restore stack pointer to X-REG
-		; TXS ;transfer X-REG to stack pointer
+.RESTORE.AUX_MAIN.STATE.DONE
 
 	;RE-ENABLE BANK-SWITCHED RAM ($D000 Bank 2)
 	LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK2 2nd)
@@ -1800,8 +1809,14 @@ COMBAT.READ_WRITE.CHR_SHEET.PC ;(READ/WRITE ENABLED)
 			
 		;set parameters for READ_WRITE.CHR_SHEET.POINTER
 		;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
+
+.SAVE.AUX_MAIN.STATE1
+		;save aux/zpage/bsr sate. 
+		LDA $C016		;MAIN/AUX ZPAGE & BSR. (bit7 = 1: AUX, bit7=0 MAIN)
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
 		STA $C009 ;enable aux zero-page & aux BSR 
-						
+		
 		;connect character sheet pointer
 		LDA #CHR_SHEET.PC.AUX_MEMORY.START
 		CLC
@@ -1812,7 +1827,13 @@ COMBAT.READ_WRITE.CHR_SHEET.PC ;(READ/WRITE ENABLED)
 		ADC RESULT+$1 ;16-bit add. PC character sheet record index, LO byte
 		STA CHR_SHEET.POINTER+$1
 
-		STA $C008 ;enable main zero-page & main BSR 
+.RESTORE.AUX_MAIN.STATE1
+	;restore aux/zpage/bsr state. 
+	LDA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+	BMI .RESTORE.AUX_MAIN.STATE.DONE1 ;branch if aux was originally enabled
+	STA $C008 ;enable main zero-page & main BSR 
+.RESTORE.AUX_MAIN.STATE.DONE1
+
 		
 		;set stop value
 		LDA #CHR_SHEET.PC.RECORD_SIZE
@@ -1903,9 +1924,13 @@ COMBAT.READ_WRITE.CHR_SHEET.MOB
 	JSR MLP.16.NO_BCD
 		;RETURN VALUE: result+$0 (product LO), result+$1 (product HO)
 
+.SAVE.AUX_MAIN.STATE1
+		;save aux/zpage/bsr sate. 
+		LDA $C016		;MAIN/AUX ZPAGE & BSR. (bit7 = 1: AUX, bit7=0 MAIN)
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
 		;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
 		STA $C009 ;enable aux zero-page & aux BSR 
-				
+		
 		;connect character sheet pointer
 		LDA #CHR_SHEET.MOB.AUX_MEMORY.START
 		CLC
@@ -1916,7 +1941,12 @@ COMBAT.READ_WRITE.CHR_SHEET.MOB
 		ADC RESULT+$1 ;16-bit add. MOB character sheet record index, LO byte
 		STA CHR_SHEET.POINTER+$1
 		
+.RESTORE.AUX_MAIN.STATE1
+		;restore aux/zpage/bsr state. 
+		LDA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		BMI .RESTORE.AUX_MAIN.STATE.DONE1 ;branch if aux was originally enabled
 		STA $C008 ;enable main zero-page & main BSR 
+.RESTORE.AUX_MAIN.STATE.DONE1
 		
 		;set stop value
 		LDA #CHR_SHEET.MOB.RECORD_SIZE
@@ -1997,12 +2027,10 @@ COMBAT.READ_WRITE.CHR_SHEET
 	CMP #S_ENTITY_TYPE.SPECIAL
 	BEQ .READ_WRITE.CHR_SHEET.SPECIAL
 	CMP #S_ENTITY_TYPE.PC
-	
-;*****REMOVE THE COW CODE ***	
+		
 	;BEQ .READ_WRITE.CHR_SHEET.PC
-	BNE .COW
+	BNE .COW				;**OPT** Memory. 
 	JMP .READ_WRITE.CHR_SHEET.PC
-
 .COW
 
 	; CMP #S_ENTITY_TYPE.BLD_NPC
@@ -2024,13 +2052,13 @@ COMBAT.READ_WRITE.CHR_SHEET
 			; pla ;""
 			; tay
 
-	ldA COMBAT.PC.ACTIVE.SINDEX		;**OPT** Memory. This LDX is for troubleshooting only and can be removed. 
-	STA $BE00
-	lda #$ee
-		;LDX COMBAT.STATS.HIT_MISS_KILL.FLAG ;($00 = hit | $01 = miss | $02 = kill)
+	; ldA COMBAT.PC.ACTIVE.SINDEX		;**OPT** Memory. This LDX is for troubleshooting only and can be removed. 
+	; STA $BE00
+	; lda #$ee
+		; ;LDX COMBAT.STATS.HIT_MISS_KILL.FLAG ;($00 = hit | $01 = miss | $02 = kill)
 
-	LDX COW+$0
-	LDY COW+$1
+	; LDX COW+$0
+	; LDY COW+$1
 	JSR PREP.BRK
 	BRK
 
@@ -2060,9 +2088,13 @@ COMBAT.READ_WRITE.CHR_SHEET
 	JSR MLP.16.NO_BCD
 		;RETURN VALUE: result+$0 (product LO), result+$1 (product HO)
 
+.SAVE.AUX_MAIN.STATE1
+		;save aux/zpage/bsr sate. 
+		LDA $C016		;MAIN/AUX ZPAGE & BSR. (bit7 = 1: AUX, bit7=0 MAIN)
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
 		;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
 		STA $C009 ;enable aux zero-page & aux BSR 
-				
+		
 		;connect character sheet pointer
 		LDA #CHR_SHEET.MOB.AUX_MEMORY.START
 		CLC
@@ -2073,7 +2105,12 @@ COMBAT.READ_WRITE.CHR_SHEET
 		ADC RESULT+$1 ;16-bit add. MOB character sheet record index, LO byte
 		STA CHR_SHEET.POINTER+$1
 		
+.RESTORE.AUX_MAIN.STATE1
+		;restore aux/zpage/bsr state. 
+		LDA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		BMI .RESTORE.AUX_MAIN.STATE.DONE1 ;branch if aux was originally enabled
 		STA $C008 ;enable main zero-page & main BSR 
+.RESTORE.AUX_MAIN.STATE.DONE1
 		
 		;set stop value
 		LDA #CHR_SHEET.MOB.RECORD_SIZE
@@ -2120,9 +2157,16 @@ COMBAT.READ_WRITE.CHR_SHEET
 	JSR MLP.16.NO_BCD
 		;RETURN VALUE: result+$0 (product LO), result+$1 (product HO)
 
+		
+;**OPT** Memory. I seems like the section below is identical among the character sheet routines. Setup as JSR. 
+		
+.SAVE.AUX_MAIN.STATE2
+		;save aux/zpage/bsr sate. 
+		LDA $C016		;MAIN/AUX ZPAGE & BSR. (bit7 = 1: AUX, bit7=0 MAIN)
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
 		;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
 		STA $C009 ;enable aux zero-page & aux BSR 
-				
+		
 		;connect character sheet pointer
 		LDA #CHR_SHEET.SPECIAL.AUX_MEMORY.START
 		CLC
@@ -2133,7 +2177,12 @@ COMBAT.READ_WRITE.CHR_SHEET
 		ADC RESULT+$1 ;16-bit add. SPECIAL character sheet record index, LO byte
 		STA CHR_SHEET.POINTER+$1
 		
+.RESTORE.AUX_MAIN.STATE2
+		;restore aux/zpage/bsr state. 
+		LDA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		BMI .RESTORE.AUX_MAIN.STATE.DONE2 ;branch if aux was originally enabled
 		STA $C008 ;enable main zero-page & main BSR 
+.RESTORE.AUX_MAIN.STATE.DONE2 
 		
 		;set stop value
 		LDA #CHR_SHEET.SPECIAL.RECORD_SIZE
@@ -2173,6 +2222,11 @@ COMBAT.READ_WRITE.CHR_SHEET
 	JSR MLP.16.NO_BCD
 		;RETURN VALUE: result+$0 (product LO), result+$1 (product HO)
 
+		
+.SAVE.AUX_MAIN.STATE3
+		;save aux/zpage/bsr sate. 
+		LDA $C016		;MAIN/AUX ZPAGE & BSR. (bit7 = 1: AUX, bit7=0 MAIN)
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)		
 		;(note: aux zero-page needs to be enabled before setting the zero page parameters that will be used in READ_WRITE.CHR_SHEET.POINTER after aux memory is enabled)
 		STA $C009 ;enable aux zero-page & aux BSR 
 				
@@ -2186,7 +2240,12 @@ COMBAT.READ_WRITE.CHR_SHEET
 		ADC RESULT+$1 ;16-bit add. PC character sheet record index, LO byte
 		STA CHR_SHEET.POINTER+$1
 		
+.RESTORE.AUX_MAIN.STATE3
+		;restore aux/zpage/bsr state. 
+		LDA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		BMI .RESTORE.AUX_MAIN.STATE.DONE3 ;branch if aux was originally enabled
 		STA $C008 ;enable main zero-page & main BSR 
+.RESTORE.AUX_MAIN.STATE.DONE3
 		
 		;set stop value
 		LDA #CHR_SHEET.PC.RECORD_SIZE

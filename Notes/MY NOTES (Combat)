@@ -16,9 +16,15 @@ need a handful of new entrance routines. (MO.DRAW)
 	
 
 *Will BSR:bank 1 entrance routines work? Example COPY.SCREEN ENTRANCE, ANIMATION.UPDATE.ENTRANCE
+	*my plan: I created GET.AUX_MAIN.ZPAGE_BANK_STATUS and RESTORE.AUX_MAIN.ZPAGE_BANK_STATUS to handle this. Call them on either side
+	of the existing code. And the softswitch double LDAs to restore bank2 after the JSR can be removed because the restore subroutine handles that. 
 
 *Review mob/player character sheet reads. Those routines assume they arent' being accessed from Aux BSR so
 they probably disable aux on exit, which would be a problem. 
+	
+
+
+
 
 -memory shuffle prep
 *Move event mgr to BSR: bank2
