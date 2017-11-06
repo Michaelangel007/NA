@@ -1906,6 +1906,49 @@ PRODOS.IO.FILE_NOT_FOUND.LOOKUP
 			; RTS
 @END
 
+
+
+GET.AUX_MAIN.ZPAGE_BANK_STATUS ;sets main zpage & BSR if aux was enabled. gets bsr bank that is active. 
+@START
+
+.SET.AUX_MAIN.ZPAGE_BSR
+		LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
+		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 		
+		;aux enabled. set main zpage & bsr
+		;(this is needed because COUT.ADDRESS (in ROM) uses zpage variables to track HTAB, VTAB, hi-res line number etc.)	
+
+		PLA
+		STA TEMP16+$0	;save aux zpage RTS address (LO)
+		PLA
+		STA TEMP16+$1	;save aux zpage RTS address (HO)
+		STX TEMP
+		
+			; LDX HTAB
+			; LDY VTAB
+		STA $C008 ;enable main zero-page & main BSR 
+			; STX HTAB
+			; STY VTAB
+			
+			TSX							;transfer AUX stack pointer to X-REG
+			STX STACK_POINTER.SAVED_AUX	;save AUX stack pointer
+			
+			LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
+			TXS ;transfer X-REG to stack pointer
+
+		LDA TEMP16+$1	;push RTS address (HO) to main zpage
+		PHA
+		LDA TEMP16+$0	;push RTS address (LO) to main zpage
+		PHA
+		LDX TEMP
+		
+.SET.AUX_MAIN.ZPAGE_BSR.DONE
+
+	;**FALLS THROUGH**
+@END
+
+	;**FALLS THROUGH**
+	
 GET.BSR_BANK.STATUS
 @START
 
@@ -1918,9 +1961,46 @@ GET.BSR_BANK.STATUS
 	; LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
 	; STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
 			
+
+
 			
 	RTS
 @END
+
+
+RESTORE.AUX_MAIN.ZPAGE_BANK_STATUS ;sets aux zpage & BSR if aux was enabled. Restores bsr bank that was active.  
+@START
+.RESTORE.AUX_MAIN.ZPAGE_BSR
+		LDA AUX_MAIN.ZPAGE_BSR.STATE	;(bit7 = 1: AUX, bit7=0 MAIN)
+		BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled when the COUT wrapper was called. 	
+		;set AUX zpage & bsr (restore to original state)
+		PLA
+		STA TEMP16+$0	;save main zpage RTS address (LO)
+		PLA
+		STA TEMP16+$1	;save main zpage RTS address (HO)
+
+			TSX			;transfer stack pointer to X-REG
+			STX STACK_POINTER.SAVED	;save main stack pointer
+		
+			LDX STACK_POINTER.SAVED_AUX	;restore AUX stack pointer to X-REG
+			TXS ;transfer X-REG to stack pointer	
+			; LDX HTAB
+			; LDY VTAB
+		STA $C009 ;enable aux zero-page & aux BSR 	
+			; STX HTAB
+			; STY VTAB
+			
+		LDA TEMP16+$1	;push RTS address (HO) to aux zpage
+		PHA
+		LDA TEMP16+$0	;push RTS address (LO) to aux zpage
+		PHA
+		
+.RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
+
+	;**FALLS THROUGH**
+@END
+
+	;**FALLS THROUGH**
 
 RESTORE.BSR_BANK.STATUS
 @START

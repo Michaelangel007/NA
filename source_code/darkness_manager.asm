@@ -136,24 +136,30 @@ DARKNESS.REVIEW.AUX_BSR.ENTRANCE ;=============REWORK DARNKESS FOR ENTIRE SCREEN
 ;ENTRANCE: DIRECT
 
 			
-			; STA TEMP
-			; LDA TROUBLESHOOTING.HOOK
-			; CMP #$01
-			; BNE .TEMP
-			; ; pla
-			; ; tax
-			; ; pla
-			; ; tay
-			; lda #$bb
-			; ;JSR FULL.BRK
-				; ;JMP TEST.AUX_BSR
-				; jmp test.darkness.end
-
-; .TEMP
-			; LDA TEMP
 
 			
-		
+			STA TEMP
+			LDA TROUBLESHOOTING.HOOK
+			CMP #$01
+			BNE .TEMP
+			lda #$00
+			sta htab
+			sta vtab
+			jsr UPDATE.CHAR.POS
+			lda #$b0
+			jsr cout
+			lda #$b1
+			jsr cout
+			jsr keyin
+			; LDA #$AA			
+			; JSR FULL.BRK	;use stack to trace call
+.TEMP
+			LDA TEMP
+
+
+
+
+			
 	JSR DARKNESS.TOD
 	JSR DARKNESS.PLS
 	JSR DARKNESS.ELS
@@ -169,6 +175,7 @@ DARKNESS.REVIEW.AUX_BSR.ENTRANCE ;=============REWORK DARNKESS FOR ENTIRE SCREEN
 		; LDA $C082
 		; BRK
 ; .TEMP
+
 
 
 
@@ -5120,6 +5127,7 @@ TILE.LOOKUP.OFFSCREEN.ROW ; 	=====LOAD A ROW OF TILES NOT ON THE VIEW SCREEN ===
 ;======DEFINE VARIABLES===
 
 
+END.DARKNESS_MANAGER.ASM
 
 ;ORIGINAL TESTING NOTES
 @START
@@ -5355,5 +5363,8 @@ TILE.LOOKUP.OFFSCREEN.ROW ; 	=====LOAD A ROW OF TILES NOT ON THE VIEW SCREEN ===
 ;01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.01.
 ;01.00.00.00.00.00.00.00.00.00.00.00.00.00.00.00.01.
 ;01.01.01.01.01.01.01.01.01.01.01.01.01.01.01.01.01
+
+
+
 
 @END

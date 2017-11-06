@@ -708,21 +708,22 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 
 
 			
-	JSR GET.BSR_BANK.STATUS
+	;JSR GET.BSR_BANK.STATUS
+	JSR GET.AUX_MAIN.ZPAGE_BANK_STATUS ;sets main zpage & BSR if aux was enabled. Gets bsr bank that is active.  
 
-.SET.AUX_MAIN.ZPAGE_BSR
-		LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
-		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
-		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 		
-		;aux enabled. set main zpage & bsr
-		;(this is needed because COUT.ADDRESS (in ROM) uses zpage variables to track HTAB, VTAB, hi-res line number etc.)		
-		STA $C008 ;enable main zero-page & main BSR 
-			TSX							;transfer AUX stack pointer to X-REG
-			STX STACK_POINTER.SAVED_AUX	;save AUX stack pointer
+; .SET.AUX_MAIN.ZPAGE_BSR
+		; LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
+		; STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
+		; BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 		
+		; ;set main zpage & bsr
+		; ;(this is needed because COUT.ADDRESS (in ROM) uses zpage variables to track HTAB, VTAB, hi-res line number etc.)		
+		; STA $C008 ;enable main zero-page & main BSR 
+			; TSX							;transfer AUX stack pointer to X-REG
+			; STX STACK_POINTER.SAVED_AUX	;save AUX stack pointer
 			
-			LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
-			TXS ;transfer X-REG to stack pointer		
-.SET.AUX_MAIN.ZPAGE_BSR.DONE
+			; LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
+			; TXS ;transfer X-REG to stack pointer		
+; .SET.AUX_MAIN.ZPAGE_BSR.DONE
 
 
 	
@@ -738,32 +739,36 @@ COUT ;========OUTPUT 1 CHARACTER TO DEFAULT OUTPUT DEVICE=====
 		
 
 				
-.RESTORE.AUX_MAIN.ZPAGE_BSR
-		LDA AUX_MAIN.ZPAGE_BSR.STATE	;(bit7 = 1: AUX, bit7=0 MAIN)
-		BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled when the COUT wrapper was called. 	
-		;set AUX zpage & bsr (restore to original state)
-			TSX			;transfer stack pointer to X-REG
-			STX STACK_POINTER.SAVED	;save main stack pointer
+; .RESTORE.AUX_MAIN.ZPAGE_BSR
+		; LDA AUX_MAIN.ZPAGE_BSR.STATE	;(bit7 = 1: AUX, bit7=0 MAIN)
+		; BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled when the COUT wrapper was called. 	
+		; ;set AUX zpage & bsr (restore to original state)
+			; TSX			;transfer stack pointer to X-REG
+			; STX STACK_POINTER.SAVED	;save main stack pointer
 			
-			LDX STACK_POINTER.SAVED_AUX	;restore AUX stack pointer to X-REG
-			TXS ;transfer X-REG to stack pointer					
-		STA $C009 ;enable aux zero-page & aux BSR 	
-.RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
+			; LDX STACK_POINTER.SAVED_AUX	;restore AUX stack pointer to X-REG
+			; TXS ;transfer X-REG to stack pointer					
+		; STA $C009 ;enable aux zero-page & aux BSR 	
+; .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
 
 	
-	JSR RESTORE.BSR_BANK.STATUS
+	;JSR RESTORE.BSR_BANK.STATUS
+	JSR RESTORE.AUX_MAIN.ZPAGE_BANK_STATUS ;sets main zpage & BSR if aux was enabled. Restores bsr bank that was active.  
 
 
 			; STA TEMP
-			; LDA TROUBLESHOOTING.HOOK2
+			; LDA TROUBLESHOOTING.HOOK
 			; CMP #$01
 			; BNE .TEMP
 			; jsr keyin
-			; ; LDA #$AA
-			; ; LDX COUT_CHAR_TYPE ;($00 = normal, $7F = inverse)
-		
-			; ; JSR PREP.BRK
-			; ; BRK
+			; PLA
+			; PLA
+			; TAX
+			; PLA
+			; TAY
+			; LDA #$AA
+			; JSR PREP.BRK
+			; BRK
 ; .TEMP
 			; LDA TEMP
 
@@ -1635,27 +1640,15 @@ UPDATE.CHAR.POS ;============MOVES CURSOR TO HTAB/VTAB POSITION ON TEXT SCREEN
 	PHA
 	TYA
 	PHA
-	
-	JSR GET.BSR_BANK.STATUS
 
-.SET.AUX_MAIN.ZPAGE_BSR
-		LDA $C016		;MAIN/AUX ZPAGE & BSR) (bit7 = 1: AUX, bit7=0 MAIN)
-		STA AUX_MAIN.ZPAGE_BSR.STATE ;(bit7 = 1: AUX, bit7=0 MAIN)
-		BPL .SET.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled. 		
-		;aux enabled. set main zpage & bsr
-		;(this is needed because COUT.ADDRESS (in ROM) uses zpage variables to track HTAB, VTAB, hi-res line number etc.)		
-			LDX HTAB
-			LDY VTAB
-		STA $C008 ;enable main zero-page & main BSR 
-			STX HTAB
-			STY VTAB
-			
-			TSX							;transfer AUX stack pointer to X-REG
-			STX STACK_POINTER.SAVED_AUX	;save AUX stack pointer
-			
-			LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
-			TXS ;transfer X-REG to stack pointer		
-.SET.AUX_MAIN.ZPAGE_BSR.DONE
+
+
+		LDX HTAB
+		LDY VTAB	
+	;JSR GET.BSR_BANK.STATUS
+	JSR GET.AUX_MAIN.ZPAGE_BANK_STATUS ;sets main zpage & BSR if aux was enabled. Gets bsr bank that is active.  
+		STX HTAB
+		STY VTAB
 
 	
 ;ENABLE ROM ROUTINES
@@ -1668,25 +1661,17 @@ UPDATE.CHAR.POS ;============MOVES CURSOR TO HTAB/VTAB POSITION ON TEXT SCREEN
 	; LDA $C083				;READ TWICE TO READ/WRITE ENABLE BANK SWITCHED-RAM ($Dxxx BANK 1ST)
 	; LDA $C083
 
-.RESTORE.AUX_MAIN.ZPAGE_BSR
-		LDA AUX_MAIN.ZPAGE_BSR.STATE	;(bit7 = 1: AUX, bit7=0 MAIN)
-		BPL .RESTORE.AUX_MAIN.ZPAGE_BSR.DONE ;if bit7=1 then AUX zpage and bsr was enabled when the COUT wrapper was called. 	
-		;set AUX zpage & bsr (restore to original state)
-			TSX			;transfer stack pointer to X-REG
-			STX STACK_POINTER.SAVED	;save main stack pointer
-			
-			LDX STACK_POINTER.SAVED_AUX	;restore AUX stack pointer to X-REG
-			TXS ;transfer X-REG to stack pointer	
-			LDX HTAB
-			LDY VTAB
-		STA $C009 ;enable aux zero-page & aux BSR 	
-			STX HTAB
-			STY VTAB
-.RESTORE.AUX_MAIN.ZPAGE_BSR.DONE
+
+
+		; LDX HTAB
+		; LDY VTAB		
+	;JSR RESTORE.BSR_BANK.STATUS
+	JSR RESTORE.AUX_MAIN.ZPAGE_BANK_STATUS ;sets main zpage & BSR if aux was enabled. Restores bsr bank that was active.  
+		; STX HTAB
+		; STY VTAB
 
 	
-	JSR RESTORE.BSR_BANK.STATUS
-
+	
 .EXIT
 ;RESTORE REGISTERS
 	PLA

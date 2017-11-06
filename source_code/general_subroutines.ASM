@@ -222,6 +222,8 @@ PLAYER.INPUT.COMMAND_DIRECTION
 	RTS
 @END
 
+
+
 ;===============ENTRANCE/WRAPPER ROUTINES======
 @START
 
@@ -608,6 +610,31 @@ DARKNESS.REVIEW
 	STA $C008 ;enable main zero-page & main BSR 
 		LDX STACK_POINTER.SAVED	;restore stack pointer to X-REG
 		TXS ;transfer X-REG to stack pointer
+		
+		
+			; STA TEMP
+			; LDA TROUBLESHOOTING.HOOK
+			; CMP #$01
+			; BNE .TEMP2
+			; ; lda #$00
+			; ; sta htab
+			; ; sta vtab
+			; ; jsr UPDATE.CHAR.POS
+			; ; lda #$b0
+			; ; jsr cout
+			; ; lda #$b1
+			; ; jsr cout
+			; ; jsr keyin
+			; PLA
+			; TAX
+			; PLA
+			; TAY
+			; LDA #$AA			
+			; JSR FULL.BRK	;use stack to trace call
+; .TEMP2
+			; LDA TEMP
+
+			
 
 .EXIT
 		
@@ -654,6 +681,7 @@ SCROLL.COLUMNS.ENTRANCE
 		
 @END
 
+	
 	
 STATUS_BAR.DRAW
 @START

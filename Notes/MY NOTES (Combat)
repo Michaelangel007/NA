@@ -1,6 +1,43 @@
 http://sinisterdesign.net/12-ways-to-improve-turn-based-rpg-combat-systems/
 
 
+====Persistent Combat Module Plan===
+
+*How will calls to ProDOS.IO work? Will they be needed? I imagine they'll be needed at a minimum for the spell file. See if combat can
+reside in Aux BSR bank 1. If yes, then it should just work, no entrance routine needed. 
+	*my plan: should work as-is if I add a detect aux status to .IO.SUCCEEDED. will also need to save aux status at the top of the routine
+
+*Consider that map object mgr and combat make calls between each other. Either they need to be in the same BSR bank or we'll
+need a handful of new entrance routines. (MO.DRAW)
+	*my plan: I'm going to keep COMBAT.MOVE.MANAGER as part of MO.DRAW in BSR2, that's the better place for it since moving it to AUX BSR just forces
+	the same amount of byte to move from AUX BSR to main memory. And, even if I moved it to AUX BSR there are 3 paths out of COMBAT.MOVE.MANAGER that would
+	need entrance bridges back to MO.DRAW. 
+	*bottom line: I'll create a single entrance bridge routine for all paths from COMBAT.MOVE.MANAGER to COMBAT module, and use an ACC parm to branch to the desire routine.
+	
+
+*Will BSR:bank 1 entrance routines work? Example COPY.SCREEN ENTRANCE, ANIMATION.UPDATE.ENTRANCE
+
+*Review mob/player character sheet reads. Those routines assume they arent' being accessed from Aux BSR so
+they probably disable aux on exit, which would be a problem. 
+
+-memory shuffle prep
+*Move event mgr to BSR: bank2
+*Move all text blocks to main memory
+*Move screenbuilder tables to main memory
+*(SKIP) move combat move manager to combat module
+*Move the get row/columns local subroutines from darkness mgr to main memory. 
+
+*Change all mobs and players to use melee weapons so shape tables can be temporarily disconnected without causing hangs
+
+-load combat into aux BSR via loader.P
+	*change the .ORG in combat module to the end of darkness. 
+	*disable the ProRWTS calls in game_loop.ASM (i.e. attack command and shift+3 playtest) which previously loaded combat into swap space
+	*disable the ProRWTS calls that swap darkness and weapon shape tables. leave darknesss in memory. 
+	
+-Once combat works otherwise, reconnect weapon shape tables with them in lower aux memory. 
+	*Does aux_move work in aux_bsr? If not, may need to copy weapon shape data by enabling lower aux, copy, disable lower aux
+
+
 ===COMBAT ALWAYS IN MEMORY -NOTES=====
 *To help facilitate keeping combat module in memory permanently 
 (in the AUX BSR) Instead of storing mob.special char sheet in 
@@ -45,6 +82,11 @@ for character sheets might already handle everythign needed.
 		;I suspect the implication of reducing the # of saved paths is reducing the # of NPCs that can be in transit at the same time.
 			I bet we can reduce this by a lot (maybe by half) and be okay from a design standpoint. To verify find out the max size of a single saved path. I think it's 1 page. 
 		;See "Pathfinder: Saved NPC Paths" in memory map.
+	
+	
+	
+	
+	
 	
 ===SCROLL TEXT===
 

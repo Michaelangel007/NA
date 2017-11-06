@@ -783,7 +783,9 @@ If force flag set, only force animation one out of every four sequential-moves (
 				With the entire swap module available, consider if at least some spells could stay in memory once loaded from disk (via load flag)
 				There are probably more spells code blocks than would fit in the swap space but it might be possible to organize the reserved memory blocks so the more common spells are in separate memory.
 				Loading inventory uses the swap space but the contents will be put back
-
+			
+			*See MY NOTES(Combat), "Persistent Combat Module Plan" for specific steps I've compiled to execute an attempt to keep combat in memory at all times (in AUX BSR)
+			
 		-Make final connection between combat and inventory
 			*see comments in COMBAT.DISPLAY.STATS_SUMMARY
 		

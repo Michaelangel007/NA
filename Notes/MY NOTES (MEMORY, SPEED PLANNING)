@@ -39,8 +39,13 @@
 	*use Sprite type to select tile type for MTT in animation manager
 	
 *Options to free up more main memory
+	*Some of the code for commands (example movement commands) in game_loop.ASM might be able to be moved into BSR: bank1 or BSR: bank2. 
+	*Move mob and player character sheets to lower aux memory. This frees up about $800 bytes in Aux BSR bank 1. Some lower aux
+		;memory could be freed up by reduing the number of saved NPC pathfinder paths. 
 	*Finish screen hole converstion. Some variables couldn't be converted to screen holes because the screen clear (setting the screen holes and the rest of the hi-res screen to $00) happnes after GAME.START.DRIVER. Screen clear can be run before GAME.SETUP.DRIVER
 		;once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). To find the variables that can be converted but weren't, search for "**OPT** Memory. Screenhole."
+		;Once the above are done, consider loading the global text blocks (currently in game_loop.ASM) into screen holes (for text blocks less than 8 bytes /w stop value). 
+			*this only makes sense to do when I can do the load in LOADER.P, so the loading code is in memory that gets clobbered by the game engine.
 	*Convert EVENT.FLAGS to screen holes instead of .BS $100
 		;Maybe the event flag array could use screen holes once it's no longer being used for the debug log. It would mean in the code accessing the event flags via a direct lable like EVENT_FLAG00,EVENT_FLAG01 etc. as each label can be .EQ to a different address. What we couldn't do is make relative references like EVENT.FLAGS+$0, EVENT.FLAGS+$1 etc.
 		;however, I think this is a problem with the way NPC.TALK expects to use the flags. 
