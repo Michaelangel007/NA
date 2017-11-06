@@ -10,7 +10,7 @@
                 .CR     6502            Use 6502 overlay
 				.EF		errors
 				;.LI 	OFF				Switches the assembler machine code conversion listing off so errors are easier to see				
-				.LF		c:\my_code\na\build_folder\LIST
+				.LF		../build_folder/LIST
 				.EB		OFF				;turn off error bell
 				;				***For include files, look at end of program, before variable definitions. 
 
@@ -2790,25 +2790,25 @@ END.GAME_LOOP.ASM
 @START
 ;======(SAME TARGET FILE)======
 @START
-				.IN 	c:\my_code\na\source_code\offloaded_variables.asm
-				.IN 	c:\my_code\na\source_code\routines_text.asm
-				.IN 	c:\my_code\na\source_code\ptools.asm
-				.IN 	c:\my_code\na\source_code\map_tools.asm
-				.IN 	c:\my_code\na\source_code\event_manager.asm	
-				.IN 	c:\my_code\na\source_code\misc.main_memory_only.asm	
-				.IN 	c:\my_code\na\source_code\data.txt.global.asm
+				.IN 	offloaded_variables.asm
+				.IN 	routines_text.asm
+				.IN 	ptools.asm
+				.IN 	map_tools.asm
+				.IN 	event_manager.asm
+				.IN 	misc.main_memory_only.asm
+				.IN 	data.txt.global.asm
 
-				.IN 	c:\my_code\na\source_code\sound_manager.asm
+				.IN 	sound_manager.asm
 
 				
 ;recently moved back from BS memory
 
 				
 ;TEMPORARY FOR TROUBLESHOOTING				
-	;.IN 	c:\my_code\na\source_code\zone_functions
-	;.IN 	c:\my_code\na\source_code\darkness_manager
-	;.IN 	c:\my_code\na\source_code\map_object_management
-	;.IN 	c:\my_code\na\source_code\zone_functions
+	;.IN 	zone_functions
+	;.IN 	darkness_manager
+	;.IN 	map_object_management
+	;.IN 	zone_functions
 
 @END
 					
@@ -2824,79 +2824,79 @@ END.GAME_LOOP.ASM
 				;.EN  ;end current target file
 
 ;BOOT PROCESS 
-				.IN 	c:\my_code\na\source_code\noxarch.main.asm
-				.IN 	c:\my_code\na\source_code\noxarch.main.old.asm
-				;.IN 	c:\my_code\na\source_code\loader.p.asm
+				.IN 	noxarch.main.asm
+				.IN 	noxarch.main.old.asm
+				;.IN 	loader.p.asm
 
 ;CONTROLLERS
-				.IN 	c:\my_code\na\source_code\controller.hrcg.aux.ASM
+				.IN 	controller.hrcg.aux.ASM
 				
 				
 ;DATA FILES: SHAPES			
-				.IN 	c:\my_code\na\source_code\data.shapes.building.asm
-				.IN 	c:\my_code\na\source_code\data.shapes.castle_courtyard.asm
-				.IN 	c:\my_code\na\source_code\data.shapes.undermap.asm
-		;		.IN 	c:\my_code\na\source_code\data.shapes.undermap_town.asm
+				.IN 	data.shapes.building.asm
+				.IN 	data.shapes.castle_courtyard.asm
+				.IN 	data.shapes.undermap.asm
+		;		.IN 	data.shapes.undermap_town.asm
 
 				
 ;DATA FILES: SURFACE
-				.IN 	c:\my_code\na\source_code\compressed_data\compressed.data.map.surface.asm
-				.IN 	c:\my_code\na\source_code\data.spr.surface.asm
+				.IN 	compressed_data/compressed.data.map.surface.asm
+				.IN 	data.spr.surface.asm
 
 ;DATA FILES: LOCATION 1
-				.IN 	c:\my_code\na\source_code\data.tlk.l001.asm
+				.IN 	data.tlk.l001.asm
 				;floor1 (map1)
-				.IN 	c:\my_code\na\source_code\data.map.l1.f1.m1.asm
-				.IN 	c:\my_code\na\source_code\data.spr.l1.f1.m1.asm
+				.IN 	data.map.l1.f1.m1.asm
+				.IN 	data.spr.l1.f1.m1.asm
 				;floor2 (map2)
-				.IN 	c:\my_code\na\source_code\data.map.l1.f2.m2.asm
-				.IN 	c:\my_code\na\source_code\data.spr.l1.f2.m2.asm
+				.IN 	data.map.l1.f2.m2.asm
+				.IN 	data.spr.l1.f2.m2.asm
 ;DATA FILES: LOCATION 2
-				;.IN 	c:\my_code\na\source_code\data.tlk.l001.asm
+				;.IN 	data.tlk.l001.asm
 				;floor1.1 (map3)
-				.IN 	c:\my_code\na\source_code\data.map.l2.f1.1.m3.asm
-				.IN 	c:\my_code\na\source_code\data.spr.l2.f1.1.m3.asm
+				.IN 	data.map.l2.f1.1.m3.asm
+				.IN 	data.spr.l2.f1.1.m3.asm
 				;floor2.1 (map4)
-				.IN 	c:\my_code\na\source_code\data.map.l2.f2.1.m4.asm
-				.IN 	c:\my_code\na\source_code\data.spr.l2.f2.1.m4.asm
+				.IN 	data.map.l2.f2.1.m4.asm
+				.IN 	data.spr.l2.f2.1.m4.asm
 				;floor3.1 (map5)
-				.IN 	c:\my_code\na\source_code\data.map.l2.f3.1.m5.asm
-				.IN 	c:\my_code\na\source_code\data.spr.l2.f3.1.m5.asm
+				.IN 	data.map.l2.f3.1.m5.asm
+				.IN 	data.spr.l2.f3.1.m5.asm
 ;DATA FILES: UNDERMAP
-				.IN 	c:\my_code\na\source_code\compressed_data\compressed.data.map.undermap_lv1.asm
-				.IN 	c:\my_code\na\source_code\data.spr.undermap_lv1.asm
+				.IN 	compressed_data/compressed.data.map.undermap_lv1.asm
+				.IN 	data.spr.undermap_lv1.asm
 
 
 
 ;MAIN GAME FILES				
 
-				.IN 	c:\my_code\na\source_code\swap.routines.inventory.asm
+				.IN 	swap.routines.inventory.asm
 				;
-				.IN 	c:\my_code\na\source_code\swap.routines.cast_spell.setup.asm
-				.IN 	c:\my_code\na\source_code\swap.routines.spell_file.asm
-				.IN 	c:\my_code\na\source_code\swap.routines.combat.asm
-				.IN 	c:\my_code\na\source_code\swap.routines.combat.setup.asm
-				.IN 	c:\my_code\na\source_code\swap.routines.combat.exit.asm
+				.IN 	swap.routines.cast_spell.setup.asm
+				.IN 	swap.routines.spell_file.asm
+				.IN 	swap.routines.combat.asm
+				.IN 	swap.routines.combat.setup.asm
+				.IN 	swap.routines.combat.exit.asm
 				;
-				.IN 	c:\my_code\na\source_code\swap.routines.npc.talk.asm
-				.IN 	c:\my_code\na\source_code\swap.routines.non_building.asm
-				.IN 	c:\my_code\na\source_code\swap.routines.building.asm
+				.IN 	swap.routines.npc.talk.asm
+				.IN 	swap.routines.non_building.asm
+				.IN 	swap.routines.building.asm
 				;
 				;
-				.IN 	c:\my_code\na\source_code\lower_main.routines.ASM
-				.IN 	c:\my_code\na\source_code\bs_routines.bank1.asm
-				.IN 	c:\my_code\na\source_code\bs_routines.bank2.asm
-				.IN 	c:\my_code\na\source_code\bs_aux_routines.bank2.ASM
+				.IN 	lower_main.routines.ASM
+				.IN 	bs_routines.bank1.asm
+				.IN 	bs_routines.bank2.asm
+				.IN 	bs_aux_routines.bank2.ASM
 
 				
 ;DATA FILES: GAME & PLAYER
-				.IN 	c:\my_code\na\source_code\data.ply.character_sheet.ASM
-				;.IN 	c:\my_code\na\source_code\data.game.inventory.ASM
-				;.IN 	c:\my_code\na\source_code\data.game.mob_tables.ASM
+				.IN 	data.ply.character_sheet.ASM
+				;.IN 	data.game.inventory.ASM
+				;.IN 	data.game.mob_tables.ASM
 
 				
 @END
 @END
 
 				;***TESTING****
-				; .IN 	c:\my_code\na\testing\prodos_testing\dummy.file.ASM					
+				; .IN 	..\testing\prodos_testing\dummy.file.ASM					

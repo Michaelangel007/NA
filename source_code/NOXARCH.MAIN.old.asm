@@ -11,7 +11,7 @@
 				; .EF		errors
 				; .LF		C:\MY_CODE\LIST
 ; ;				.LI 	OFF				Switches the assembler machine code conversion listing off so errors are easier to see				
-; ;				.IN 	c:\my_code\na\source_code\routines_common
+; ;				.IN 	source_code\routines_common
 
 ;=====================SUBROUTINE DOCUMENTATION====================================
 ;

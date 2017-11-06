@@ -2109,7 +2109,7 @@ INV_8.SEARCH.PLY_INV ;returns a pointer to the item searched for or if not found
 ;via .EQs
 
 
-		.IN 	c:\my_code\na\source_code\swap.routines.inv.search.ply_inv.asm
+		.IN 	swap.routines.inv.search.ply_inv.asm
 
 
 

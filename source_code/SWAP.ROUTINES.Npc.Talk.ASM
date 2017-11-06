@@ -3308,7 +3308,7 @@ TEXT_BLOCK.ANY_KEY2	.AZ -/<any key>/ ;ASCII text string
 		
 	;***Warning: must reassemble ZX7.BIN to load it into any location other than $BD00 (see c:\my_code\na\compression\npc.speech.text\zx7.6502.s)
 	;.BI c:\my_code\na\COMPRESSION\NPC.SPEECH.TEXT\zx7.bd00.bin,BIN	;unpack driver for ZX7 compression using the version built to run at $BF00
-	.BI c:\my_code\na\COMPRESSION\NPC.SPEECH.TEXT\zx7.bd62.bin,BIN	;unpack driver for ZX7 compression using the version built to run at $BF00
+	.BI ../COMPRESSION/NPC.SPEECH.TEXT/zx7.bd62.bin,BIN	;unpack driver for ZX7 compression using the version built to run at $BF00
 
 
 ;***Warning: above the ZX7 compressor end memory address thru $BFFF are the map object arrays which are

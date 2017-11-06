@@ -1020,7 +1020,7 @@ TM_1.SEARCH.PLY_INV
 ;**Init to the top of the player inventory data array
 ;***PLAYER_MERCH.INVENTORY.DATA.POINTER(2) contains the memory address of the inventory record for the item the search was for -if it was found.
 ;
-		.IN 	c:\my_code\na\source_code\swap.routines.inv.search.ply_inv.asm
+		.IN 	swap.routines.inv.search.ply_inv.asm
 
 		
 		

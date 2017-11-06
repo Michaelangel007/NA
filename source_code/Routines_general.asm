@@ -14,10 +14,10 @@
 ;avoided by creating duplicate variables using different names, 
 ;resulting in extra memory used. 
 				; ;My libraries
-				; .IN 	c:\my_code\na\source_code\routines_graphics				
-				; .IN 	c:\my_code\na\source_code\routines_text
-				; .IN 	c:\my_code\na\source_code\routines_math
-				; .IN 	c:\my_code\na\source_code\routines_general
+				; .IN 	routines_graphics				
+				; .IN 	routines_text
+				; .IN 	routines_math
+				; .IN 	routines_general
 ;				
 ;animation.update 	.eq $B000
 ;generate.debug.log	.eq $B100

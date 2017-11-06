@@ -13,12 +13,12 @@
 ;NOTE: This file is loaded into the main memory range $0C00-$1200
 
 
-				.IN 	c:\my_code\na\source_code\routines_graphics				
-				.IN 	c:\my_code\na\source_code\routines_math
-				.IN 	c:\my_code\na\source_code\routines_general
-				.IN 	c:\my_code\na\source_code\general_subroutines.asm
+				.IN 	routines_graphics				
+				.IN 	routines_math
+				.IN 	routines_general
+				.IN 	general_subroutines.asm
 		
-				;.IN 	c:\my_code\na\source_code\sound_manager	
+				;.IN 	sound_manager	
 						
 	.NO $2000		;FILLER TO THE UPPER LIMIT OF THE MEMORY RANGE ALLOCATED FOR THIS FILE 
 					;This enables SBASM to generate an error if/when the code overshoots this memory address.

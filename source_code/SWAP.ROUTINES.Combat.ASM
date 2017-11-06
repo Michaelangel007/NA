@@ -2718,7 +2718,7 @@ COMBAT.ATTACK.RANGE.DISPLAY
 ;COMBAT STATISTICS ROUTINES1
 @START
 
-	.IN 	c:\my_code\na\source_code\swap.routines.combat.stats_routines2.asm
+	.IN 	swap.routines.combat.stats_routines2.asm
 			
 
 @END
@@ -3628,7 +3628,7 @@ COMBAT.DISPLAY.STATS_SUMMARY
 		LDA COMBAT.PC.ACTIVE
 		STA INV.ACTIVE_PLAYER
 
-	.IN 	c:\my_code\na\source_code\swap.routines.combat.stats_summary.asm
+	.IN 	swap.routines.combat.stats_summary.asm
 
 @END
 
@@ -6732,7 +6732,7 @@ COMBAT.DRAW.SINGLE.OFF_GRID ;off tile grid (animated, single-tile, foreground)
 
 ;COMBAT STATISTICS ROUTINES2
 @START
-	.IN 	c:\my_code\na\source_code\swap.routines.combat.stats_routines.asm
+	.IN 	swap.routines.combat.stats_routines.asm
 
 @END
 

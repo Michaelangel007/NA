@@ -3466,7 +3466,7 @@ DUMMY.FILE		.AZ #$0A,/DUMMY.FILE/	;ascii array, using LO values. Filename is lim
 ;======(SAME TARGET FILE)======
 
 	;load mob character sheet
-	;.IN 	c:\my_code\na\source_code\swap.routines.combat.test_data2.asm
+	;.IN 	swap.routines.combat.test_data2.asm
 
 				
 ;	.NO $4000				;ENSURES THAT THE PROGRAM CODE DOESN'T GET CLOBBERED BY THE INCLUDE TARGET FILES,
@@ -3475,9 +3475,9 @@ DUMMY.FILE		.AZ #$0A,/DUMMY.FILE/	;ascii array, using LO values. Filename is lim
 	
 
 ;======(SEPERATE TARGET FILE)======	
-				.IN 	c:\my_code\na\source_code\data.shapes.surface.asm
-				.IN 	c:\my_code\na\source_code\data.other.sunrise_sunset.asm
-				.IN 	c:\my_code\na\source_code\compressed_data\compressed.data.map.surface.asm
+				.IN 	data.shapes.surface.asm
+				.IN 	data.other.sunrise_sunset.asm
+				.IN 	compressed_data/compressed.data.map.surface.asm
 
-				.IN 	c:\my_code\na\testing\prodos_testing\dummy.file2.asm								
+				.IN 	../testing/prodos_testing/dummy.file2.asm								
 

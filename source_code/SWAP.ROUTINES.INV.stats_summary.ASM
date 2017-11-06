@@ -61,4 +61,4 @@ INV_0.SCREEN_0
 
 	;this is a shared include file used by the combat module and inventory module, so that the same
 	;code is inserted into each. 
-	.IN 	c:\my_code\na\source_code\swap.routines.combat.stats_summary.asm
+	.IN 	swap.routines.combat.stats_summary.asm

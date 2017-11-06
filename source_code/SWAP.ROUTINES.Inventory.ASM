@@ -132,11 +132,11 @@ INV.PLAYER.INVENTORY.DATA.LESS_ONE_RECORD	.EQ INV.PLAYER.INVENTORY.DATA-INV.PLAY
 
 INV.DATA.INVENTORY
 ;(player readied equipment, player inventory, master game items table)			
-				.IN 	c:\my_code\na\source_code\data.game.inventory.ASM
+				.IN 	data.game.inventory.ASM
 				
 
 INV.DATA.MERCHANT_PROFILE
-				.IN 	c:\my_code\na\source_code\data.game.merchant_profile.ASM
+				.IN 	data.game.merchant_profile.ASM
 
 
 				
@@ -149,7 +149,7 @@ INV.ENTRANCE.START
 	.PH SWAP_SPACE.MAIN_MEMORY
 INV.ENTRANCE.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.entrance_exit.asm
+			.IN 	swap.routines.inv.entrance_exit.asm
 	
 INV.ENTRANCE.PATCH_END
 	.EP ;end patch mode
@@ -167,7 +167,7 @@ INV_0.STATS_SUMMARY.START	;screen0
 INV_0.STATS_SUMMARY.PATCH_START	
 	
 
-	.IN 	c:\my_code\na\source_code\swap.routines.inv.stats_summary.asm
+	.IN 	swap.routines.inv.stats_summary.asm
 
 
 INV_0.STATS_SUMMARY.PATCH_END
@@ -185,7 +185,7 @@ INV_1.READIED_EQUIPMENT.START	;screen1
 INV_1.READIED_EQUIPMENT.PATCH_START	
 	
 
-	.IN 	c:\my_code\na\source_code\swap.routines.inv.readied_equipment.asm
+	.IN 	swap.routines.inv.readied_equipment.asm
 
 
 INV_1.READIED_EQUIPMENT.PATCH_END
@@ -203,7 +203,7 @@ INV_2.COMBAT_STATS.START	;screen2
 INV_2.COMBAT_STATS.PATCH_START	
 	
 
-	.IN 	c:\my_code\na\source_code\swap.routines.inv.combat_stats.asm
+	.IN 	swap.routines.inv.combat_stats.asm
 
 
 INV_2.COMBAT_STATS.PATCH_END
@@ -221,7 +221,7 @@ INV_3.SKILLS.START	;screen3
 INV_3.SKILLS.PATCH_START	
 	
 
-	.IN 	c:\my_code\na\source_code\swap.routines.inv.skills.asm	
+	.IN 	swap.routines.inv.skills.asm	
 	
 INV_3.SKILLS.PATCH_END
 	.EP ;end patch mode
@@ -252,7 +252,7 @@ INV_4.1a.SHARED_ROUTINES.START
 	.PH INV_3.SKILLS.PATCH_END
 INV_4.1a.DISPLAY_PLAYER_INVENTORY.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\SWAP.ROUTINES.INV_4.1a.SHARED_ROUTINES.ASM
+			.IN 	SWAP.ROUTINES.INV_4.1a.SHARED_ROUTINES.ASM
 
 INV_4.1a.SHARED_ROUTINES.PATCH_END
 	.EP ;end patch mode
@@ -268,7 +268,7 @@ INV_4.1b.SHARED_ROUTINES.START
 	.PH INV_4.1a.SHARED_ROUTINES.PATCH_END
 INV_4.1b.DISPLAY_PLAYER_INVENTORY.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\SWAP.ROUTINES.INV_4.1b.SHARED_ROUTINES.ASM
+			.IN 	SWAP.ROUTINES.INV_4.1b.SHARED_ROUTINES.ASM
 
 INV_4.1b.SHARED_ROUTINES.PATCH_END
 	.EP ;end patch mode
@@ -284,7 +284,7 @@ INV_4.DISPLAY_PLAYER_INVENTORY.START
 	.PH INV_4.1b.SHARED_ROUTINES.PATCH_END
 INV_4.DISPLAY_PLAYER_INVENTORY.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.display_inventory.ASM
+			.IN 	swap.routines.inv.display_inventory.ASM
 
 INV_4.DISPLAY_PLAYER_INVENTORY.PATCH_END
 	.EP ;end patch mode
@@ -317,7 +317,7 @@ INV_6.READY_UNREADY.START
 	.PH INV_4.DISPLAY_PLAYER_INVENTORY.PATCH_END
 INV_6.READY_UNREADY.PATCH_START
 
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.ready_unready.ASM
+			.IN 	swap.routines.inv.ready_unready.ASM
 
 INV_6.READY_UNREADY.PATCH_END
 	.EP ;end patch mode
@@ -333,7 +333,7 @@ INV_7.CALCULATE.COMBAT.STATS.START
 	.PH INV_6.READY_UNREADY.PATCH_END
 INV_7.CALCULATE.COMBAT.STATS.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.calc.combat.stats.ASM
+			.IN 	swap.routines.inv.calc.combat.stats.ASM
 
 INV_7.CALCULATE.COMBAT.STATS.PATCH_END
 	.EP ;end patch mode
@@ -385,7 +385,7 @@ INV_8.MERCHANT_TRANSACTIONS.START
 	;*****this .PH is inside the INV_4 include file. 
 INV_8.MERCHANT_TRANSACTIONS.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.merchant_transactions.ASM
+			.IN 	swap.routines.inv.merchant_transactions.ASM
 
 INV_8.MERCHANT_TRANSACTIONS.PATCH_END
 	.EP ;end patch mode
@@ -399,7 +399,7 @@ INV_8.1.DATA_STORAGE.PATCH_START
 ;-----
 INV_8.1.MASTER_PRICE_TABLE.DATA									
 ;datagram: (sell_price_lo, sell_price_ho)
-				.IN 	c:\my_code\na\source_code\data.game.master_price_table.ASM
+				.IN 	data.game.master_price_table.ASM
 				
 INV_8.1.MASTER_PRICE_TABLE.RECORD_SIZE	.EQ	$02 ;#CONSTANT
 
@@ -546,7 +546,7 @@ TM_1.TREASURE_MGT.START
 	.PH INV_4.1a.DISPLAY_PLAYER_INVENTORY.PATCH_START ;this sub_module shares the same memory range as INV_4, INV_6, INV_7
 TM_1.TREASURE_MGT.PATCH_START
 	
-			.IN 	c:\my_code\na\source_code\swap.routines.inv.treasure_mgt.ASM
+			.IN 	swap.routines.inv.treasure_mgt.ASM
 
 TM_1.TREASURE_MGT.PATCH_END
 	.EP ;end patch mode

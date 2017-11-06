@@ -543,7 +543,7 @@ EXIT.ABORT								;USED IF PLAYER PRESSES A KEY DURING THIS ROUTINE, KEEPS TURN 
 
 ;INCLUDE FILES
 
-	.IN 	c:\my_code\na\source_code\zone_functions
+	.IN 	zone_functions
 
 		;**OPT** Disk. Reduce the .NO to the actual amount of memory needed for the routines in this file. 
 	.NO $A000 ;fill up to top of reserved memory block so that overflows are reported by SBASM

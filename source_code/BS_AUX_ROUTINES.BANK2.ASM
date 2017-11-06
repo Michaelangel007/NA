@@ -33,7 +33,7 @@ BS_AUX_ROUTINES.BANK2.FILE_START
 	
 BS_AUX_ROUTINES.BANK2.COPY_TO.START
 	
-	.IN 	c:\my_code\na\source_code\darkness_manager
+	.IN 	darkness_manager
 
 
 		

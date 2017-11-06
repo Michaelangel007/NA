@@ -54,7 +54,7 @@
 INV.INVENTORY.DATA.START	
 
 ;PLAYER READIED EQUIPMENT & INVENTORY DATA
-				.IN 	c:\my_code\na\source_code\data.ply.inventory.ASM
+				.IN 	data.ply.inventory.ASM
 
 				
 ;==========GAME ITEM TABLES==========

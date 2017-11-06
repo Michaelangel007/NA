@@ -1671,8 +1671,8 @@ COMBAT_SE.TEST.MODE
 ;**OPT** Memory. Disk. Remove combat test mode
 COMBAT_LOADER.MO.DATA ;(for test mode)
 ;(load PC and MOB map object arrays)
-	.IN 	c:\my_code\na\source_code\swap.routines.combat.test_data.asm
-	.IN 	c:\my_code\na\source_code\swap.routines.combat.test_data2.asm
+	.IN 	swap.routines.combat.test_data.asm
+	.IN 	swap.routines.combat.test_data2.asm
 
 
 @END
@@ -2349,7 +2349,7 @@ COMBAT_SE.SETUP.MAIN.END
 ;MOB TABLES
 @START
 
-				.IN 	c:\my_code\na\source_code\data.game.mob_tables.ASM
+				.IN 	data.game.mob_tables.ASM
 
 @END
 

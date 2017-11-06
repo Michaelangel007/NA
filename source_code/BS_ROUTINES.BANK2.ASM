@@ -117,12 +117,12 @@ TILE_SWAP.SUN ;setup in BSR because it copies between AUX memory locations
 @END
 
 				
-				.IN 	c:\my_code\na\source_code\map_object_management
+				.IN 	map_object_management
 
-				.IN 	c:\my_code\na\source_code\graphics_engine ;originally in lower main RTS, tried moving to BSR2 (had problem with darkness), then moved to main memory to troubleshoot it. 
+				.IN 	graphics_engine ;originally in lower main RTS, tried moving to BSR2 (had problem with darkness), then moved to main memory to troubleshoot it. 
 				
-				.IN 	c:\my_code\na\source_code\movement_manager
-				.IN 	c:\my_code\na\source_code\tile_functions2
+				.IN 	movement_manager
+				.IN 	tile_functions2
 				
 	.NO $FFFF,$AB	;FILLER TO THE UPPER LIMIT OF BANK SWITCHED MEMORY. 
 					;This enables SBASM to generate an error if/when the code overshoots this memory address.
