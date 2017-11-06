@@ -1019,7 +1019,7 @@ SEED2	.BS $1
 SEED3	.BS $1
 RND.LO	.BS $1
 RND.HI	.BS $1
-RAND_TABLE    .HS	01.01.00.FE.FF.01
+RAND_TABLE    .HS	01.01.00.FE.FF.01 		;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole (needs 6 bytes). Do this after the screen clear. 
 RANDOM_NUMBER.ITERATION_TALLY	.BS $1
 RND.ABORT	.BS $1	
 
@@ -2023,6 +2023,9 @@ CHR_SHEET.POINTER				.EQ $CA ;#POINTER
 CHR_SHEET.S_ENTITY.NUMBER		.EQ SHAPE.HOPPER0+$2
 
 
+
+;CHR_SHEET.POINTER.LOOKUP_TABLE (local subroutine of SET.CHR_SHEET.POINTER).	**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole (needs 6 bytes). Do this after the screen clear. 
+
 @END
 
 ;COMBAT STATS MECHANICS
@@ -2636,8 +2639,8 @@ DATA.SPR.M5		.AZ #$0B,/DATA.SPR.M5/	;ascii array, using LO values. Filename is l
 ;FILES LOAD MEMORY ADDRESSES
 DATA.OTHER.SUNRISE_SUNSET.AUX.START			.EQ $6C00 ;#CONSTANT
 
-DATA.OTHER.SUNRISE_SUNSET.AUX.LO			.HS	00.BB.76.31.EC.A7
-DATA.OTHER.SUNRISE_SUNSET.AUX.HO			.HS	6C.6C.6D.6E.6E.6F
+DATA.OTHER.SUNRISE_SUNSET.AUX.LO			.HS	00.BB.76.31.EC.A7 		;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+DATA.OTHER.SUNRISE_SUNSET.AUX.HO			.HS	6C.6C.6D.6E.6E.6F		;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
 
 ;OTHER FILE INFORMATION
 DATA.MAP.SURFACE.TOTAL.SECTORS				.EQ $20 ;#CONSTANT
@@ -5285,19 +5288,19 @@ RZONE.LOAD.OFFSET.RIGHT				.EQ $10				;#CONSTANT. The amount by which players RM
 RZONE.LOAD.X.START					.EQ $18				;THE STARTING X AXIS POSITION AFTER A ZONE TRANSITION
 RZONE.LOAD.Y.START					.EQ $17				;THE STARTING Y AXIS POSITION AFTER A ZONE TRANSITION
 
-RZONE.SOUTH.TABLE_TO.LO 		.HS					00.00
-RZONE.SOUTH.TABLE_TO.HO 		.HS					00.03
-RZONE.SOUTH.TABLE_FROM.LO 		.HS					00.00
-RZONE.SOUTH.TABLE_FROM.HO  		.HS					03.06
+RZONE.SOUTH.TABLE_TO.LO 		.HS					00.00	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+RZONE.SOUTH.TABLE_TO.HO 		.HS					00.03	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+RZONE.SOUTH.TABLE_FROM.LO 		.HS					00.00	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+RZONE.SOUTH.TABLE_FROM.HO  		.HS					03.06	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
 
-RZONE.EAST.TABLE_TO.LO 			.HS					00.00.00.10.10.10
-RZONE.EAST.TABLE_FROM.LO 		.HS					10.10.10.20.20.20
+RZONE.EAST.TABLE_TO.LO 			.HS					00.00.00.10.10.10	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+RZONE.EAST.TABLE_FROM.LO 		.HS					10.10.10.20.20.20   ;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
 
-RZONE.WEST.TABLE_TO.LO 			.HS					20.20.20.10.10.10
-RZONE.EAST_WEST.TABLE_TO.HO		.HS					00.03.06.00.03.06
+RZONE.WEST.TABLE_TO.LO 			.HS					20.20.20.10.10.10	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+RZONE.EAST_WEST.TABLE_TO.HO		.HS					00.03.06.00.03.06	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
 
-RZONE.WEST.TABLE_FROM.LO 		.HS					10.10.10.00.00.00
-RZONE.EAST_WEST.TABLE_FROM.HO  	.HS					00.03.06.00.03.06
+RZONE.WEST.TABLE_FROM.LO 		.HS					10.10.10.00.00.00	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
+RZONE.EAST_WEST.TABLE_FROM.HO  	.HS					00.03.06.00.03.06	;**OPT** Memory. Screenhole. Can be converted to screenhole once LOADER.P no longer runs at $2000 (I'm planning on moving it to $9600). In LOADER.P load the table values into a screenhole. Do this after the screen clear. 
 
 RZONE.TRANSITION.TOP.HO				.EQ	$0000			;#CONSTANT. The HO byte of the start address of the top row of zones 	(0,1,2) on the regional map. Used in scrolling zones. 
 RZONE.TRANSITION.MIDDLE.HO			.EQ	$0300			;#CONSTANT. The HO byte of the start address of the middle row of zones (3,4,5) on the regional map. Used in scrolling zones. 
